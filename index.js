@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * dockerize
+ * strapi-tool-strapi-tool-dockerize
  * Add docker support for a Strapi Project
  *
  * @author Simen Daehlin <https://dehlin.dev>

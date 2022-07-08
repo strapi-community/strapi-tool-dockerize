@@ -1,19 +1,15 @@
 {
-	"name": "dockerize",
+	"name": "@strapi-community/strapi-tool-dockerize",
 	"description": "Add docker support for a Strapi Project",
 	"version": "1.0.0",
 	"license": "MIT",
 	"bin": {
-		"strapi-dockerize": "index.js",
-		"strapi-tool-dockerize": "index.js"
+		"strapi-strapi-tool-dockerize": "index.js",
+		"strapi-dockerize": "index.js"
 	},
-	"author": {
-		"name": "Simen Daehlin",
-		"email": "simen.dehlin@gmail.com",
-		"url": "https://dehlin.dev"
-	},
+	"author": "Simen Daehlin <simen.dehlin@gmail.com> (https://dehlin.dev)",
 	"keywords": [
-		"dockerize",
+		"strapi-tool-dockerize",
 		"Simen Daehlin",
 		"Strapi",
 		"Strapi Community"
@@ -38,5 +34,14 @@
 	},
 	"devDependencies": {
 		"prettier": "^2.7.1"
-	}
+	},
+	"main": "index.js",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/strapi-community/strapi-tool-dockerize.git"
+	},
+	"bugs": {
+		"url": "https://github.com/strapi-community/strapi-tool-dockerize/issues"
+	},
+	"homepage": "https://github.com/strapi-community/strapi-tool-dockerize#readme"
 }

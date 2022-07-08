@@ -5,7 +5,7 @@ const unhandled = require('cli-handle-unhandled');
 module.exports = ({ clear = true }) => {
 	unhandled();
 	welcome({
-		title: `dockerize`,
+		title: `strapi-tool-dockerize`,
 		tagLine: `by Simen Daehlin`,
 		description: pkg.description,
 		version: pkg.version,

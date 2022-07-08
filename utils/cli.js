@@ -31,7 +31,7 @@ const commands = {
 };
 
 const helpText = meowHelp({
-	name: `dockerize`,
+	name: `strapi-tool-dockerize`,
 	flags,
 	commands
 });
