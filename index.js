@@ -16,6 +16,7 @@ const flags = cli.flags;
 const { clear, debug } = flags;
 const { prompt, toggle } = require('enquirer');
 const alert = require('cli-alerts');
+const appendEnvFile = require('./utils/env');
 
 (async () => {
 	// init({ clear });
@@ -28,6 +29,7 @@ const alert = require('cli-alerts');
 		enabled: 'Yes',
 		disabled: 'No'
 	});
+
 	if (dockerCompose) {
 		response = await prompt([
 			{
@@ -70,13 +72,10 @@ const alert = require('cli-alerts');
 		response.dbport = portNumberAnswer.dbport;
 
 		await whatToCreate(dockerCompose, response.dbtype.toLowerCase());
+		await appendEnvFile(response);
 	} else {
 		await whatToCreate(dockerCompose);
 	}
 
 	debug && log(flags);
-	alert({
-		type: 'info',
-		msg: '🚀 If you liked this application please give a 🙌 to @Eventyret on our Strapi Discord'
-	});
 })();

@@ -32,7 +32,8 @@
 		"cli-welcome": "^2.2.2",
 		"copy-template-dir": "^1.4.0",
 		"enquirer": "^2.3.6",
-		"meow": "^9.0.0"
+		"meow": "^9.0.0",
+		"ora": "^5.4.1"
 	},
 	"devDependencies": {
 		"prettier": "^2.7.1"
