@@ -5,7 +5,11 @@ Easy one line command to add Docker support to your Strapi Application 🚀
 ## Usage
 
 ```bash
-npx @strapi/dockerize
+npx strapi-dockerize
+```
+
+```bash
+npx strapi-tool-dockerize
 ```
 
 That's it simple as that.

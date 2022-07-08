@@ -4,9 +4,8 @@
 	"version": "1.0.0",
 	"license": "MIT",
 	"bin": {
-		"dockerize": "index.js",
 		"strapi-dockerize": "index.js",
-		"sd": "index.js"
+		"strapi-tool-dockerize": "index.js"
 	},
 	"author": {
 		"name": "Simen Daehlin",
