@@ -1,0 +1,43 @@
+{
+	"name": "dockerize",
+	"description": "Add docker support for a Strapi Project",
+	"version": "1.0.0",
+	"license": "MIT",
+	"bin": {
+		"dockerize": "index.js",
+		"strapi-dockerize": "index.js",
+		"sd": "index.js"
+	},
+	"author": {
+		"name": "Simen Daehlin",
+		"email": "simen.dehlin@gmail.com",
+		"url": "https://dehlin.dev"
+	},
+	"keywords": [
+		"dockerize",
+		"Simen Daehlin",
+		"Strapi",
+		"Strapi Community"
+	],
+	"files": [
+		"index.js",
+		"utils"
+	],
+	"scripts": {
+		"format": "prettier --write \"./**/*.{js,json}\""
+	},
+	"dependencies": {
+		"chalk": "^4.1.2",
+		"cli-alerts": "^1.2.2",
+		"cli-handle-error": "^4.4.0",
+		"cli-handle-unhandled": "^1.1.1",
+		"cli-meow-help": "^3.1.0",
+		"cli-welcome": "^2.2.2",
+		"copy-template-dir": "^1.4.0",
+		"enquirer": "^2.3.6",
+		"meow": "^9.0.0"
+	},
+	"devDependencies": {
+		"prettier": "^2.7.1"
+	}
+}
