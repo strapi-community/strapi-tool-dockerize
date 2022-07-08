@@ -10,7 +10,7 @@
 const init = require('./utils/init');
 const cli = require('./utils/cli');
 const log = require('./utils/log');
-const copy = require('./utils/copyFiles');
+const whatToCreate = require('./utils/copyFiles');
 const input = cli.input;
 const flags = cli.flags;
 const { clear, debug } = flags;
@@ -18,9 +18,10 @@ const { prompt, toggle } = require('enquirer');
 const alert = require('cli-alerts');
 
 (async () => {
-	init({ clear });
+	// init({ clear });
 	input.includes(`help`) && cli.showHelp(0);
 	let response;
+
 	const dockerCompose = await toggle({
 		name: 'useCompose',
 		message: 'Do you want to create a docker-compose file?',
@@ -68,10 +69,9 @@ const alert = require('cli-alerts');
 		});
 		response.dbport = portNumberAnswer.dbport;
 
-		console.log(response);
+		await whatToCreate(dockerCompose, response.dbtype.toLowerCase());
 	}
-
-	await copy(response);
+	await whatToCreate(dockerCompose);
 
 	debug && log(flags);
 	alert({
