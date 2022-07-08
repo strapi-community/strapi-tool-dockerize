@@ -10,7 +10,7 @@
 const init = require('./utils/init');
 const cli = require('./utils/cli');
 const log = require('./utils/log');
-const copyFiles = require('./utils/copyFiles');
+const copy = require('./utils/copyFiles');
 const input = cli.input;
 const flags = cli.flags;
 const { clear, debug } = flags;
@@ -71,7 +71,7 @@ const alert = require('cli-alerts');
 		console.log(response);
 	}
 
-	!dockerCompose ? copyFiles(response, false) : copyFiles(response, true);
+	await copy(response);
 
 	debug && log(flags);
 	alert({

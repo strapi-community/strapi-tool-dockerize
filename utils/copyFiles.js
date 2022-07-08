@@ -6,7 +6,7 @@ const fs = require('fs');
 const inDir = path.join(__dirname, '../templates');
 const outDir = path.join(process.cwd());
 
-const copyFiles = info => copy(inDir, outDir, info => createCorrectFile(info));
+copy(inDir, outDir, info => createCorrectFile(info));
 
 function createCorrectFile(config) {
 	console.log(config);
@@ -19,7 +19,6 @@ function createCorrectFile(config) {
 			fs.unlink(`${outDir}/Dockerfile.npm`, () => {});
 		}
 	});
-	if (generateCompose) createDockerCompose(config);
 	alert({ type: 'success', msg: '🚀 All done ready to go' });
 }
 function createDockerCompose(type) {
@@ -54,4 +53,4 @@ function createDockerCompose(type) {
 	}
 }
 
-module.exports = copyFiles;
+module.exports = copy;
