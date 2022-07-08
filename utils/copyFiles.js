@@ -6,31 +6,52 @@ const fs = require('fs');
 const inDir = path.join(__dirname, '../templates');
 const outDir = path.join(process.cwd());
 
-const copyFiles = info => copy(inDir, outDir, info => createCorrectFile());
+const copyFiles = info => copy(inDir, outDir, info => createCorrectFile(info));
 
-function createCorrectFile() {
+function createCorrectFile(config) {
+	console.log(config);
 	fs.access('yarn.lock', fs.F_OK, err => {
 		if (err) {
-			fs.rename(
-				`${outDir}/Dockerfile.npm`,
-				`${outDir}/Dockerfile`,
-				() => {}
-			);
+			fs.rename(`${outDir}/Dockerfile.npm`, `${outDir}/Dockerfile`, () => {});
 			fs.unlink(`${outDir}/Dockerfile.yarn`, () => {});
 		} else {
-			fs.rename(
-				`${outDir}/Dockerfile.yarn`,
-				`${outDir}/Dockerfile`,
-				() => {}
-			);
+			fs.rename(`${outDir}/Dockerfile.yarn`, `${outDir}/Dockerfile`, () => {});
 			fs.unlink(`${outDir}/Dockerfile.npm`, () => {});
 		}
 	});
+	if (generateCompose) createDockerCompose(config);
 	alert({ type: 'success', msg: '🚀 All done ready to go' });
-	alert({
-		type: 'info',
-		msg: '🚀 If you liked this application please give a 🙌 to @Eventyret on our Strapi Discord'
-	});
+}
+function createDockerCompose(type) {
+	switch (type.toLowerCase()) {
+		case 'mysql':
+			fs.rename(
+				`${outDir}/docker-compose.mysql`,
+				`${outDir}/docker-compose.yml`,
+				() => {}
+			);
+			fs.unlink(`${outDir}/docker-compose.postgres`, () => {});
+			fs.unlink(`${outDir}/docker-compose.mariadb`, () => {});
+			break;
+		case 'mariadb':
+			fs.rename(
+				`${outDir}/docker-compose.mariadb`,
+				`${outDir}/docker-compose.yml`,
+				() => {}
+			);
+			fs.unlink(`${outDir}/docker-compose.postgres`, () => {});
+			fs.unlink(`${outDir}/docker-compose.mysl`, () => {});
+			break;
+		case 'postgres':
+			fs.rename(
+				`${outDir}/docker-compose.postgres`,
+				`${outDir}/docker-compose.yml`,
+				() => {}
+			);
+			fs.unlink(`${outDir}/docker-compose.mariadb`, () => {});
+			fs.unlink(`${outDir}/docker-compose.mysql`, () => {});
+			break;
+	}
 }
 
 module.exports = copyFiles;
