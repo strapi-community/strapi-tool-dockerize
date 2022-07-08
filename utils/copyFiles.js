@@ -8,7 +8,8 @@ const dockerfileDir = path.join(__dirname, '../templates/dockerfiles');
 const outDir = path.join(process.cwd());
 
 async function whatToCreate(createCompose, dbType) {
-	createCompose ? await createDockerComposeFiles(dbType) : createDockerFiles();
+	if (createCompose) await createDockerComposeFiles(dbType);
+	await createDockerFiles();
 }
 
 // Create two inputs one for docker compose one for Dockerfile
@@ -30,25 +31,34 @@ async function createDockerFiles() {
 				fs.unlink(`${outDir}/Dockerfile.npm`, () => {});
 			}
 		});
-		alert({ type: 'success', msg: '🚀 All done ready to go' });
 	});
 }
 async function createDockerComposeFiles(type) {
+	console.log(type);
 	switch (type) {
 		case 'mysql':
+			alert({ type: 'success', msg: '🚀 Creating MySQL docker compose files' });
 			await fs.copyFileSync(
 				`${dockerComposeDir}/docker-compose.mysql`,
 				`${outDir}/docker-compose.yml`
 			);
 			return;
 		case 'mariadb':
+			alert({
+				type: 'success',
+				msg: '🚀 Creating MariaDB docker compose files'
+			});
 			await fs.copyFileSync(
 				`${dockerComposeDir}/docker-compose.mariadb`,
 				`${outDir}/docker-compose.yml`
 			);
 
 			return;
-		case 'postgres':
+		case 'postgresql':
+			alert({
+				type: 'success',
+				msg: '🚀 Creating Postgres docker compose files'
+			});
 			await fs.copyFileSync(
 				`${dockerComposeDir}/docker-compose.postgres`,
 				`${outDir}/docker-compose.yml`

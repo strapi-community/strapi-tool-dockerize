@@ -70,8 +70,9 @@ const alert = require('cli-alerts');
 		response.dbport = portNumberAnswer.dbport;
 
 		await whatToCreate(dockerCompose, response.dbtype.toLowerCase());
+	} else {
+		await whatToCreate(dockerCompose);
 	}
-	await whatToCreate(dockerCompose);
 
 	debug && log(flags);
 	alert({
