@@ -1,7 +1,7 @@
 {
-	"name": "@strapi-community/strapi-tool-dockerize",
+	"name": "@strapi-community/dockerize",
 	"description": "Add docker support for a Strapi Project",
-	"version": "1.0.0",
+	"version": "4.0.0",
 	"license": "MIT",
 	"bin": {
 		"strapi-strapi-tool-dockerize": "index.js",
@@ -16,7 +16,8 @@
 	],
 	"files": [
 		"index.js",
-		"utils"
+		"utils",
+		"templates"
 	],
 	"scripts": {
 		"format": "prettier --write \"./**/*.{js,json}\""
