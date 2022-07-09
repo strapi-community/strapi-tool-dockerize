@@ -2,6 +2,7 @@ const path = require('path');
 const ora = require('ora');
 const { access, copyFile } = require('fs/promises');
 const { constants } = require('fs');
+
 const dockerComposeDir = path.join(__dirname, '../templates/docker-compose');
 const dockerfileDir = path.join(__dirname, '../templates/dockerfiles');
 const outDir = path.join(process.cwd());
@@ -19,13 +20,13 @@ async function createDockerFiles() {
 		await copyFile(`${dockerfileDir}/Dockerfile.yarn`, `${outDir}/Dockerfile`);
 		spinner.stopAndPersist({
 			symbol: '🐳',
-			text: ' Dockerfile with YARN setup added'
+			text: ' Dockerfile with YARN setup added \n'
 		});
 	} catch (err) {
 		await copyFile(`${dockerfileDir}/Dockerfile.npm`, `${outDir}/Dockerfile`);
 		spinner.stopAndPersist({
 			symbol: '🐳',
-			text: ' Dockerfile with NPM support added'
+			text: ' Dockerfile with NPM support added \n'
 		});
 	}
 	await copyFile(`${dockerfileDir}/.dockerignore`, `${outDir}/.dockerignore`);
@@ -33,6 +34,13 @@ async function createDockerFiles() {
 async function createDockerComposeFiles(type) {
 	spinner.start();
 	try {
+		await access(`docker-compose.yml`, constants.R_OK);
+		spinner.stopAndPersist({
+			symbol: '⚠️',
+			text: ' docker-compose.yml already exists, skipping \n'
+		});
+		return;
+	} catch (err) {
 		switch (type) {
 			case 'mysql':
 				await copyFile(
@@ -41,7 +49,7 @@ async function createDockerComposeFiles(type) {
 				);
 				spinner.stopAndPersist({
 					symbol: '🚀',
-					text: ' Docker Compose file with MySQL database added'
+					text: ' Docker Compose file with MySQL database added \n'
 				});
 				return;
 			case 'mariadb':
@@ -51,7 +59,7 @@ async function createDockerComposeFiles(type) {
 				);
 				spinner.stopAndPersist({
 					symbol: '🚀',
-					text: ' Docker Compose with MariaDB database added'
+					text: ' Docker Compose with MariaDB database added \n'
 				});
 				return;
 			case 'postgresql':
@@ -61,12 +69,10 @@ async function createDockerComposeFiles(type) {
 				);
 				spinner.stopAndPersist({
 					symbol: '🚀',
-					text: ' Docker Compose with PostgreSQL database added'
+					text: ' Docker Compose with PostgreSQL database added \n'
 				});
 				return;
 		}
-	} catch (err) {
-		console.log(err);
 	}
 }
 

@@ -5,12 +5,12 @@ const unhandled = require('cli-handle-unhandled');
 module.exports = ({ clear = true }) => {
 	unhandled();
 	welcome({
-		title: `strapi-tool-dockerize`,
+		title: `@strapi-community/dockerize`,
 		tagLine: `by Simen Daehlin`,
 		description: pkg.description,
 		version: pkg.version,
-		bgColor: '#36BB09',
-		color: '#000000',
+		bgColor: '#ac94fb',
+		color: '#ffffff',
 		bold: true,
 		clear
 	});
