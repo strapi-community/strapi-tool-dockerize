@@ -7,6 +7,7 @@ const dockerComposeDir = path.join(__dirname, '../templates/docker-compose');
 const dockerfileDir = path.join(__dirname, '../templates/dockerfiles');
 const outDir = path.join(process.cwd());
 const spinner = ora({ text: '' });
+const replace = require('replace-in-file');
 
 async function whatToCreate(createCompose, dbType) {
 	if (createCompose) await createDockerComposeFiles(dbType);
@@ -39,7 +40,6 @@ async function createDockerComposeFiles(type) {
 			symbol: '⚠️',
 			text: ' docker-compose.yml already exists, skipping \n'
 		});
-		return;
 	} catch (err) {
 		switch (type) {
 			case 'mysql':
@@ -51,7 +51,7 @@ async function createDockerComposeFiles(type) {
 					symbol: '🚀',
 					text: ' Docker Compose file with MySQL database added \n'
 				});
-				return;
+				break;
 			case 'mariadb':
 				await copyFile(
 					`${dockerComposeDir}/docker-compose.mariadb`,
@@ -61,7 +61,7 @@ async function createDockerComposeFiles(type) {
 					symbol: '🚀',
 					text: ' Docker Compose with MariaDB database added \n'
 				});
-				return;
+				break;
 			case 'postgresql':
 				await copyFile(
 					`${dockerComposeDir}/docker-compose.postgres`,
@@ -71,9 +71,21 @@ async function createDockerComposeFiles(type) {
 					symbol: '🚀',
 					text: ' Docker Compose with PostgreSQL database added \n'
 				});
-				return;
+				break;
 		}
 	}
+	await yarnLockToPackageLock();
 }
 
+async function yarnLockToPackageLock() {
+	const options = {
+		files: `${outDir}/docker-compose.yml`,
+		from: '- ./yarn.lock:/opt/yarn.lock',
+		to: '- ./package-lock.json:/opt/package-lock.json'
+	};
+	try {
+		await access(`package-lock.json`, constants.R_OK);
+		await replace(options);
+	} catch (err) {}
+}
 module.exports = whatToCreate;
