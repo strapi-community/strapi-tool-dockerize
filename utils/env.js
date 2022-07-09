@@ -22,6 +22,7 @@ async function appendEnvFile(config) {
 		writeLine(`DATABASE_NAME=${config.dbname}`);
 		writeLine(`DATABASE_USERNAME=${config.dbuser}`);
 		writeLine(`DATABASE_PASSWORD=${config.dbpassword}`);
+		writeLine(`NODE_ENV=development`);
 		writeLine(
 			`DATABASE_CLIENT=${
 				config.dbtype.toLowerCase() === 'postgresql' ? 'postgres' : 'mysql'
