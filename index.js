@@ -28,7 +28,7 @@ const { clear, debug } = flags;
 
 	spinner.stopAndPersist({
 		symbol: '☝️',
-		text: ` Strapi is now dockerized  🐳 - have a look at the logs above for more info. 🚀`
+		text: ` Strapi is now dockerized  🐳 - have a look at the logs above for more info. 🚀 \n`
 	});
 	spinner.stopAndPersist({
 		symbol: '⭐️',
