@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.8]( (2022-07-09)
+
+### Bugfixes
+
+- Removed extra `}` causign an issue with variables
+
 ## [4.0.7]( (2022-07-09)
 
 ### Bugfixes
