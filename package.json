@@ -1,7 +1,7 @@
 {
-	"name": "@strapi-community/strapi-tool-dockerize",
+	"name": "@strapi-community/dockerize",
 	"description": "Add docker support for a Strapi Project",
-	"version": "1.0.1",
+	"version": "4.0.0",
 	"license": "MIT",
 	"bin": {
 		"strapi-strapi-tool-dockerize": "index.js",
@@ -16,21 +16,25 @@
 	],
 	"files": [
 		"index.js",
-		"utils"
+		"utils",
+		"templates"
 	],
 	"scripts": {
 		"format": "prettier --write \"./**/*.{js,json}\""
 	},
 	"dependencies": {
+		"await-to-js": "^3.0.0",
 		"chalk": "^4.1.2",
 		"cli-alerts": "^1.2.2",
 		"cli-handle-error": "^4.4.0",
 		"cli-handle-unhandled": "^1.1.1",
 		"cli-meow-help": "^3.1.0",
+		"cli-should-cancel": "^1.0.3",
 		"cli-welcome": "^2.2.2",
 		"copy-template-dir": "^1.4.0",
 		"enquirer": "^2.3.6",
-		"meow": "^9.0.0"
+		"meow": "^9.0.0",
+		"ora": "^5.4.1"
 	},
 	"devDependencies": {
 		"prettier": "^2.7.1"

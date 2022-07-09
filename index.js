@@ -10,7 +10,11 @@
 const init = require('./utils/init');
 const cli = require('./utils/cli');
 const log = require('./utils/log');
-const copyFiles = require('./utils/copyFiles');
+const questions = require('./utils/questions');
+const alert = require('cli-alerts');
+const { pkg } = require('./utils/cli');
+const ora = require('ora');
+const spinner = ora({ text: '' });
 
 const input = cli.input;
 const flags = cli.flags;
@@ -19,7 +23,16 @@ const { clear, debug } = flags;
 (async () => {
 	init({ clear });
 	input.includes(`help`) && cli.showHelp(0);
-	copyFiles();
-
+	await questions();
 	debug && log(flags);
+
+	spinner.stopAndPersist({
+		symbol: '☝️',
+		text: ` Strapi is now dockerized  🐳 - have a look at the logs above for more info. 🚀`
+	});
+	spinner.stopAndPersist({
+		symbol: '⭐️',
+		text: ` Star the project on GitHub if you liked this tool 🙏. \n`
+	});
+	console.log(`👉 ${pkg.homepage} 👈 \n`);
 })();
