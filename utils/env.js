@@ -26,7 +26,7 @@ async function appendEnvFile(config) {
 		writeLine(
 			`DATABASE_CLIENT=${
 				config.dbtype.toLowerCase() === 'postgresql' ? 'postgres' : 'mysql'
-			}}`
+			}`
 		);
 		spinner.stopAndPersist({
 			symbol: '🕵️',
