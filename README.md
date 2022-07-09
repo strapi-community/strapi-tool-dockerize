@@ -1,7 +1,9 @@
 <div align="center">
-# @Strapi-community/dockerize
- Add 🐳 docker support for a Strapi Project with ease 🚀
- 
+<h1>@Strapi-community/dockerize</h1>
+	
+<p style="margin-top: 0;">Add docker support for a Strapi Project with ease 🚀</p>
+	
+<p>
   <a href="https://discord.strapi.io">
     <img src="https://img.shields.io/discord/811989166782021633?color=blue&label=strapi-discord" alt="Strapi Discord">
   </a>
@@ -11,6 +13,7 @@
   <a href="https://www.npmjs.org/package/@strapi-community/dockerize">
     <img src="https://img.shields.io/npm/dm/@strapi-community/dockerize" alt="Monthly download on NPM" />
   </a>
+</p>
 </div>
 
 ## Table of Contents <!-- omit in toc -->
