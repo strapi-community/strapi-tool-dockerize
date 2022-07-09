@@ -35,7 +35,8 @@
 		"enquirer": "^2.3.6",
 		"execa": "5.1.1",
 		"meow": "^9.0.0",
-		"ora": "^5.4.1"
+		"ora": "^5.4.1",
+		"replace-in-file": "^6.3.5"
 	},
 	"devDependencies": {
 		"prettier": "^2.7.1"
