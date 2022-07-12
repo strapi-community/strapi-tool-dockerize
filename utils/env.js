@@ -6,8 +6,7 @@ async function appendEnvFile(config) {
 	spinner.start();
 	await readFile('.env', 'utf8', async (err, data) => {
 		const logger = createWriteStream('.env', { flags: 'a' });
-
-		if (data.includes('Strapi Dockerize variables')) {
+		if (data && data.includes('Strapi Dockerize variables')) {
 			spinner.stopAndPersist({
 				symbol: '⚠️',
 				text: ` .env file already contains Strapi Dockerize variables please update manually or remove them \n`
@@ -16,7 +15,7 @@ async function appendEnvFile(config) {
 		}
 		const writeLine = line => logger.write(`\n${line}`);
 
-		writeLine(`\n # Strapi Dockerize variables\n`);
+		writeLine(`# Strapi Dockerize variables \n`);
 		writeLine(`DATABASE_HOST=localhost`);
 		writeLine(`DATABASE_PORT=${config.dbport}`);
 		writeLine(`DATABASE_NAME=${config.dbname}`);
