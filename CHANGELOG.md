@@ -3,11 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-## [4.0.11]( (2022-07-17)
+## [4.0.12]( (2022-07-17)
 
 ### Bugfixes
 
 - Fixed a bug where incorrect dependencies were being added to the `package.json` file.
+- Removed wrong commited console.log
 
 ## [4.0.9]( (2022-07-12)
 
