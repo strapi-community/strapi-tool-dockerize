@@ -5,12 +5,13 @@ const execa = require('execa');
 const spinner = ora({ text: '' });
 
 async function installDependecies(config) {
+	console.log(config);
 	try {
 		await access(`yarn.lock`, constants.R_OK);
 		spinner.start(` 📦 Installing dependencies using yarn...`);
 		await execa(`yarn`, [
 			`add`,
-			`${config.dbtype === 'postgresql' ? 'pg' : 'mysql'}`
+			`${config.dbtype.toLowerCase() === 'postgresql' ? 'pg' : 'mysql'}`
 		]);
 		spinner.stopAndPersist({
 			symbol: '✅',
@@ -20,7 +21,7 @@ async function installDependecies(config) {
 		spinner.start(` 📦 Installing dependencies using npm...`);
 		await execa(`npm`, [
 			`install`,
-			`${config.dbtype === 'postgresql' ? 'pg' : 'mysql'}`
+			`${config.dbtype.toLowerCase() === 'postgresql' ? 'pg' : 'mysql'}`
 		]);
 		spinner.stopAndPersist({
 			symbol: '✅',
