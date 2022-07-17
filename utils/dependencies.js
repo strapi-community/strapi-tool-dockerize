@@ -5,7 +5,6 @@ const execa = require('execa');
 const spinner = ora({ text: '' });
 
 async function installDependecies(config) {
-	console.log(config);
 	try {
 		await access(`yarn.lock`, constants.R_OK);
 		spinner.start(` 📦 Installing dependencies using yarn...`);
