@@ -31,6 +31,7 @@ async function createDockerFiles() {
 		});
 	}
 	await copyFile(`${dockerfileDir}/.dockerignore`, `${outDir}/.dockerignore`);
+	await checkForDataFolder();
 }
 async function createDockerComposeFiles(type) {
 	spinner.start();
@@ -85,6 +86,17 @@ async function yarnLockToPackageLock() {
 	};
 	try {
 		await access(`package-lock.json`, constants.R_OK);
+		await replace(options);
+	} catch (err) {}
+}
+async function checkForDataFolder() {
+	const options = {
+		files: `${outDir}/.dockerignore`,
+		from: 'data/',
+		to: ''
+	};
+	try {
+		await access(`data`, constants.R_OK);
 		await replace(options);
 	} catch (err) {}
 }
