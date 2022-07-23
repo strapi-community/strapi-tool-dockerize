@@ -5,6 +5,10 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [4.0.13]( (2022-07-23)
 
+### Feature
+
+- Now removing mysql or postgres dependencies if we re run the tool or switch
+
 ### Bugfixes
 
 - Removed unused imports
