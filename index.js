@@ -11,7 +11,6 @@ const init = require('./utils/init');
 const cli = require('./utils/cli');
 const log = require('./utils/log');
 const questions = require('./utils/questions');
-const alert = require('cli-alerts');
 const { pkg } = require('./utils/cli');
 const ora = require('ora');
 const spinner = ora({ text: '' });

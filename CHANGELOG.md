@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.13]( (2022-07-23)
+
+### Feature
+
+- Now removing mysql or postgres dependencies if we re run the tool or switch
+
+### Bugfixes
+
+- Removed unused imports
+- Fixed [#7](https://github.com/strapi-community/strapi-tool-dockerize/issues/7)
+  now checking if the data folder exists if it does we won't ignore it with docker.
+
 ## [4.0.12]( (2022-07-17)
 
 ### Bugfixes
