@@ -21,7 +21,8 @@
 	],
 	"scripts": {
 		"format": "prettier --write \"./**/*.{js,json}\"",
-		"semantic-release": "semantic-release --branches main"
+		"semantic-release": "semantic-release --branches main",
+		"commit": "git-cz"
 	},
 	"dependencies": {
 		"cli-alerts": "^1.2.2",
@@ -36,6 +37,7 @@
 		"replace-in-file": "^6.3.5"
 	},
 	"devDependencies": {
+		"cz-conventional-changelog": "^3.3.0",
 		"prettier": "^2.7.1",
 		"semantic-release": "^19.0.3"
 	},
@@ -47,5 +49,10 @@
 	"bugs": {
 		"url": "https://github.com/strapi-community/strapi-tool-dockerize/issues"
 	},
-	"homepage": "https://github.com/strapi-community/strapi-tool-dockerize#readme"
+	"homepage": "https://github.com/strapi-community/strapi-tool-dockerize#readme",
+	"config": {
+		"commitizen": {
+			"path": "./node_modules/cz-conventional-changelog"
+		}
+	}
 }
