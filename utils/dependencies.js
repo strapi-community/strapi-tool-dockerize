@@ -38,6 +38,7 @@ async function checkForOldDependecies(config, options) {
 		spinner.start(` 📦 Checking for old dependencies...`);
 		await access(`package.json`, constants.R_OK);
 		if (config.dbtype.toLowerCase() === 'postgresql') {
+			spinner.start(' 📦  Removing old dependencies...');
 			await execa(`${options.type}`, [`${options.command}`, `mysql`]);
 		} else {
 			await execa(`${options.type}`, [`${options.command}`, `pg`]);

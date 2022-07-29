@@ -34,46 +34,39 @@ async function createDockerFiles() {
 	await checkForDataFolder();
 }
 async function createDockerComposeFiles(type) {
-	spinner.start();
-	try {
-		await access(`docker-compose.yml`, constants.R_OK);
-		spinner.stopAndPersist({
-			symbol: '⚠️',
-			text: ' docker-compose.yml already exists, skipping \n'
-		});
-	} catch (err) {
-		switch (type) {
-			case 'mysql':
-				await copyFile(
-					`${dockerComposeDir}/docker-compose.mysql`,
-					`${outDir}/docker-compose.yml`
-				);
-				spinner.stopAndPersist({
-					symbol: '🚀',
-					text: ' Docker Compose file with MySQL database added \n'
-				});
-				break;
-			case 'mariadb':
-				await copyFile(
-					`${dockerComposeDir}/docker-compose.mariadb`,
-					`${outDir}/docker-compose.yml`
-				);
-				spinner.stopAndPersist({
-					symbol: '🚀',
-					text: ' Docker Compose with MariaDB database added \n'
-				});
-				break;
-			case 'postgresql':
-				await copyFile(
-					`${dockerComposeDir}/docker-compose.postgres`,
-					`${outDir}/docker-compose.yml`
-				);
-				spinner.stopAndPersist({
-					symbol: '🚀',
-					text: ' Docker Compose with PostgreSQL database added \n'
-				});
-				break;
-		}
+	spinner.start(' 🐳  Creating docker-compose.yml file');
+
+	switch (type) {
+		case 'mysql':
+			await copyFile(
+				`${dockerComposeDir}/docker-compose.mysql`,
+				`${outDir}/docker-compose.yml`
+			);
+			spinner.stopAndPersist({
+				symbol: '🚀',
+				text: ' Docker Compose file with MySQL database added \n'
+			});
+			break;
+		case 'mariadb':
+			await copyFile(
+				`${dockerComposeDir}/docker-compose.mariadb`,
+				`${outDir}/docker-compose.yml`
+			);
+			spinner.stopAndPersist({
+				symbol: '🚀',
+				text: ' Docker Compose with MariaDB database added \n'
+			});
+			break;
+		case 'postgresql':
+			await copyFile(
+				`${dockerComposeDir}/docker-compose.postgres`,
+				`${outDir}/docker-compose.yml`
+			);
+			spinner.stopAndPersist({
+				symbol: '🚀',
+				text: ' Docker Compose with PostgreSQL database added \n'
+			});
+			break;
 	}
 	await yarnLockToPackageLock();
 }
