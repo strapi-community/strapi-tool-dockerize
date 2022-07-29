@@ -22,7 +22,8 @@
 	"scripts": {
 		"format": "prettier --write \"./**/*.{js,json}\"",
 		"semantic-release": "semantic-release --branches main",
-		"commit": "git-cz"
+		"commit": "git-cz",
+		"acp": "git add . && npm run commit"
 	},
 	"dependencies": {
 		"cli-alerts": "^1.2.2",
