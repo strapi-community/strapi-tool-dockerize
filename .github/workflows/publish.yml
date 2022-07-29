@@ -1,20 +1,21 @@
-name: Publish to NPM
+name: Node.JS CI
+
 on:
-  release:
-    types: [created]
+  push:
+    branches: [main, master]
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Setup Node
+      - uses: actions/checkout@v2
+      - name: 'Use Node.JS version'
         uses: actions/setup-node@v2
         with:
-          node-version: '16.x'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Publish package on NPM 📦
-        run: npm publish --action=public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          node-version: ${{ matrix.node-version }}
+      - run: npm install
+# GITHUB_TOKEN: ${{ secrets.G_TOKEN }}
+# NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
