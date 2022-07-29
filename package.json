@@ -27,7 +27,6 @@
 		"cli-handle-error": "^4.4.0",
 		"cli-handle-unhandled": "^1.1.1",
 		"cli-meow-help": "^3.1.0",
-		"cli-should-cancel": "^1.0.3",
 		"cli-welcome": "^2.2.2",
 		"enquirer": "^2.3.6",
 		"execa": "5.1.1",
