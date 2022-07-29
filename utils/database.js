@@ -4,7 +4,9 @@ const ora = require('ora');
 const spinner = ora({ text: '' });
 
 async function generateDatabase(config) {
-	return `module.exports = ({ env }) => ({
+	return `${
+		(await jsOrTs()) === 'ts' ? 'export default' : 'module.exports = '
+	} ({ env }) => ({
 	connection: {
 		client: '${
 			config.dbtype.toLowerCase() === 'postgresql' ? 'postgres' : 'mysql'
@@ -24,7 +26,11 @@ async function generateDatabase(config) {
 
 async function checkAndBackupDB(config) {
 	spinner.start();
-	const databasePath = path.join(process.cwd(), 'config', 'database.js');
+	const databasePath = path.join(
+		process.cwd(),
+		'config',
+		`database.${await jsOrTs()}`
+	);
 	const databaseOldPath = path.join(process.cwd(), 'config', 'database.backup');
 
 	try {
@@ -38,8 +44,16 @@ async function checkAndBackupDB(config) {
 	} catch (error) {
 		spinner.stopAndPersist({
 			symbol: '❌',
-			text: ` Unable to access config/database.js does it exist 🤔 - check and try again \n`
+			text: ` Unable to access config/database.${await jsOrTs()} does it exist 🤔 - check and try again \n`
 		});
+	}
+}
+async function jsOrTs() {
+	try {
+		await access(path.join(process.cwd(), 'tsconfig.json'));
+		return 'ts';
+	} catch (error) {
+		return 'js';
 	}
 }
 

@@ -1,7 +1,7 @@
 {
 	"name": "@strapi-community/dockerize",
 	"description": "Add docker support for a Strapi Project",
-	"version": "4.0.13",
+	"version": "0.0.0-development",
 	"license": "MIT",
 	"bin": {
 		"strapi-strapi-tool-dockerize": "index.js",
@@ -20,14 +20,15 @@
 		"templates"
 	],
 	"scripts": {
-		"format": "prettier --write \"./**/*.{js,json}\""
+		"format": "prettier --write \"./**/*.{js,json}\"",
+		"semantic-release": "semantic-release --branches main",
+		"commit": "git-cz"
 	},
 	"dependencies": {
 		"cli-alerts": "^1.2.2",
 		"cli-handle-error": "^4.4.0",
 		"cli-handle-unhandled": "^1.1.1",
 		"cli-meow-help": "^3.1.0",
-		"cli-should-cancel": "^1.0.3",
 		"cli-welcome": "^2.2.2",
 		"enquirer": "^2.3.6",
 		"execa": "5.1.1",
@@ -36,15 +37,22 @@
 		"replace-in-file": "^6.3.5"
 	},
 	"devDependencies": {
-		"prettier": "^2.7.1"
+		"cz-conventional-changelog": "^3.3.0",
+		"prettier": "^2.7.1",
+		"semantic-release": "^19.0.3"
 	},
 	"main": "index.js",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/strapi-community/strapi-tool-dockerize.git"
+		"url": "https://github.com/strapi-community/strapi-tool-dockerize.git"
 	},
 	"bugs": {
 		"url": "https://github.com/strapi-community/strapi-tool-dockerize/issues"
 	},
-	"homepage": "https://github.com/strapi-community/strapi-tool-dockerize#readme"
+	"homepage": "https://github.com/strapi-community/strapi-tool-dockerize#readme",
+	"config": {
+		"commitizen": {
+			"path": "./node_modules/cz-conventional-changelog"
+		}
+	}
 }
