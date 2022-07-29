@@ -1,7 +1,7 @@
 {
 	"name": "@strapi-community/dockerize",
 	"description": "Add docker support for a Strapi Project",
-	"version": "4.0.13",
+	"version": "0.0.0-development",
 	"license": "MIT",
 	"bin": {
 		"strapi-strapi-tool-dockerize": "index.js",
@@ -20,7 +20,8 @@
 		"templates"
 	],
 	"scripts": {
-		"format": "prettier --write \"./**/*.{js,json}\""
+		"format": "prettier --write \"./**/*.{js,json}\"",
+		"semantic-release": "semantic-release --branches main"
 	},
 	"dependencies": {
 		"cli-alerts": "^1.2.2",
@@ -35,12 +36,13 @@
 		"replace-in-file": "^6.3.5"
 	},
 	"devDependencies": {
-		"prettier": "^2.7.1"
+		"prettier": "^2.7.1",
+		"semantic-release": "^19.0.3"
 	},
 	"main": "index.js",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/strapi-community/strapi-tool-dockerize.git"
+		"url": "https://github.com/strapi-community/strapi-tool-dockerize.git"
 	},
 	"bugs": {
 		"url": "https://github.com/strapi-community/strapi-tool-dockerize/issues"
