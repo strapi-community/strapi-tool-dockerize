@@ -17,5 +17,17 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm install
+  publish:
+      runs-on: ubuntu-latest
+      if: ${{ github.ref == 'refs/heads/main' }}
+      needs: [build]
+      steps:
+        - uses: actions/checkout@v2
+        - name: 'Use Node.JS version'
+          uses: actions/setup-node@v2
+          with:
+            node-version: ${{ matrix.node-version }}
+        - run: npm ci
+        - run: npm run semantic-release
 # GITHUB_TOKEN: ${{ secrets.G_TOKEN }}
 # NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
