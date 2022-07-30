@@ -1,5 +1,5 @@
 const path = require('path');
-const { access, rename, writeFile } = require('fs/promises');
+const { access, copyFile } = require('fs/promises');
 const { projectType, spinner } = require('./utils');
 
 async function generateDatabase(config) {
@@ -23,14 +23,13 @@ async function generateDatabase(config) {
 `;
 }
 
-async function checkAndBackupDB(config) {
-	spinner.start(`Checking for existing config/database.${projectType()}`);
-
+async function checkAndBackupDB() {
 	const databasePath = path.join(
 		process.cwd(),
 		'config',
 		`database.${projectType()}`
 	);
+	spinner.start(`Checking for existing config/database.${projectType()}`);
 	const databaseOldPath = path.join(process.cwd(), 'config', 'database.backup');
 	spinner.stopAndPersist({
 		symbol: '🕵️‍♀️',
@@ -38,13 +37,9 @@ async function checkAndBackupDB(config) {
 	});
 	try {
 		await access(databasePath);
-		await rename(databasePath, databaseOldPath);
-		await writeFile(databasePath, (await generateDatabase(config)).toString());
-		spinner.stopAndPersist({
-			symbol: '💾',
-			text: ` Added ${config.dbtype.toUpperCase()} support to database configuration  \n`
-		});
+		await copyFile(databasePath, databaseOldPath);
 	} catch (error) {
+		console.log(error);
 		spinner.stopAndPersist({
 			symbol: '❌',
 			text: ` Unable to access config/database.${projectType()} does it exist 🤔 - check and try again \n`
@@ -52,4 +47,4 @@ async function checkAndBackupDB(config) {
 	}
 }
 
-module.exports = checkAndBackupDB;
+module.exports = { checkAndBackupDB, generateDatabase };

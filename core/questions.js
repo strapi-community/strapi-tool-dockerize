@@ -1,7 +1,7 @@
 const whatToCreate = require('./copyFiles');
 const { prompt, toggle } = require('enquirer');
 const appendEnvFile = require('./env/env');
-const checkAndBackupDB = require('./database');
+const createEnv = require('./env/envSetup');
 const installDependecies = require('./dependencies');
 
 module.exports = async () => {
@@ -11,12 +11,6 @@ module.exports = async () => {
 		message: 'Do you want to create a docker-compose file? 🐳',
 		enabled: 'Yes',
 		disabled: 'No'
-	});
-	const env = await prompt({
-		type: 'select',
-		name: 'answer',
-		message: 'What enviroments do you want to configure 💻',
-		choices: ['Development', 'Production', 'Both']
 	});
 	// TODO: ADD Heroku to providers
 	// const deployment = await prompt({
@@ -28,6 +22,12 @@ module.exports = async () => {
 	// });
 
 	if (dockerCompose) {
+		const env = await prompt({
+			type: 'select',
+			name: 'answer',
+			message: 'What enviroments do you want to configure 💻',
+			choices: ['Development', 'Production', 'Both']
+		});
 		config = await prompt([
 			{
 				type: 'select',
@@ -72,7 +72,7 @@ module.exports = async () => {
 
 		await whatToCreate(dockerCompose, config);
 		await appendEnvFile(config);
-		await checkAndBackupDB(config);
+		await createEnv(config);
 		await installDependecies(config);
 	} else {
 		await whatToCreate(dockerCompose, config);

@@ -2,8 +2,10 @@ const path = require('path');
 const replace = require('replace-in-file');
 const { access } = require('fs/promises');
 const { constants } = require('fs');
+const execa = require('execa');
 const ora = require('ora');
 const spinner = ora({ text: '' });
+const chalk = require('chalk');
 
 let _projectType = 'js';
 let _packageManager = '';
@@ -21,10 +23,13 @@ async function yarnOrNpm() {
 		_packageManager = 'npm';
 	}
 	spinner.stopAndPersist({
-		symbol: '🕵️‍♀️',
-		text: ` ${packageManagerUsed().toUpperCase()} detected \n`
+		symbol: '📦',
+		text: ` ${chalk.bold.yellow(
+			packageManagerUsed().toUpperCase()
+		)} detected \n`
 	});
 }
+
 async function yarnLockToPackageLock() {
 	const options = {
 		files: `${outDir}/docker-compose.yml`,
@@ -55,9 +60,11 @@ async function detectProjectType() {
 		_projectType = 'ts';
 	} catch (error) {}
 	spinner.stopAndPersist({
-		symbol: '💻',
+		symbol: '🍿',
 		text: ` ${
-			projectType() === 'ts' ? 'TypeScript' : 'JavaScript'
+			projectType() === 'ts'
+				? `${chalk.bold.blueBright('TypeScript')}`
+				: `${chalk.bold.yellow('JavaScript')}`
 		} project detected \n`
 	});
 }
@@ -78,5 +85,8 @@ module.exports = {
 	dockerfileDir,
 	outDir,
 	yarnOrNpm,
-	packageManagerUsed
+	packageManagerUsed,
+	replace,
+	chalk,
+	execa
 };

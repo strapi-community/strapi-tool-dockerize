@@ -26,15 +26,16 @@ const { clear, debug } = flags;
 (async () => {
 	init({ clear });
 	input.includes(`help`) && cli.showHelp(0);
-	(await detectProjectType()) && (await yarnOrNpm());
+	await detectProjectType();
+	await yarnOrNpm();
 	await questions();
 	debug && log(flags);
 
 	spinner.stopAndPersist({
 		symbol: '☝️',
-		text: `  Strapi is now ${chalk.bold.blueBright(
-			'dockerized  🐳'
-		)} - have a look at the logs above for more info. 🚀 \n`
+		text: `  ${chalk.yellow('Strapi')} is now ${chalk.bold.blueBright(
+			'dockerized'
+		)} 🐳 - have a look at the logs above for more info. 🚀 \n`
 	});
 	spinner.stopAndPersist({
 		symbol: '⭐️',

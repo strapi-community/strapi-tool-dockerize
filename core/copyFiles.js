@@ -1,5 +1,4 @@
-const { access, copyFile } = require('fs/promises');
-const { constants } = require('fs');
+const { copyFile } = require('fs/promises');
 const {
 	yarnLockToPackageLock,
 	checkForDataFolder,
@@ -7,11 +6,11 @@ const {
 	dockerComposeDir,
 	dockerfileDir,
 	outDir,
-	packageManagerUsed
+	packageManagerUsed,
+	chalk
 } = require('./utils');
 
 async function whatToCreate(createCompose, config) {
-	console.log(config);
 	if (createCompose)
 		await createDockerComposeFiles(config.dbtype.toLowerCase());
 	await createDockerFiles();
@@ -40,7 +39,9 @@ async function createDockerComposeFiles(type) {
 	);
 	spinner.stopAndPersist({
 		symbol: '🐳',
-		text: ` Added docker-compose file with ${type.toUpperCase()} configuration \n`
+		text: ` Added docker-compose file with ${chalk.bold.green(
+			type.toUpperCase()
+		)} configuration \n`
 	});
 	await yarnLockToPackageLock();
 }
