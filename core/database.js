@@ -2,10 +2,11 @@ const path = require('path');
 const { access, rename, writeFile } = require('fs/promises');
 const ora = require('ora');
 const spinner = ora({ text: '' });
+const { jsOrTs } = require('../cli/jsOrTs');
 
 async function generateDatabase(config) {
 	return `${
-		(await jsOrTs()) === 'ts' ? 'export default' : 'module.exports = '
+		(await jsOrTs()) ? 'export default' : 'module.exports = '
 	} ({ env }) => ({
 	connection: {
 		client: '${
@@ -44,16 +45,10 @@ async function checkAndBackupDB(config) {
 	} catch (error) {
 		spinner.stopAndPersist({
 			symbol: '❌',
-			text: ` Unable to access config/database.${await jsOrTs()} does it exist 🤔 - check and try again \n`
+			text: ` Unable to access config/database.${
+				(await jsOrTs()) ? 'ts' : 'js'
+			} does it exist 🤔 - check and try again \n`
 		});
-	}
-}
-async function jsOrTs() {
-	try {
-		await access(path.join(process.cwd(), 'tsconfig.json'));
-		return 'ts';
-	} catch (error) {
-		return 'js';
 	}
 }
 

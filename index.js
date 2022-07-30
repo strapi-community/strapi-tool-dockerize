@@ -7,11 +7,11 @@
  * @author Simen Daehlin <https://dehlin.dev>
  */
 
-const init = require('./utils/init');
-const cli = require('./utils/cli');
-const log = require('./utils/log');
-const questions = require('./utils/questions');
-const { pkg } = require('./utils/cli');
+const init = require('./cli/init');
+const cli = require('./cli/cli');
+const log = require('./cli/log');
+const questions = require('./core/questions');
+const { pkg } = require('./cli/cli');
 const ora = require('ora');
 const spinner = ora({ text: '' });
 
