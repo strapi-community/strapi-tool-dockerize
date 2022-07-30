@@ -33,5 +33,5 @@ const { clear, debug } = flags;
 		symbol: '⭐️',
 		text: ` Star the project on GitHub if you liked this tool 🙏. \n`
 	});
-	console.log(`👉 ${pkg.homepage} 👈 \n`);
+	console.log(`👉 ${pkg.url} 👈 \n`);
 })();
