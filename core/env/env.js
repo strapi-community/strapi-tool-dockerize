@@ -1,6 +1,5 @@
 const { createWriteStream, readFile } = require('fs');
-const ora = require('ora');
-const spinner = ora({ text: '' });
+const { spinner } = require('../utils');
 
 async function appendEnvFile(config) {
 	spinner.start();
