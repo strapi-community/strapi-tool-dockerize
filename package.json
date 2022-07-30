@@ -26,6 +26,7 @@
 		"acp": "git add . && npm run commit"
 	},
 	"dependencies": {
+		"chalk": "^4.1.2",
 		"cli-alerts": "^1.2.2",
 		"cli-handle-error": "^4.4.0",
 		"cli-handle-unhandled": "^1.1.1",
