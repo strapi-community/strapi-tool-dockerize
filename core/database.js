@@ -1,11 +1,10 @@
 const path = require('path');
-const { access, rename, writeFile } = require('fs/promises');
-const ora = require('ora');
-const spinner = ora({ text: '' });
+const { access, copyFile } = require('fs/promises');
+const { projectType, spinner } = require('./utils');
 
 async function generateDatabase(config) {
 	return `${
-		(await jsOrTs()) === 'ts' ? 'export default' : 'module.exports = '
+		projectType() ? 'export default' : 'module.exports = '
 	} ({ env }) => ({
 	connection: {
 		client: '${
@@ -24,37 +23,28 @@ async function generateDatabase(config) {
 `;
 }
 
-async function checkAndBackupDB(config) {
-	spinner.start();
+async function checkAndBackupDB() {
 	const databasePath = path.join(
 		process.cwd(),
 		'config',
-		`database.${await jsOrTs()}`
+		`database.${projectType()}`
 	);
+	spinner.start(`Checking for existing config/database.${projectType()}`);
 	const databaseOldPath = path.join(process.cwd(), 'config', 'database.backup');
-
+	spinner.stopAndPersist({
+		symbol: '🕵️‍♀️',
+		text: ` Detected config/database.${projectType()}, made a backup at 👉 config/database.backup \n`
+	});
 	try {
 		await access(databasePath);
-		await rename(databasePath, databaseOldPath);
-		await writeFile(databasePath, (await generateDatabase(config)).toString());
-		spinner.stopAndPersist({
-			symbol: '💾',
-			text: ' Database configuration file created \n'
-		});
+		await copyFile(databasePath, databaseOldPath);
 	} catch (error) {
+		console.log(error);
 		spinner.stopAndPersist({
 			symbol: '❌',
-			text: ` Unable to access config/database.${await jsOrTs()} does it exist 🤔 - check and try again \n`
+			text: ` Unable to access config/database.${projectType()} does it exist 🤔 - check and try again \n`
 		});
-	}
-}
-async function jsOrTs() {
-	try {
-		await access(path.join(process.cwd(), 'tsconfig.json'));
-		return 'ts';
-	} catch (error) {
-		return 'js';
 	}
 }
 
-module.exports = checkAndBackupDB;
+module.exports = { checkAndBackupDB, generateDatabase };
