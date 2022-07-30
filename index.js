@@ -12,8 +12,7 @@ const cli = require('./cli/cli');
 const log = require('./cli/log');
 const questions = require('./core/questions');
 const { pkg } = require('./cli/cli');
-const ora = require('ora');
-const spinner = ora({ text: '' });
+const { isTS, spinner } = require('./core/utils');
 
 const input = cli.input;
 const flags = cli.flags;
@@ -22,6 +21,7 @@ const { clear, debug } = flags;
 (async () => {
 	init({ clear });
 	input.includes(`help`) && cli.showHelp(0);
+	await isTS();
 	await questions();
 	debug && log(flags);
 
