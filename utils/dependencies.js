@@ -15,7 +15,7 @@ async function installDependecies(config) {
 			`${config.dbtype.toLowerCase() === 'postgresql' ? 'pg' : 'mysql'}`
 		]);
 		spinner.stopAndPersist({
-			symbol: '✅',
+			symbol: '📦',
 			text: ` ${config.dbtype} dependencies installed with YARN \n`
 		});
 	} catch (err) {
@@ -28,7 +28,7 @@ async function installDependecies(config) {
 		]);
 
 		spinner.stopAndPersist({
-			symbol: '✅',
+			symbol: '📦',
 			text: ` ${config.dbtype} dependencies installed with NPM \n`
 		});
 	}
@@ -45,7 +45,7 @@ async function checkForOldDependecies(config, options) {
 		}
 
 		spinner.stopAndPersist({
-			symbol: '✅',
+			symbol: '📦',
 			text: ` Old dependencies removed \n`
 		});
 	} catch (err) {}
