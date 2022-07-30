@@ -1,8 +1,7 @@
-const ora = require('ora');
-const { access, readFile } = require('fs/promises');
+const { access } = require('fs/promises');
 const { constants } = require('fs');
+const { spinner } = require('./utils');
 const execa = require('execa');
-const spinner = ora({ text: '' });
 
 async function installDependecies(config) {
 	try {

@@ -1,6 +1,6 @@
 const whatToCreate = require('./copyFiles');
 const { prompt, toggle } = require('enquirer');
-const appendEnvFile = require('./env');
+const appendEnvFile = require('./env/env');
 const checkAndBackupDB = require('./database');
 const installDependecies = require('./dependencies');
 
@@ -18,13 +18,14 @@ module.exports = async () => {
 		message: 'What enviroments do you want to configure 💻',
 		choices: ['Development', 'Production', 'Both']
 	});
-	const deployment = await prompt({
-		type: 'select',
-		name: 'answer',
-		message: 'Are you deploying to any of the following host 🚀',
-		hint: 'Currently we are only supporting Heroku',
-		choices: ['Heroku', 'Other']
-	});
+	// TODO: ADD Heroku to providers
+	// const deployment = await prompt({
+	// 	type: 'select',
+	// 	name: 'answer',
+	// 	message: 'Are you deploying to any of the following host 🚀',
+	// 	hint: 'Currently we are only supporting Heroku',
+	// 	choices: ['Other', 'Heroku']
+	// });
 
 	if (dockerCompose) {
 		config = await prompt([
@@ -51,8 +52,6 @@ module.exports = async () => {
 				type: 'password',
 				name: 'dbpassword',
 				message: 'Database Password',
-				hint: 'Defaults to strapi',
-				initial: 'strapi',
 				validate: value => {
 					if (value.length < 1) {
 						return 'Password is required';
@@ -68,9 +67,8 @@ module.exports = async () => {
 			initial: config.dbtype.toLowerCase() === 'postgresql' ? 5432 : 3306
 		});
 		config.dbport = portNumberAnswer.dbport;
-		config.production = productionReady.production;
 		config.env = env.answer;
-		config.deployment = deployment.answer;
+		//config.deployment = deployment.answer;
 
 		await whatToCreate(dockerCompose, config);
 		await appendEnvFile(config);

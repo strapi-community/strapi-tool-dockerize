@@ -5,10 +5,10 @@ async function appendEnvFile(config) {
 	spinner.start();
 	await readFile('.env', 'utf8', async (err, data) => {
 		const logger = createWriteStream('.env', { flags: 'a' });
-		if (data && data.includes('Strapi Dockerize variables')) {
+		if (data && data.includes('Strapi Dockerize')) {
 			spinner.stopAndPersist({
 				symbol: '⚠️',
-				text: ` .env file already contains Strapi Dockerize variables please update manually or remove them \n`
+				text: ` .env file already contains dockerized variables please update manually or remove them \n`
 			});
 			return;
 		}
@@ -28,7 +28,7 @@ async function appendEnvFile(config) {
 		);
 		spinner.stopAndPersist({
 			symbol: '🕵️',
-			text: ' Added Strapi Dockerize variables to .env file \n'
+			text: ' Added Dockerize variables to .env file \n'
 		});
 	});
 }
