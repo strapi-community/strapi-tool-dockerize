@@ -25,7 +25,9 @@ async function createDockerFiles() {
 		);
 		spinner.stopAndPersist({
 			symbol: '🐳',
-			text: ` Dockerfile with ${packageManagerUsed().toUpperCase()} setup added \n`
+			text: ` ${chalk.bold.blue('Dockerfile')} with ${chalk.yellow(
+				packageManagerUsed().toUpperCase()
+			)} setup added \n`
 		});
 	} catch (err) {}
 	await copyFile(`${dockerfileDir}/.dockerignore`, `${outDir}/.dockerignore`);

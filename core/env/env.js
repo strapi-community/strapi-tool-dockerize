@@ -11,9 +11,15 @@ async function appendEnvFile(config) {
 			await envUpdate(config.env);
 			spinner.stopAndPersist({
 				symbol: '⚠️',
-				text: ` .env file already contains enviromental variables but we updated your NODE_ENV with ${chalk.green.bold(
-					config.env.toUpperCase()
-				)} the rest you need to update yourself 🙏 \n`
+				text: ` .env file already contains ${chalk.blue(
+					'dockerize'
+				)} variables but we updated your\n    local ${chalk.bold(
+					'NODE_ENV'
+				)} to ${chalk.green.bold(
+					config.env.toLowerCase() === 'both'
+						? 'development'
+						: config.env.toUpperCase()
+				)}, the rest you need to update yourself 🙏 \n`
 			});
 			return;
 		}
@@ -26,7 +32,9 @@ async function appendEnvFile(config) {
 		writeLine(`DATABASE_NAME=${config.dbname}`);
 		writeLine(`DATABASE_USERNAME=${config.dbuser}`);
 		writeLine(`DATABASE_PASSWORD=${config.dbpassword}`);
-		writeLine(`NODE_ENV=${config.env.toLowerCase()}`);
+		writeLine(
+			`NODE_ENV=${config.env.toLowerCase()} === 'both' ? 'development' : ${config.env.toLowerCase()}`
+		);
 		writeLine(
 			`DATABASE_CLIENT=${
 				config.dbtype.toLowerCase() === 'postgresql' ? 'postgres' : 'mysql'
