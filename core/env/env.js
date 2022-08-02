@@ -33,7 +33,11 @@ async function appendEnvFile(config) {
 		writeLine(`DATABASE_USERNAME=${config.dbuser}`);
 		writeLine(`DATABASE_PASSWORD=${config.dbpassword}`);
 		writeLine(
-			`NODE_ENV=${config.env.toLowerCase()} === 'both' ? 'development' : ${config.env.toLowerCase()}`
+			`NODE_ENV=${
+				config.env.toLowerCase() === 'both'
+					? 'development'
+					: config.env.toLowerCase()
+			}`
 		);
 		writeLine(
 			`DATABASE_CLIENT=${
