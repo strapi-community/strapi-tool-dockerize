@@ -3,6 +3,7 @@ const { prompt, toggle } = require('enquirer');
 const appendEnvFile = require('./env/env');
 const createEnv = require('./env/envSetup');
 const installDependecies = require('./dependencies');
+const { setEnv } = require('./utils');
 
 module.exports = async () => {
 	let config;
@@ -69,12 +70,19 @@ module.exports = async () => {
 		config.dbport = portNumberAnswer.dbport;
 		config.env = env.answer;
 		//config.deployment = deployment.answer;
-
+		setEnv(env.answer);
 		await whatToCreate(dockerCompose, config);
 		await appendEnvFile(config);
 		await createEnv(config);
 		await installDependecies(config);
 	} else {
+		const env = await prompt({
+			type: 'select',
+			name: 'answer',
+			message: 'What enviroment do you want the app to run in 🐳',
+			choices: ['Development', 'Production']
+		});
+		setEnv(env.answer);
 		await whatToCreate(dockerCompose, config);
 	}
 };
