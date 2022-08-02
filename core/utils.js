@@ -9,8 +9,9 @@ const chalk = require('chalk');
 
 let _projectType = 'js';
 let _packageManager = '';
+let _env = 'development';
 
-const dockerComposeDir = path.join(__dirname, '../templates/docker-compose');
+const dockerComposeDir = path.join(__dirname, '../templates/compose');
 const dockerfileDir = path.join(__dirname, '../templates/dockerfiles');
 const outDir = path.join(process.cwd());
 
@@ -68,11 +69,20 @@ async function detectProjectType() {
 		} project detected \n`
 	});
 }
+
 function projectType() {
 	return _projectType;
 }
 function packageManagerUsed() {
 	return _packageManager;
+}
+
+function setEnv(env) {
+	env.toLowerCase() === 'both' ? (_env = 'production') : (_env = env);
+}
+
+function getEnv() {
+	return _env;
 }
 
 module.exports = {
@@ -88,5 +98,7 @@ module.exports = {
 	packageManagerUsed,
 	replace,
 	chalk,
-	execa
+	execa,
+	setEnv,
+	getEnv
 };
