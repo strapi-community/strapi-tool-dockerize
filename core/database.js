@@ -4,7 +4,7 @@ const { projectType, spinner } = require('./utils');
 
 async function generateDatabase(config) {
 	return `${
-		projectType() ? 'export default' : 'module.exports = '
+		projectType() === 'ts' ? 'export default' : 'module.exports = '
 	} ({ env }) => ({
 	connection: {
 		client: '${
