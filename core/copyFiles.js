@@ -7,7 +7,8 @@ const {
 	dockerfileDir,
 	outDir,
 	packageManagerUsed,
-	chalk
+	chalk,
+	getEnv
 } = require('./utils');
 
 async function whatToCreate(createCompose, config) {
@@ -20,7 +21,7 @@ async function createDockerFiles() {
 	spinner.start();
 	try {
 		await copyFile(
-			`${dockerfileDir}/Dockerfile.${packageManagerUsed()}`,
+			`${dockerfileDir}/${getEnv()}/Dockerfile.${packageManagerUsed()}`,
 			`${outDir}/Dockerfile`
 		);
 		spinner.stopAndPersist({
