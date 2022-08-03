@@ -39,6 +39,12 @@ module.exports = async () => {
 			},
 			{
 				type: 'input',
+				name: 'dbhost',
+				message: 'Database Host',
+				initial: 'localhost'
+			},
+			{
+				type: 'input',
 				name: 'dbname',
 				message: 'Database Name',
 				initial: 'strapi'
@@ -73,7 +79,7 @@ module.exports = async () => {
 		setConfig(config);
 		setEnv(env.answer.toLowerCase());
 		await whatToCreate(dockerCompose, config);
-		await appendEnvFile(config);
+		await appendEnvFile();
 		await createEnv(config);
 		await installDependecies(config);
 	} else {
