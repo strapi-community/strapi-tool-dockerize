@@ -1,4 +1,4 @@
-name: Node.JS CI
+name: Github & NPM Release
 
 on:
   push:
@@ -10,7 +10,7 @@ jobs:
     if: ${{ github.ref == 'refs/heads/main' }}
     steps:
       - uses: actions/checkout@v2
-      - name: 'Use Node.JS version'
+      - name: 'Running Semantic Release'
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}

@@ -1,6 +1,6 @@
 {
 	"name": "@strapi-community/dockerize",
-	"description": "Add docker support for a Strapi Project",
+	"description": "Easy add docker support for a Strapi Project",
 	"version": "0.0.0-development",
 	"license": "MIT",
 	"bin": {
@@ -20,7 +20,8 @@
 		"templates",
 		"cli",
 		"core",
-		"providers"
+		"providers",
+		"utils"
 	],
 	"scripts": {
 		"format": "prettier --write \"./**/*.{js,json}\"",
