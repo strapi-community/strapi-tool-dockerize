@@ -23,7 +23,7 @@ async function createDockerFiles() {
 		);
 		if (getEnv() === 'production') {
 			await copyFile(
-				`${dockerfileDir}/${production}/Dockerfile.${getPackageManager()}`,
+				`${dockerfileDir}/production/Dockerfile.${getPackageManager()}`,
 				`${outDir}/Dockerfile.prod`
 			);
 		}
@@ -33,7 +33,9 @@ async function createDockerFiles() {
 				getEnv().toUpperCase()
 			)} added \n`
 		});
-	} catch (error) {}
+	} catch (error) {
+		generateError(error);
+	}
 
 	await copyFile(`${dockerfileDir}/.dockerignore`, `${outDir}/.dockerignore`);
 	await checkForDataFolder();

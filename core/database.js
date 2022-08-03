@@ -10,8 +10,8 @@ async function generateDatabase() {
 	} ({ env }) => ({
 	connection: {
 		client: '${
-			config.dbtype.toLowerCase() === 'postgresql' ? 'postgres' : 'mysql'
-		}',
+	config.dbtype.toLowerCase() === 'postgresql' ? 'postgres' : 'mysql'
+}',
 		connection: {
 			host: env('DATABASE_HOST', '${config.dbhost}'),
 			port: env.int('DATABASE_PORT', ${config.dbport}),

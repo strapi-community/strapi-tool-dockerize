@@ -15,7 +15,7 @@ async function yarnLockToPackageLock() {
 		to: '- ./package-lock.json:/opt/package-lock.json'
 	};
 	try {
-		await access(`package-lock.json`, constants.R_OK);
+		await access('package-lock.json', constants.R_OK);
 		await replace(options);
 	} catch (error) {}
 }
@@ -26,7 +26,7 @@ async function checkForDataFolder() {
 		to: ''
 	};
 	try {
-		await access(`data`, constants.R_OK);
+		await access('data', constants.R_OK);
 		await replace(options);
 	} catch (error) {}
 }

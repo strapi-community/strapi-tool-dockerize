@@ -20,7 +20,7 @@ const { clear, debug } = flags;
 
 (async () => {
 	init({ clear });
-	input.includes(`help`) && cli.showHelp(0);
+	input.includes('help') && cli.showHelp(0);
 	try {
 		await detectProjectType();
 		await detectPackageManager();

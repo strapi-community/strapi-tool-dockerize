@@ -26,7 +26,8 @@
 		"format": "prettier --write \"./**/*.{js,json}\"",
 		"semantic-release": "semantic-release --branches main",
 		"commit": "git-cz",
-		"acp": "git add . && npm run commit"
+		"acp": "git add . && npm run commit",
+		"lint": "eslint --ext .js --fix \"./**/*.js\""
 	},
 	"dependencies": {
 		"chalk": "^4.1.2",
@@ -46,6 +47,7 @@
 	},
 	"devDependencies": {
 		"cz-conventional-changelog": "^3.3.0",
+		"eslint": "^8.21.0",
 		"prettier": "^2.7.1",
 		"semantic-release": "^19.0.3"
 	},

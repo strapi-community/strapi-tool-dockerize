@@ -26,7 +26,7 @@ async function detectProjectType() {
 async function detectPackageManager() {
 	spinner.start(' 💻 Detecting package manager... ');
 	try {
-		await access(`yarn.lock`, constants.R_OK);
+		await access('yarn.lock', constants.R_OK);
 		_packageManager = 'yarn';
 	} catch (error) {
 		_packageManager = 'npm';

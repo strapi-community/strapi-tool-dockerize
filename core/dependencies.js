@@ -35,9 +35,9 @@ async function installDependecies(config) {
 }
 async function checkForOldDependecies(config, options) {
 	try {
-		spinner.start(` 📦 Checking for old dependencies...`);
-		await access(`package.json`, constants.R_OK);
-		spinner.start(` 📦 Cleaning up old dependencies...`);
+		spinner.start(' 📦 Checking for old dependencies...');
+		await access('package.json', constants.R_OK);
+		spinner.start(' 📦 Cleaning up old dependencies...');
 
 		await execa(`${options.type}`, [
 			`${options.command}`,
@@ -46,12 +46,12 @@ async function checkForOldDependecies(config, options) {
 
 		spinner.stopAndPersist({
 			symbol: '📦',
-			text: ` Cleaned up old dependencies \n`
+			text: ' Cleaned up old dependencies \n'
 		});
 	} catch (error) {
 		spinner.stopAndPersist({
 			symbol: '📦',
-			text: ` No old dependencies to clean up \n`
+			text: ' No old dependencies to clean up \n'
 		});
 		return;
 	}

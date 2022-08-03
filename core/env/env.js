@@ -15,7 +15,7 @@ async function appendEnvFile() {
 			return;
 		}
 
-		writeLine(`# @strapi-community/dockerize variables \n`);
+		writeLine('# @strapi-community/dockerize variables \n');
 		writeLine(`DATABASE_HOST=${config.dbhost}`);
 		writeLine(`DATABASE_PORT=${config.dbport}`);
 		writeLine(`DATABASE_NAME=${config.dbname}`);
@@ -58,7 +58,7 @@ async function envUpdate(env) {
 		],
 		to: [
 			`${env.toLowerCase()}`,
-			`development`,
+			'development',
 			`DATABASE_CLIENT=${
 				config.dbtype.toLowerCase() === 'postgresql' ? 'postgres' : 'mysql'
 			}`,
