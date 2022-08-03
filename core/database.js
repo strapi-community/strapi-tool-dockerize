@@ -1,7 +1,12 @@
 const path = require('path');
-const { spinner, access, copyFile, generateError } = require('./utils');
-const { getProjectType } = require('./detection');
-const { getConfig } = require('./config');
+const {
+	spinner,
+	access,
+	copyFile,
+	generateError,
+	getProjectType,
+	getConfig
+} = require('../utils');
 
 async function generateDatabase() {
 	const config = getConfig();
@@ -13,7 +18,7 @@ async function generateDatabase() {
 	config.dbtype.toLowerCase() === 'postgresql' ? 'postgres' : 'mysql'
 }',
 		connection: {
-			host: env('DATABASE_HOST', '${config.dbhost}'),
+		host: env('DATABASE_HOST', '${config.dbhost}'),
 			port: env.int('DATABASE_PORT', ${config.dbport}),
 			database: env('DATABASE_NAME', '${config.dbname}'),
 			user: env('DATABASE_USERNAME', '${config.dbuser}'),

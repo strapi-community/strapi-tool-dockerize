@@ -5,8 +5,7 @@ const execa = require('execa');
 const ora = require('ora');
 const spinner = ora({ text: '' });
 const chalk = require('chalk');
-const { dockerComposeDir, dockerfileDir, outDir } = require('./const');
-const generateError = require('./bugreport');
+const { dockerComposeDir, dockerfileDir, outDir } = require('../core/const');
 
 async function yarnLockToPackageLock() {
 	const options = {
@@ -43,6 +42,5 @@ module.exports = {
 	execa,
 	access,
 	constants,
-	copyFile,
-	generateError
+	copyFile
 };

@@ -3,8 +3,7 @@ const { prompt, toggle } = require('enquirer');
 const appendEnvFile = require('./env/env');
 const createEnv = require('./env/envSetup');
 const installDependecies = require('./dependencies');
-const { setEnv } = require('./detection');
-const { setConfig } = require('./config');
+const { setEnv, setConfig } = require('../utils');
 module.exports = async () => {
 	let config;
 	const dockerCompose = await toggle({

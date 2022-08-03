@@ -11,9 +11,12 @@ const init = require('./cli/init');
 const cli = require('./cli/cli');
 const log = require('./cli/log');
 const questions = require('./core/questions');
-const { detectProjectType, detectPackageManager } = require('./core/detection');
-const goodbye = require('./core/goodbye');
-const { generateError } = require('./core/utils');
+const {
+	detectProjectType,
+	detectPackageManager,
+	goodbye,
+	generateError
+} = require('./utils');
 const input = cli.input;
 const flags = cli.flags;
 const { clear, debug } = flags;
@@ -28,6 +31,7 @@ const { clear, debug } = flags;
 		debug && log(flags);
 		goodbye();
 	} catch (error) {
+		console.log(error);
 		await generateError(error);
 	}
 })();

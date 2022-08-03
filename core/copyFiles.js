@@ -1,14 +1,15 @@
-const { copyFile } = require('fs/promises');
+const { dockerComposeDir, dockerfileDir, outDir } = require('./const');
 const {
 	yarnLockToPackageLock,
 	checkForDataFolder,
 	spinner,
 	chalk,
-	generateError
-} = require('./utils');
-const { dockerComposeDir, dockerfileDir, outDir } = require('./const');
-const { getPackageManager, getEnv } = require('./detection');
-const { getConfig } = require('./config');
+	generateError,
+	getPackageManager,
+	getEnv,
+	getConfig,
+	copyFile
+} = require('../utils');
 async function whatToCreate(createCompose) {
 	if (createCompose) await createDockerComposeFiles();
 	await createDockerFiles();

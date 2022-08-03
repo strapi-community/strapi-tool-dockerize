@@ -2,8 +2,8 @@ const path = require('path');
 const fse = require('fs-extra');
 
 const { generateDatabase } = require('../database');
-const { spinner, chalk, generateError } = require('../utils');
-const { getProjectType } = require('../detection');
+const { spinner, chalk, generateError } = require('../../utils/utils');
+const { getProjectType } = require('../../utils/detection');
 
 async function _envSetup(config, envType) {
 	const databasePath = path.join(

@@ -1,6 +1,12 @@
 const { createWriteStream, readFile } = require('fs');
-const { getConfig } = require('../config');
-const { spinner, replace, outDir, chalk, generateError } = require('../utils');
+const {
+	spinner,
+	replace,
+	outDir,
+	chalk,
+	generateError,
+	getConfig
+} = require('../../utils');
 const logger = createWriteStream('.env', { flags: 'a' });
 
 const writeLine = line => logger.write(`\n${line}`);

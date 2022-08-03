@@ -4,9 +4,9 @@ const {
 	execa,
 	access,
 	constants,
-	generateError
-} = require('./utils');
-const { getPackageManager } = require('./detection');
+	generateError,
+	getPackageManager
+} = require('../utils');
 
 async function installDependecies(config) {
 	try {
@@ -30,6 +30,7 @@ async function installDependecies(config) {
 			)} \n`
 		});
 	} catch (error) {
+		console.log(error);
 		await generateError(error);
 	}
 }
