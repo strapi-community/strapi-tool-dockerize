@@ -1,0 +1,11 @@
+build:
+  docker:
+    web: Dockerfile.prod
+  config:
+    NODE_ENV: production
+    DATABASE_URL: $DATABASE_URL
+    WEBSITE_URL: $WEBSITE_URL
+    PORT: $PORT
+
+run:
+  web: yarn start
