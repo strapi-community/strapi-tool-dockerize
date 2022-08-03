@@ -7,29 +7,11 @@ const ora = require('ora');
 const spinner = ora({ text: '' });
 const chalk = require('chalk');
 
-let _projectType = 'js';
-let _packageManager = '';
-let _env = 'development';
+const config = {};
 
 const dockerComposeDir = path.join(__dirname, '../templates/compose');
 const dockerfileDir = path.join(__dirname, '../templates/dockerfiles');
 const outDir = path.join(process.cwd());
-
-async function yarnOrNpm() {
-	spinner.start(' 💻 Detecting package manager... ');
-	try {
-		await access(`yarn.lock`, constants.R_OK);
-		_packageManager = 'yarn';
-	} catch (error) {
-		_packageManager = 'npm';
-	}
-	spinner.stopAndPersist({
-		symbol: '📦',
-		text: ` ${chalk.bold.yellow(
-			packageManagerUsed().toUpperCase()
-		)} detected \n`
-	});
-}
 
 async function yarnLockToPackageLock() {
 	const options = {
@@ -54,51 +36,14 @@ async function checkForDataFolder() {
 	} catch (err) {}
 }
 
-async function detectProjectType() {
-	spinner.start(' 💻 Detecting Project type... ');
-	try {
-		await access(path.join(process.cwd(), 'tsconfig.json'));
-		_projectType = 'ts';
-	} catch (error) {}
-	spinner.stopAndPersist({
-		symbol: '🍿',
-		text: ` ${
-			projectType() === 'ts'
-				? `${chalk.bold.blueBright('TypeScript')}`
-				: `${chalk.bold.yellow('JavaScript')}`
-		} project detected \n`
-	});
-}
-
-function projectType() {
-	return _projectType;
-}
-function packageManagerUsed() {
-	return _packageManager;
-}
-
-function setEnv(env) {
-	env.toLowerCase() === 'both' ? (_env = 'production') : (_env = env);
-}
-
-function getEnv() {
-	return _env;
-}
-
 module.exports = {
 	yarnLockToPackageLock,
 	checkForDataFolder,
-	detectProjectType,
-	projectType,
 	spinner,
 	dockerComposeDir,
 	dockerfileDir,
 	outDir,
-	yarnOrNpm,
-	packageManagerUsed,
 	replace,
 	chalk,
-	execa,
-	setEnv,
-	getEnv
+	execa
 };
