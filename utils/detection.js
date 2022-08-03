@@ -1,5 +1,5 @@
 const path = require('path');
-const { spinner, chalk, constants, access, generateError } = require('./utils');
+const { spinner, chalk, constants, access } = require('./utils');
 
 let _projectType = 'js';
 let _packageManager = '';
@@ -10,9 +10,7 @@ async function detectProjectType() {
 	try {
 		await access(path.join(process.cwd(), 'tsconfig.json'));
 		_projectType = 'ts';
-	} catch (error) {
-		await generateError(error);
-	}
+	} catch (error) {}
 	spinner.stopAndPersist({
 		symbol: '🍿',
 		text: ` ${
