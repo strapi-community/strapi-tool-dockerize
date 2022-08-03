@@ -2,7 +2,7 @@ const path = require('path');
 const fse = require('fs-extra');
 
 const { generateDatabase } = require('../database');
-const { spinner, chalk } = require('../utils');
+const { spinner, chalk, generateError } = require('../utils');
 const { getProjectType } = require('../detection');
 
 async function _envSetup(config, envType) {
@@ -20,7 +20,7 @@ async function _envSetup(config, envType) {
 			(await generateDatabase(config)).toString()
 		);
 	} catch (error) {
-		console.log(error);
+		await generateError(error);
 	}
 }
 
