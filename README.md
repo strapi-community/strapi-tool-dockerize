@@ -56,6 +56,20 @@ I/We are actively looking for contributors, maintainers, and others to help shap
 
 If interested please feel free to email the lead maintainer Simen at: simen@dehlin.dev or ping `Cookie Monster#6725` on Discord.
 
+## ⭐️ Show your support
+
+Give a star if this project helped you.
+
+## 🔗 Links
+
+- [NPM package](https://www.npmjs.com/package/@strapi-community/dockerize)
+- [GitHub repository](https://github.com/strapi-community/strapi-tool-dockerize)
+
+## 🌎 Community support
+
+- For general help using Strapi, please refer to [the official Strapi documentation](https://strapi.io/documentation/).
+- For support with this plugin you can DM me in the Strapi Discord [channel](https://discord.strapi.io/).
+
 ## 🙋‍♀️ Authors
 
 - [@Eventyret / Simen Daehlin](https://github.com/Eventyret)
