@@ -2,7 +2,8 @@ const path = require('path');
 const fse = require('fs-extra');
 
 const { generateDatabase } = require('../database');
-const { spinner, projectType, chalk } = require('../utils');
+const { spinner, chalk } = require('../utils');
+const { getProjectType } = require('../detection');
 
 async function _envSetup(config, envType) {
 	const databasePath = path.join(
@@ -10,7 +11,7 @@ async function _envSetup(config, envType) {
 		'config',
 		'env',
 		`${envType.toLowerCase()}`,
-		`database.${projectType()}`
+		`database.${getProjectType()}`
 	);
 
 	try {
@@ -35,7 +36,7 @@ async function createEnv(config) {
 		symbol: '💾',
 		text: ` Added ${chalk.bold.green(
 			config.dbtype.toUpperCase()
-		)} configuration to database.${projectType()} \n`
+		)} configuration to database.${getProjectType()} \n`
 	});
 }
 async function _cleanupFolders() {

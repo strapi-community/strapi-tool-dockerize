@@ -45,7 +45,7 @@ function getEnv() {
 }
 
 function getProjectType() {
-	return _getProjectType;
+	return _projectType;
 }
 function getPackageManager() {
 	return _packageManager;

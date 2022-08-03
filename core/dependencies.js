@@ -1,26 +1,27 @@
 const { access } = require('fs/promises');
 const { constants } = require('fs');
-const { spinner, packageManagerUsed, chalk, execa } = require('./utils');
+const { spinner, chalk, execa } = require('./utils');
+const { getPackageManager } = require('./detection');
 
 async function installDependecies(config) {
 	try {
 		await checkForOldDependecies(config, {
-			type: packageManagerUsed(),
-			command: packageManagerUsed() === 'yarn' ? 'remove' : 'uninstall'
+			type: getPackageManager(),
+			command: getPackageManager() === 'yarn' ? 'remove' : 'uninstall'
 		});
 		spinner.start(
 			` 📦 Installing dependencies using ${chalk.bold.yellow(
-				packageManagerUsed().toUpperCase()
+				getPackageManager().toUpperCase()
 			)}...`
 		);
-		await execa(packageManagerUsed(), [
-			`${packageManagerUsed() === 'yarn' ? 'add' : 'install'}`,
+		await execa(getPackageManager(), [
+			`${getPackageManager() === 'yarn' ? 'add' : 'install'}`,
 			`${config.dbtype.toLowerCase() === 'postgresql' ? 'pg' : 'mysql'}`
 		]);
 		spinner.stopAndPersist({
 			symbol: '📦',
 			text: ` ${config.dbtype} dependencies installed with ${chalk.bold.yellow(
-				packageManagerUsed().toUpperCase()
+				getPackageManager().toUpperCase()
 			)} \n`
 		});
 	} catch (err) {

@@ -3,7 +3,7 @@ const { prompt, toggle } = require('enquirer');
 const appendEnvFile = require('./env/env');
 const createEnv = require('./env/envSetup');
 const installDependecies = require('./dependencies');
-const { setEnv } = require('./utils');
+const { setEnv } = require('./detection');
 
 module.exports = async () => {
 	let config;
@@ -26,14 +26,14 @@ module.exports = async () => {
 		const env = await prompt({
 			type: 'select',
 			name: 'answer',
-			message: 'What enviroments do you want to configure 💻',
+			message: 'What enviroments do you want to configure?',
 			choices: ['Development', 'Production', 'Both']
 		});
 		config = await prompt([
 			{
 				type: 'select',
 				name: 'dbtype',
-				message: 'What database do you want to use? 💾',
+				message: 'What database do you want to use?',
 				hint: 'SQLite is not an option when using docker-compose',
 				choices: ['MySQL', 'MariaDB', 'PostgreSQL']
 			},
@@ -64,13 +64,13 @@ module.exports = async () => {
 		const portNumberAnswer = await prompt({
 			type: 'numeral',
 			name: 'dbport',
-			message: 'Database Port 💾',
+			message: 'Database Port',
 			initial: config.dbtype.toLowerCase() === 'postgresql' ? 5432 : 3306
 		});
 		config.dbport = portNumberAnswer.dbport;
 		config.env = env.answer;
 		//config.deployment = deployment.answer;
-		setEnv(env.answer);
+		setEnv(env.answer.toLowerCase());
 		await whatToCreate(dockerCompose, config);
 		await appendEnvFile(config);
 		await createEnv(config);
@@ -79,10 +79,10 @@ module.exports = async () => {
 		const env = await prompt({
 			type: 'select',
 			name: 'answer',
-			message: 'What enviroment do you want the app to run in 🐳',
+			message: 'What enviroment do you want to configure for?',
 			choices: ['Development', 'Production']
 		});
-		setEnv(env.answer);
+		setEnv(env.answer.toLowerCase());
 		await whatToCreate(dockerCompose, config);
 	}
 };

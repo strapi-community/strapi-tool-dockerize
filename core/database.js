@@ -1,10 +1,11 @@
 const path = require('path');
 const { access, copyFile } = require('fs/promises');
-const { projectType, spinner } = require('./utils');
+const { spinner } = require('./utils');
+const { getProjectType } = require('./detection');
 
 async function generateDatabase(config) {
 	return `${
-		projectType() === 'ts' ? 'export default' : 'module.exports = '
+		getProjectType() === 'ts' ? 'export default' : 'module.exports = '
 	} ({ env }) => ({
 	connection: {
 		client: '${
@@ -27,13 +28,13 @@ async function checkAndBackupDB() {
 	const databasePath = path.join(
 		process.cwd(),
 		'config',
-		`database.${projectType()}`
+		`database.${getProjectType()}`
 	);
-	spinner.start(`Checking for existing config/database.${projectType()}`);
+	spinner.start(`Checking for existing config/database.${getProjectType()}`);
 	const databaseOldPath = path.join(process.cwd(), 'config', 'database.backup');
 	spinner.stopAndPersist({
 		symbol: '🕵️‍♀️',
-		text: ` Detected config/database.${projectType()}, made a backup at 👉 config/database.backup \n`
+		text: ` Detected config/database.${getProjectType()}, made a backup at 👉 config/database.backup \n`
 	});
 	try {
 		await access(databasePath);
@@ -42,7 +43,7 @@ async function checkAndBackupDB() {
 		console.log(error);
 		spinner.stopAndPersist({
 			symbol: '❌',
-			text: ` Unable to access config/database.${projectType()} does it exist 🤔 - check and try again \n`
+			text: ` Unable to access config/database.${getProjectType()} does it exist 🤔 - check and try again \n`
 		});
 	}
 }
