@@ -33,9 +33,7 @@ async function createDockerFiles() {
 				getEnv().toUpperCase()
 			)} added \n`
 		});
-	} catch (err) {
-		await generateError(error);
-	}
+	} catch (error) {}
 
 	await copyFile(`${dockerfileDir}/.dockerignore`, `${outDir}/.dockerignore`);
 	await checkForDataFolder();

@@ -17,9 +17,7 @@ async function yarnLockToPackageLock() {
 	try {
 		await access(`package-lock.json`, constants.R_OK);
 		await replace(options);
-	} catch (err) {
-		await generateError(error);
-	}
+	} catch (error) {}
 }
 async function checkForDataFolder() {
 	const options = {
@@ -30,9 +28,7 @@ async function checkForDataFolder() {
 	try {
 		await access(`data`, constants.R_OK);
 		await replace(options);
-	} catch (err) {
-		await generateError(error);
-	}
+	} catch (error) {}
 }
 
 module.exports = {

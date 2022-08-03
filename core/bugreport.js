@@ -18,7 +18,7 @@ async function generateError(error) {
 
 ${error.message}
 
-### Stack trace
+### 🕵️‍♀️ Stack trace
 
 \`\`\`bash
 ${error.stack}

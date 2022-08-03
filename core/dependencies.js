@@ -29,7 +29,7 @@ async function installDependecies(config) {
 				getPackageManager().toUpperCase()
 			)} \n`
 		});
-	} catch (err) {
+	} catch (error) {
 		await generateError(error);
 	}
 }
@@ -48,7 +48,7 @@ async function checkForOldDependecies(config, options) {
 			symbol: '📦',
 			text: ` Cleaned up old dependencies \n`
 		});
-	} catch (err) {
+	} catch (error) {
 		spinner.stopAndPersist({
 			symbol: '📦',
 			text: ` No old dependencies to clean up \n`
