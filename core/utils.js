@@ -6,6 +6,7 @@ const ora = require('ora');
 const spinner = ora({ text: '' });
 const chalk = require('chalk');
 const { dockerComposeDir, dockerfileDir, outDir } = require('./const');
+const generateError = require('./bugreport');
 
 async function yarnLockToPackageLock() {
 	const options = {
@@ -16,7 +17,9 @@ async function yarnLockToPackageLock() {
 	try {
 		await access(`package-lock.json`, constants.R_OK);
 		await replace(options);
-	} catch (err) {}
+	} catch (err) {
+		await generateError(error);
+	}
 }
 async function checkForDataFolder() {
 	const options = {
@@ -27,7 +30,9 @@ async function checkForDataFolder() {
 	try {
 		await access(`data`, constants.R_OK);
 		await replace(options);
-	} catch (err) {}
+	} catch (err) {
+		await generateError(error);
+	}
 }
 
 module.exports = {
@@ -42,5 +47,6 @@ module.exports = {
 	execa,
 	access,
 	constants,
-	copyFile
+	copyFile,
+	generateError
 };

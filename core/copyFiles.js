@@ -3,14 +3,14 @@ const {
 	yarnLockToPackageLock,
 	checkForDataFolder,
 	spinner,
-	chalk
+	chalk,
+	generateError
 } = require('./utils');
 const { dockerComposeDir, dockerfileDir, outDir } = require('./const');
 const { getPackageManager, getEnv } = require('./detection');
-
-async function whatToCreate(createCompose, config) {
-	if (createCompose)
-		await createDockerComposeFiles(config.dbtype.toLowerCase());
+const { getConfig } = require('./config');
+async function whatToCreate(createCompose) {
+	if (createCompose) await createDockerComposeFiles();
 	await createDockerFiles();
 }
 
@@ -33,21 +33,24 @@ async function createDockerFiles() {
 				getEnv().toUpperCase()
 			)} added \n`
 		});
-	} catch (err) {}
+	} catch (err) {
+		await generateError(error);
+	}
 
 	await copyFile(`${dockerfileDir}/.dockerignore`, `${outDir}/.dockerignore`);
 	await checkForDataFolder();
 }
-async function createDockerComposeFiles(type) {
+async function createDockerComposeFiles() {
+	const config = getConfig();
 	spinner.start(' 🐳  Creating docker-compose.yml file');
 	await copyFile(
-		`${dockerComposeDir}/docker-compose.${type.toLowerCase()}`,
+		`${dockerComposeDir}/docker-compose.${config.dbtype.toLowerCase()}`,
 		`${outDir}/docker-compose.yml`
 	);
 	spinner.stopAndPersist({
 		symbol: '🐳',
 		text: ` Added docker-compose file with ${chalk.bold.green(
-			type.toUpperCase()
+			config.dbtype.toUpperCase()
 		)} configuration \n`
 	});
 	await yarnLockToPackageLock();

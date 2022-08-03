@@ -1,8 +1,10 @@
 const path = require('path');
-const { spinner, access, copyFile } = require('./utils');
+const { spinner, access, copyFile, generateError } = require('./utils');
 const { getProjectType } = require('./detection');
+const { getConfig } = require('./config');
 
-async function generateDatabase(config) {
+async function generateDatabase() {
+	const config = getConfig();
 	return `${
 		getProjectType() === 'ts' ? 'export default' : 'module.exports = '
 	} ({ env }) => ({
@@ -11,7 +13,7 @@ async function generateDatabase(config) {
 			config.dbtype.toLowerCase() === 'postgresql' ? 'postgres' : 'mysql'
 		}',
 		connection: {
-			host: env('DATABASE_HOST', 'localhost'),
+			host: env('DATABASE_HOST', '${config.dbhost}'),
 			port: env.int('DATABASE_PORT', ${config.dbport}),
 			database: env('DATABASE_NAME', '${config.dbname}'),
 			user: env('DATABASE_USERNAME', '${config.dbuser}'),
@@ -39,7 +41,7 @@ async function checkAndBackupDB() {
 		await access(databasePath);
 		await copyFile(databasePath, databaseOldPath);
 	} catch (error) {
-		console.log(error);
+		await generateError(error);
 		spinner.stopAndPersist({
 			symbol: '❌',
 			text: ` Unable to access config/database.${getProjectType()} does it exist 🤔 - check and try again \n`

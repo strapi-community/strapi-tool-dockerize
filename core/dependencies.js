@@ -1,4 +1,11 @@
-const { spinner, chalk, execa, access, constants } = require('./utils');
+const {
+	spinner,
+	chalk,
+	execa,
+	access,
+	constants,
+	generateError
+} = require('./utils');
 const { getPackageManager } = require('./detection');
 
 async function installDependecies(config) {
@@ -23,7 +30,7 @@ async function installDependecies(config) {
 			)} \n`
 		});
 	} catch (err) {
-		console.log(err);
+		await generateError(error);
 	}
 }
 async function checkForOldDependecies(config, options) {
