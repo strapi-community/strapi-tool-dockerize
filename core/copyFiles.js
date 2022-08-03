@@ -6,11 +6,9 @@ const {
 	dockerComposeDir,
 	dockerfileDir,
 	outDir,
-	packageManagerUsed,
-	chalk,
-	getEnv
+	chalk
 } = require('./utils');
-
+const { getPackageManager, getEnv } = require('./detection');
 async function whatToCreate(createCompose, config) {
 	if (createCompose)
 		await createDockerComposeFiles(config.dbtype.toLowerCase());
@@ -21,14 +19,20 @@ async function createDockerFiles() {
 	spinner.start();
 	try {
 		await copyFile(
-			`${dockerfileDir}/${getEnv()}/Dockerfile.${packageManagerUsed()}`,
+			`${dockerfileDir}/development/Dockerfile.${getPackageManager()}`,
 			`${outDir}/Dockerfile`
 		);
+		if (getEnv() === 'production') {
+			await copyFile(
+				`${dockerfileDir}/${production}/Dockerfile.${getPackageManager()}`,
+				`${outDir}/Dockerfile.prod`
+			);
+		}
 		spinner.stopAndPersist({
 			symbol: '🐳',
-			text: ` ${chalk.bold.blue('Dockerfile')} with ${chalk.yellow(
-				packageManagerUsed().toUpperCase()
-			)} setup added \n`
+			text: ` ${chalk.bold.blue('Dockerfile')} for ${chalk.yellow(
+				getEnv().toUpperCase()
+			)} added \n`
 		});
 	} catch (err) {}
 	await copyFile(`${dockerfileDir}/.dockerignore`, `${outDir}/.dockerignore`);
