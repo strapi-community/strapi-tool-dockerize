@@ -1,7 +1,5 @@
 const path = require('path');
-const { constants } = require('fs');
-const { access } = require('fs/promises');
-const { spinner, chalk } = require('./utils');
+const { spinner, chalk, constants, access } = require('./utils');
 
 let _projectType = 'js';
 let _packageManager = '';

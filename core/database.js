@@ -1,6 +1,5 @@
 const path = require('path');
-const { access, copyFile } = require('fs/promises');
-const { spinner } = require('./utils');
+const { spinner, access, copyFile } = require('./utils');
 const { getProjectType } = require('./detection');
 
 async function generateDatabase(config) {

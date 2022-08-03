@@ -3,12 +3,11 @@ const {
 	yarnLockToPackageLock,
 	checkForDataFolder,
 	spinner,
-	dockerComposeDir,
-	dockerfileDir,
-	outDir,
 	chalk
 } = require('./utils');
+const { dockerComposeDir, dockerfileDir, outDir } = require('./const');
 const { getPackageManager, getEnv } = require('./detection');
+
 async function whatToCreate(createCompose, config) {
 	if (createCompose)
 		await createDockerComposeFiles(config.dbtype.toLowerCase());
@@ -35,6 +34,7 @@ async function createDockerFiles() {
 			)} added \n`
 		});
 	} catch (err) {}
+
 	await copyFile(`${dockerfileDir}/.dockerignore`, `${outDir}/.dockerignore`);
 	await checkForDataFolder();
 }

@@ -1,6 +1,4 @@
-const { access } = require('fs/promises');
-const { constants } = require('fs');
-const { spinner, chalk, execa } = require('./utils');
+const { spinner, chalk, execa, access, constants } = require('./utils');
 const { getPackageManager } = require('./detection');
 
 async function installDependecies(config) {

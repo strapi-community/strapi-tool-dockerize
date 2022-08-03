@@ -4,7 +4,7 @@ const appendEnvFile = require('./env/env');
 const createEnv = require('./env/envSetup');
 const installDependecies = require('./dependencies');
 const { setEnv } = require('./detection');
-
+const { setConfig } = require('./config');
 module.exports = async () => {
 	let config;
 	const dockerCompose = await toggle({
@@ -68,8 +68,9 @@ module.exports = async () => {
 			initial: config.dbtype.toLowerCase() === 'postgresql' ? 5432 : 3306
 		});
 		config.dbport = portNumberAnswer.dbport;
-		config.env = env.answer;
+		config.env = env.answer.toLowerCase();
 		//config.deployment = deployment.answer;
+		setConfig(config);
 		setEnv(env.answer.toLowerCase());
 		await whatToCreate(dockerCompose, config);
 		await appendEnvFile(config);

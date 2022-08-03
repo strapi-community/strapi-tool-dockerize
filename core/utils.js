@@ -1,17 +1,11 @@
-const path = require('path');
 const replace = require('replace-in-file');
-const { access } = require('fs/promises');
+const { access, copyFile } = require('fs/promises');
 const { constants } = require('fs');
 const execa = require('execa');
 const ora = require('ora');
 const spinner = ora({ text: '' });
 const chalk = require('chalk');
-
-const config = {};
-
-const dockerComposeDir = path.join(__dirname, '../templates/compose');
-const dockerfileDir = path.join(__dirname, '../templates/dockerfiles');
-const outDir = path.join(process.cwd());
+const { dockerComposeDir, dockerfileDir, outDir } = require('./const');
 
 async function yarnLockToPackageLock() {
 	const options = {
@@ -45,5 +39,8 @@ module.exports = {
 	outDir,
 	replace,
 	chalk,
-	execa
+	execa,
+	access,
+	constants,
+	copyFile
 };
