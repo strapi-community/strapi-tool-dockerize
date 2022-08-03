@@ -1,56 +1,26 @@
-name: Bug Report
-description: File a bug report
-title: "[Bug]: "
-labels: ["bug"]
-assignees:
+---
+name: "\U0001F680 Feature Request"
+about: "I have a suggestion (and may want to implement it \U0001F642)!"
+title: ''
+labels: 'i: enhancement'
+assignees: ''
+---
 
-- eventyret
-  body:
-- type: markdown
-  attributes:
-  value: |
-  Thanks for taking the time to fill out this bug report!
-- type: input
-  id: contact
-  attributes:
-  label: Contact Details
-  description: How can we get in touch with you if we need more info?
-  placeholder: ex. email@example.com
-  validations:
-  required: false
-- type: textarea
-  id: what-happened
-  attributes:
-  label: What happened?
-  description: Also tell us, what did you expect to happen?
-  placeholder: Tell us what you see!
-  value: "A bug happened!"
-  validations:
-  required: true
-- type: dropdown
-  id: version
-  attributes:
-  label: Version
-  description: What version of our software are you running?
-  options: - 1.0.2 (Default) - 1.0.3 (Edge)
-  validations:
-  required: true
-- type: dropdown
-  id: browsers
-  attributes:
-  label: What browsers are you seeing the problem on?
-  multiple: true
-  options: - Firefox - Chrome - Safari - Microsoft Edge
-- type: textarea
-  id: logs
-  attributes:
-  label: Relevant log output
-  description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
-  render: shell
-- type: checkboxes
-  id: terms
-  attributes:
-  label: Code of Conduct
-  description: By submitting this issue, you agree to follow our [Code of Conduct](https://example.com)
-  options: - label: I agree to follow this project's Code of Conduct
-  required: true
+## Feature Request
+
+**Is your feature request related to a problem? Please describe.**
+
+<!-- A clear and concise description of what the problem is. Ex. I have an issue when [...] -->
+
+**Describe the solution you'd like**
+
+<!-- A clear and concise description of what you want to happen. Add any considered drawbacks. -->
+
+**Describe alternatives you've considered**
+
+<!-- A clear and concise description of any alternative solutions or features you've considered. -->
+
+**Teachability, Documentation, Adoption, Migration Strategy**
+
+<!-- If you can, explain how users will be able to use this and possibly write out a version the docs.
+Maybe a screenshot or design? -->
