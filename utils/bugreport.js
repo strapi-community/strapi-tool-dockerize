@@ -10,7 +10,7 @@ const generateError = async error => {
 		assignee: 'eventyret',
 		body: `## 🐛  Bug Report
 
-## Current Behavior
+## 🤷‍♀️ What did you do
 
 <!-- A clear and concise description of the behavior. -->
 
