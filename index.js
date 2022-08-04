@@ -7,16 +7,9 @@
  * @author Simen Daehlin <https://dehlin.dev>
  */
 
-const init = require('./cli/init');
-const cli = require('./cli/cli');
-const log = require('./cli/log');
+const { cli, init, log } = require('./cli');
 const questions = require('./core/questions');
-const {
-	detectProjectType,
-	detectPackageManager,
-	goodbye,
-	generateError
-} = require('./utils');
+const { detectProjectType, detectPackageManager, goodbye } = require('./utils');
 const input = cli.input;
 const flags = cli.flags;
 const { clear, debug } = flags;
@@ -31,7 +24,6 @@ const { clear, debug } = flags;
 		debug && log(flags);
 		goodbye();
 	} catch (error) {
-		console.log(error);
-		await generateError(error);
+		goodbye(false);
 	}
 })();
