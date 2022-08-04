@@ -5,11 +5,11 @@ const execa = require('execa');
 const ora = require('ora');
 const spinner = ora({ text: '' });
 const chalk = require('chalk');
-const { dockerComposeDir, dockerfileDir, outDir } = require('../core/const');
+const config = require('./config').getConfig();
 
 async function yarnLockToPackageLock() {
 	const options = {
-		files: `${outDir}/docker-compose.yml`,
+		files: `${config.outDir}/docker-compose.yml`,
 		from: '- ./yarn.lock:/opt/yarn.lock',
 		to: '- ./package-lock.json:/opt/package-lock.json'
 	};
@@ -20,7 +20,7 @@ async function yarnLockToPackageLock() {
 }
 async function checkForDataFolder() {
 	const options = {
-		files: `${outDir}/.dockerignore`,
+		files: `${config.outDir}/.dockerignore`,
 		from: 'data/',
 		to: ''
 	};
@@ -34,9 +34,6 @@ module.exports = {
 	yarnLockToPackageLock,
 	checkForDataFolder,
 	spinner,
-	dockerComposeDir,
-	dockerfileDir,
-	outDir,
 	replace,
 	chalk,
 	execa,

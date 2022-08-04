@@ -1,7 +1,6 @@
 const whatToCreate = require('./copyFiles');
 const { prompt, toggle } = require('enquirer');
-const appendEnvFile = require('./env/env');
-const createEnv = require('./env/envSetup');
+const { createEnv, appendEnvFile } = require('./env');
 const installDependecies = require('./dependencies');
 const { setEnv, setConfig } = require('../utils');
 module.exports = async () => {
@@ -77,10 +76,10 @@ module.exports = async () => {
 		//config.deployment = deployment.answer;
 		setConfig(config);
 		setEnv(env.answer.toLowerCase());
-		await whatToCreate(dockerCompose, config);
+		await whatToCreate(dockerCompose);
 		await appendEnvFile();
-		await createEnv(config);
-		await installDependecies(config);
+		await createEnv();
+		await installDependecies();
 	} else {
 		const env = await prompt({
 			type: 'select',
@@ -89,6 +88,6 @@ module.exports = async () => {
 			choices: ['Development', 'Production']
 		});
 		setEnv(env.answer.toLowerCase());
-		await whatToCreate(dockerCompose, config);
+		await whatToCreate(dockerCompose);
 	}
 };

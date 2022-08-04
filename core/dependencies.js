@@ -5,10 +5,11 @@ const {
 	access,
 	constants,
 	generateError,
-	getPackageManager
+	getPackageManager,
+	getConfig
 } = require('../utils');
-
-async function installDependecies(config) {
+const config = getConfig();
+async function installDependecies() {
 	try {
 		await checkForOldDependecies(config, {
 			type: getPackageManager(),
