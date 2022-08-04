@@ -2,7 +2,6 @@ const { createWriteStream, readFile } = require('fs');
 const {
 	spinner,
 	replace,
-	outDir,
 	chalk,
 	generateError,
 	getConfig
@@ -51,7 +50,7 @@ async function appendEnvFile() {
 
 async function envUpdate(env) {
 	const options = {
-		files: `${outDir}/.env`,
+		files: `${config.outDir}/.env`,
 		from: [
 			/(Development|Production)/i,
 			/both/i,
@@ -68,11 +67,11 @@ async function envUpdate(env) {
 			`DATABASE_CLIENT=${
 				config.dbtype.toLowerCase() === 'postgresql' ? 'postgres' : 'mysql'
 			}`,
-			`DATABASE_HOST=${getConfig().dbhost}`,
-			`DATABASE_NAME=${getConfig().dbname}`,
-			`DATABASE_USERNAME=${getConfig().dbuser}`,
-			`DATABASE_PASSWORD=${getConfig().dbpassword}`,
-			`DATABASE_PORT=${getConfig().dbport}`
+			`DATABASE_HOST=${config.dbhost}`,
+			`DATABASE_NAME=${config.dbname}`,
+			`DATABASE_USERNAME=${config.dbuser}`,
+			`DATABASE_PASSWORD=${config.dbpassword}`,
+			`DATABASE_PORT=${config.dbport}`
 		]
 	};
 	try {

@@ -2,10 +2,16 @@ const path = require('path');
 const fse = require('fs-extra');
 
 const { generateDatabase } = require('../database');
-const { spinner, chalk, generateError } = require('../../utils/utils');
-const { getProjectType } = require('../../utils/detection');
+const {
+	spinner,
+	chalk,
+	generateError,
+	getProjectType,
+	getConfig
+} = require('../../utils');
+const config = getConfig();
 
-async function _envSetup(config, envType) {
+async function _envSetup(envType) {
 	const databasePath = path.join(
 		process.cwd(),
 		'config',
@@ -24,12 +30,12 @@ async function _envSetup(config, envType) {
 	}
 }
 
-async function createEnv(config) {
+async function createEnv() {
 	if (config.env.toLowerCase() === 'both') {
-		await _envSetup(config, 'production');
-		await _envSetup(config, 'development');
+		await _envSetup('production');
+		await _envSetup('development');
 	}
-	await _envSetup(config, config.env);
+	await _envSetup(config.env);
 	await _cleanupFolders();
 
 	spinner.stopAndPersist({
