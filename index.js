@@ -9,7 +9,12 @@
 
 const { cli, init, log } = require('./cli');
 const questions = require('./core/questions');
-const { detectProjectType, detectPackageManager, goodbye } = require('./utils');
+const {
+	detectProjectType,
+	detectPackageManager,
+	goodbye,
+	detectDownloadsAndStars
+} = require('./utils');
 const input = cli.input;
 const flags = cli.flags;
 const { clear, debug } = flags;
@@ -18,6 +23,7 @@ const { clear, debug } = flags;
 	init({ clear });
 	input.includes('help') && cli.showHelp(0);
 	try {
+		await detectDownloadsAndStars();
 		await detectProjectType();
 		await detectPackageManager();
 		await questions();

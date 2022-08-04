@@ -18,7 +18,8 @@ const {
 	getProjectType,
 	getPackageManager,
 	setEnv,
-	getEnv
+	getEnv,
+	detectDownloadsAndStars
 } = require('./detection');
 
 module.exports = {
@@ -40,5 +41,6 @@ module.exports = {
 	setEnv,
 	getEnv,
 	setConfig,
-	getConfig
+	getConfig,
+	detectDownloadsAndStars
 };
