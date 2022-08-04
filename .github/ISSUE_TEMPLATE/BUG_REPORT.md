@@ -8,18 +8,18 @@ assignees: 'eventyret'
 
 ## 🐛 Bug Report
 
-## Current Behavior
+## 🤷‍♀️ What did you do
 
 <!-- A clear and concise description of the behavior. -->
 
 ## ⛔️ Error log
 
-${error.message}
-
-### Stack trace
+### 🕵️‍♀️ Stack trace
 
 ```bash
-${error.stack}
+Stack Trace
+```
+
 ```
 
 ## 🙇‍♀️ Expected behavior/code
@@ -28,8 +28,8 @@ A clear and concise description of what you expected to happen (or code).
 
 ## 👩‍💻 Environment
 
-- 📦 Node version: ${process.version}
-- 💻 OS: ${process.platform} ${process.arch}
+- 📦 Node version:
+- 💻 OS:
 
 ## 💡 Possible Solution
 
@@ -38,3 +38,4 @@ A clear and concise description of what you expected to happen (or code).
 ## 📺 Additional context/Screenshots
 
 <!-- Add any other context about the problem here. If applicable, add screenshots to help explain. -->
+```
