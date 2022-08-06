@@ -2,35 +2,9 @@ const path = require('path');
 const fse = require('fs-extra');
 
 const { generateDatabase } = require('../database');
-const {
-	spinner,
-	chalk,
-	generateError,
-	getProjectType,
-	getConfig
-} = require('../../utils');
-const config = getConfig();
+const { spinner, chalk, generateError, config } = require('../../utils');
 
-async function _envSetup(envType) {
-	const databasePath = path.join(
-		process.cwd(),
-		'config',
-		'env',
-		`${envType.toLowerCase()}`,
-		`database.${getProjectType()}`
-	);
-
-	try {
-		await fse.outputFile(
-			databasePath,
-			(await generateDatabase(config)).toString()
-		);
-	} catch (error) {
-		await generateError(error);
-	}
-}
-
-async function createEnv() {
+const createEnv = async () => {
 	if (config.env.toLowerCase() === 'both') {
 		await _envSetup('production');
 		await _envSetup('development');
@@ -42,15 +16,33 @@ async function createEnv() {
 		symbol: '💾',
 		text: ` Added ${chalk.bold.green(
 			config.dbtype.toUpperCase()
-		)} configuration to database.${getProjectType()} \n`
+		)} configuration to database.${config.projectType} \n`
 	});
-}
-async function _cleanupFolders() {
-	// check if folder config/env/both exists if it does remove the directory and all files if not do nothing
+};
+
+const _cleanupFolders = async () => {
 	const envPath = path.join(process.cwd(), 'config', 'env', 'both');
 	if (await fse.pathExists(envPath)) {
 		await fse.remove(envPath);
 	}
-}
+};
+
+const _envSetup = async envType => {
+	const databasePath = path.join(
+		process.cwd(),
+		'config',
+		'env',
+		`${envType.toLowerCase()}`,
+		`database.${config.projectType}`
+	);
+	try {
+		await fse.outputFile(
+			databasePath,
+			(await generateDatabase(config)).toString()
+		);
+	} catch (error) {
+		await generateError(error);
+	}
+};
 
 module.exports = createEnv;

@@ -5,44 +5,44 @@ const {
 	access,
 	constants,
 	generateError,
-	getPackageManager,
-	getConfig
+	config
 } = require('../utils');
-const config = getConfig();
-async function installDependecies() {
+
+const installDependecies = async () => {
 	try {
-		await checkForOldDependecies(config, {
-			type: getPackageManager(),
-			command: getPackageManager() === 'yarn' ? 'remove' : 'uninstall'
-		});
+		await checkForOldDependecies(
+			config.packageManager === 'yarn' ? 'remove' : 'uninstall'
+		);
 		spinner.start(
 			` 📦 Installing dependencies using ${chalk.bold.yellow(
-				getPackageManager().toUpperCase()
+				config.packageManager.toUpperCase()
 			)}...`
 		);
-		await execa(getPackageManager(), [
-			`${getPackageManager() === 'yarn' ? 'add' : 'install'}`,
+		await execa(config.packageManager, [
+			`${config.packageManager === 'yarn' ? 'add' : 'install'}`,
 			`${config.dbtype.toLowerCase() === 'postgresql' ? 'pg' : 'mysql'}`
 		]);
 		spinner.stopAndPersist({
 			symbol: '📦',
-			text: ` ${config.dbtype} dependencies installed with ${chalk.bold.yellow(
-				getPackageManager().toUpperCase()
+			text: ` ${chalk.green(
+				config.dbtype.toUpperCase()
+			)} dependencies installed with ${chalk.bold.yellow(
+				config.packageManager.toUpperCase()
 			)} \n`
 		});
 	} catch (error) {
 		console.log(error);
 		await generateError(error);
 	}
-}
-async function checkForOldDependecies(config, options) {
+};
+const checkForOldDependecies = async command => {
 	try {
 		spinner.start(' 📦 Checking for old dependencies...');
 		await access('package.json', constants.R_OK);
 		spinner.start(' 📦 Cleaning up old dependencies...');
 
-		await execa(`${options.type}`, [
-			`${options.command}`,
+		await execa(`${config.packageManager}`, [
+			`${command}`,
 			`${config.dbtype.toLowerCase() === 'postgresql' ? 'mysql' : 'pg'}`
 		]);
 
@@ -57,5 +57,5 @@ async function checkForOldDependecies(config, options) {
 		});
 		return;
 	}
-}
+};
 module.exports = installDependecies;

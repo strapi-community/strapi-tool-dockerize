@@ -4,14 +4,14 @@ const {
 	replace,
 	chalk,
 	generateError,
-	getConfig
+	config
 } = require('../../utils');
+
 const logger = createWriteStream('.env', { flags: 'a' });
 
 const writeLine = line => logger.write(`\n${line}`);
-const config = getConfig();
 
-async function appendEnvFile() {
+const appendEnvFile = async () => {
 	spinner.start(' 🪄  Working .env magic');
 
 	await readFile('.env', 'utf8', async (err, data) => {
@@ -35,20 +35,18 @@ async function appendEnvFile() {
 			}`
 		);
 		writeLine(
-			`DATABASE_CLIENT=${
-				config.dbtype.toLowerCase() === 'postgresql' ? 'postgres' : 'mysql'
-			}`
+			`DATABASE_CLIENT=${config.dbtype === 'postgresql' ? 'postgres' : 'mysql'}`
 		);
 		spinner.stopAndPersist({
 			symbol: '🕵️',
-			text: `  Added ${chalk.blue('Dockerize')} variables in ${chalk.yellow(
-				'.env'
-			)} file \n`
+			text: `  Added ${chalk.bold.blue(
+				'Dockerize'
+			)} variables in ${chalk.yellow('.env')} \n`
 		});
 	});
-}
+};
 
-async function envUpdate(env) {
+const envUpdate = async env => {
 	const options = {
 		files: `${config.outDir}/.env`,
 		from: [
@@ -74,16 +72,17 @@ async function envUpdate(env) {
 			`DATABASE_PORT=${config.dbport}`
 		]
 	};
+
 	try {
 		await replace(options);
 		spinner.stopAndPersist({
 			symbol: '🕵️',
-			text: `  Updated ${chalk.blue('Dockerize')} variables in ${chalk.yellow(
-				'.env'
-			)} file \n`
+			text: `  Updated ${chalk.bold.blue(
+				'Dockerize'
+			)} variables in ${chalk.yellow('.env')} \n`
 		});
 	} catch (error) {
 		await generateError(error);
 	}
-}
+};
 module.exports = appendEnvFile;
