@@ -7,10 +7,9 @@ module.exports = ({ clear = true }) => {
 	welcome({
 		title: '@strapi-community/dockerize',
 		tagLine: 'by Simen Daehlin',
-		description: pkg.description,
+		description: `${pkg.description}\n${pkg.url}`,
 		version: pkg.version,
-		bgColor: '#ac94fb',
-		color: '#ffffff',
+		bgColor: '#8d76f9',
 		bold: true,
 		clear
 	});

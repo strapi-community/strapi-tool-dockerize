@@ -1,6 +1,6 @@
 const generateError = require('./bugreport');
 const goodbye = require('./goodbye');
-const { setConfig, getConfig } = require('./config');
+const { setConfig, config } = require('./config');
 const {
 	yarnLockToPackageLock,
 	checkForDataFolder,
@@ -15,10 +15,6 @@ const {
 const {
 	detectPackageManager,
 	detectProjectType,
-	getProjectType,
-	getPackageManager,
-	setEnv,
-	getEnv,
 	detectDownloadsAndStars
 } = require('./detection');
 
@@ -36,11 +32,7 @@ module.exports = {
 	goodbye,
 	detectPackageManager,
 	detectProjectType,
-	getProjectType,
-	getPackageManager,
-	setEnv,
-	getEnv,
 	setConfig,
-	getConfig,
+	config,
 	detectDownloadsAndStars
 };

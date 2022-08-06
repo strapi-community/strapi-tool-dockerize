@@ -4,35 +4,34 @@ const {
 	spinner,
 	chalk,
 	generateError,
-	getPackageManager,
-	getEnv,
-	getConfig,
-	copyFile
+	copyFile,
+	config
 } = require('../utils');
 
-const config = getConfig();
-async function whatToCreate(createCompose) {
+const whatToCreate = async createCompose => {
 	if (createCompose) await createDockerComposeFiles();
 	await createDockerFiles();
-}
+};
 
-async function createDockerFiles() {
+const createDockerFiles = async () => {
 	spinner.start();
 	try {
 		await copyFile(
-			`${config.dockerfileDir}/development/Dockerfile.${getPackageManager()}`,
+			`${config.dockerfileDir}/development/Dockerfile.${config.packageManager}`,
 			`${config.outDir}/Dockerfile`
 		);
-		if (getEnv() === 'production') {
+		if (config.env === 'production' || config.env === 'both') {
 			await copyFile(
-				`${config.dockerfileDir}/production/Dockerfile.${getPackageManager()}`,
+				`${config.dockerfileDir}/production/Dockerfile.${config.packageManager}`,
 				`${config.outDir}/Dockerfile.prod`
 			);
 		}
 		spinner.stopAndPersist({
 			symbol: '🐳',
 			text: ` ${chalk.bold.blue('Dockerfile')} for ${chalk.yellow(
-				getEnv().toUpperCase()
+				config.env === 'both'
+					? 'development and production'
+					: config.env.toUpperCase()
 			)} added \n`
 		});
 	} catch (error) {
@@ -44,9 +43,8 @@ async function createDockerFiles() {
 		`${config.outDir}/.dockerignore`
 	);
 	await checkForDataFolder();
-}
-async function createDockerComposeFiles() {
-	const config = getConfig();
+};
+const createDockerComposeFiles = async () => {
 	spinner.start(' 🐳  Creating docker-compose.yml file');
 	await copyFile(
 		`${config.dockerComposeDir}/docker-compose.${config.dbtype.toLowerCase()}`,
@@ -59,6 +57,6 @@ async function createDockerComposeFiles() {
 		)} configuration \n`
 	});
 	await yarnLockToPackageLock();
-}
+};
 
 module.exports = whatToCreate;

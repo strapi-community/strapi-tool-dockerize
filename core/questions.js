@@ -2,7 +2,7 @@ const whatToCreate = require('./copyFiles');
 const { prompt, toggle } = require('enquirer');
 const { createEnv, appendEnvFile } = require('./env');
 const installDependecies = require('./dependencies');
-const { setEnv, setConfig } = require('../utils');
+const { setConfig } = require('../utils');
 module.exports = async () => {
 	let config;
 	const dockerCompose = await toggle({
@@ -11,14 +11,6 @@ module.exports = async () => {
 		enabled: 'Yes',
 		disabled: 'No'
 	});
-	// TODO: ADD Heroku to providers
-	// const deployment = await prompt({
-	// 	type: 'select',
-	// 	name: 'answer',
-	// 	message: 'Are you deploying to any of the following host 🚀',
-	// 	hint: 'Currently we are only supporting Heroku',
-	// 	choices: ['Other', 'Heroku']
-	// });
 
 	if (dockerCompose) {
 		const env = await prompt({
@@ -27,6 +19,7 @@ module.exports = async () => {
 			message: 'What enviroments do you want to configure?',
 			choices: ['Development', 'Production', 'Both']
 		});
+
 		config = await prompt([
 			{
 				type: 'select',
@@ -72,10 +65,12 @@ module.exports = async () => {
 			initial: config.dbtype.toLowerCase() === 'postgresql' ? 5432 : 3306
 		});
 		config.dbport = portNumberAnswer.dbport;
-		config.env = env.answer.toLowerCase();
 		//config.deployment = deployment.answer;
-		setConfig(config);
-		setEnv(env.answer.toLowerCase());
+		setConfig({
+			...config,
+			env: env.answer.toLowerCase(),
+			dbtype: config.dbtype.toLowerCase()
+		});
 		await whatToCreate(dockerCompose);
 		await appendEnvFile();
 		await createEnv();
@@ -87,7 +82,7 @@ module.exports = async () => {
 			message: 'What enviroment do you want to configure for?',
 			choices: ['Development', 'Production']
 		});
-		setEnv(env.answer.toLowerCase());
+		setConfig({ env: env.answer.toLowerCase() });
 		await whatToCreate(dockerCompose);
 	}
 };

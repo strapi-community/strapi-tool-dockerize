@@ -1,12 +1,8 @@
 const { spinner, chalk } = require('./utils');
+const { config } = require('./config');
 const { pkg } = require('../cli/cli');
-const fetch = require('node-fetch');
 
 const goodbye = async (quit = false) => {
-	const github = await fetch(
-		'https://api.github.com/repos/strapi-community/strapi-tool-dockerize'
-	);
-	const { stargazers_count } = await github.json();
 	if (quit) {
 		spinner.stopAndPersist({
 			symbol: '☝️',
@@ -24,7 +20,7 @@ const goodbye = async (quit = false) => {
 	spinner.stopAndPersist({
 		symbol: '🎉',
 		text: ` ${chalk.bold.yellow(
-			`We now have got ${stargazers_count} ⭐️'s and counting... \n`
+			`We now have got ${config.githubStars} 🌟 and counting... \n`
 		)} `
 	});
 	console.log(`👉  ${pkg.url} 👈 \n`);
