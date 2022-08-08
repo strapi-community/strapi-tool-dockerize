@@ -1,10 +1,10 @@
-const alert = require('cli-alerts');
+const alert = require(`cli-alerts`);
 
 module.exports = info => {
 	alert({
-		type: 'warning',
-		name: 'DEBUG LOG',
-		msg: ''
+		type: `warning`,
+		name: `DEBUG LOG`,
+		msg: ``
 	});
 
 	console.log(info);
