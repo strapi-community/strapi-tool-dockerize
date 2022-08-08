@@ -1,6 +1,6 @@
-const generateError = require('./bugreport');
-const goodbye = require('./goodbye');
-const { setConfig, config } = require('./config');
+const generateError = require(`./bugreport`);
+const goodbye = require(`./goodbye`);
+const { setConfig, config } = require(`./config`);
 const {
 	yarnLockToPackageLock,
 	checkForDataFolder,
@@ -11,12 +11,12 @@ const {
 	access,
 	constants,
 	copyFile
-} = require('./utils');
+} = require(`./utils`);
 const {
 	detectPackageManager,
 	detectProjectType,
 	detectDownloadsAndStars
-} = require('./detection');
+} = require(`./detection`);
 
 module.exports = {
 	yarnLockToPackageLock,

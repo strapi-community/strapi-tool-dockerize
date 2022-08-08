@@ -1,13 +1,13 @@
-const open = require('open');
-const newGithubIssueUrl = require('new-github-issue-url');
+const open = require(`open`);
+const newGithubIssueUrl = require(`new-github-issue-url`);
 
 const generateError = async error => {
 	const url = newGithubIssueUrl({
-		repo: 'strapi-tool-dockerize',
-		user: 'strapi-community',
+		repo: `strapi-tool-dockerize`,
+		user: `strapi-community`,
 		title: `Error: ${error.message}`,
-		template: 'BUG_REPORT.md',
-		assignee: 'eventyret',
+		template: `BUG_REPORT.md`,
+		assignee: `eventyret`,
 		body: `## 🐛  Bug Report
 
 ## 🤷‍♀️ What did you do

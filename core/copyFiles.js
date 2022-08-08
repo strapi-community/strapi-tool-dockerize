@@ -6,12 +6,7 @@ const {
 	generateError,
 	copyFile,
 	config
-} = require('../utils');
-
-const whatToCreate = async createCompose => {
-	if (createCompose) await createDockerComposeFiles();
-	await createDockerFiles();
-};
+} = require(`../utils`);
 
 const createDockerFiles = async () => {
 	spinner.start();
@@ -20,17 +15,17 @@ const createDockerFiles = async () => {
 			`${config.dockerfileDir}/development/Dockerfile.${config.packageManager}`,
 			`${config.outDir}/Dockerfile`
 		);
-		if (config.env === 'production' || config.env === 'both') {
+		if (config.env === `production` || config.env === `both`) {
 			await copyFile(
 				`${config.dockerfileDir}/production/Dockerfile.${config.packageManager}`,
 				`${config.outDir}/Dockerfile.prod`
 			);
 		}
 		spinner.stopAndPersist({
-			symbol: '🐳',
-			text: ` ${chalk.bold.blue('Dockerfile')} for ${chalk.yellow(
-				config.env === 'both'
-					? 'development and production'
+			symbol: `🐳`,
+			text: ` ${chalk.bold.blue(`Dockerfile`)} for ${chalk.yellow(
+				config.env === `both`
+					? `development and production`
 					: config.env.toUpperCase()
 			)} added \n`
 		});
@@ -44,14 +39,15 @@ const createDockerFiles = async () => {
 	);
 	await checkForDataFolder();
 };
+
 const createDockerComposeFiles = async () => {
-	spinner.start(' 🐳  Creating docker-compose.yml file');
+	spinner.start(` 🐳  Creating docker-compose.yml file`);
 	await copyFile(
 		`${config.dockerComposeDir}/docker-compose.${config.dbtype.toLowerCase()}`,
 		`${config.outDir}/docker-compose.yml`
 	);
 	spinner.stopAndPersist({
-		symbol: '🐳',
+		symbol: `🐳`,
 		text: ` Added docker-compose file with ${chalk.bold.green(
 			config.dbtype.toUpperCase()
 		)} configuration \n`
@@ -59,4 +55,4 @@ const createDockerComposeFiles = async () => {
 	await yarnLockToPackageLock();
 };
 
-module.exports = whatToCreate;
+module.exports = { createDockerComposeFiles, createDockerFiles };

@@ -1,18 +1,18 @@
-const path = require('path');
+const path = require(`path`);
 const {
 	spinner,
 	access,
 	copyFile,
 	generateError,
 	config
-} = require('../utils');
+} = require(`../utils`);
 
 const generateDatabase = async () => {
 	return `${
-		config.projectType === 'ts' ? 'export default' : 'module.exports = '
+		config.projectType === `ts` ? `export default` : `module.exports = `
 	} ({ env }) => ({
 	connection: {
-		client: '${config.dbtype === 'postgresql' ? 'postgres' : 'mysql'}',
+		client: '${config.dbtype === `postgresql` ? `postgres` : `mysql`}',
 		connection: {
 		host: env('DATABASE_HOST', '${config.dbhost}'),
 			port: env.int('DATABASE_PORT', ${config.dbport}),
@@ -29,13 +29,13 @@ const generateDatabase = async () => {
 const checkAndBackupDB = async () => {
 	const databasePath = path.join(
 		process.cwd(),
-		'config',
+		`config`,
 		`database.${config.projectType}`
 	);
 	spinner.start(`Checking for existing config/database.${config.projectType}`);
-	const databaseOldPath = path.join(process.cwd(), 'config', 'database.backup');
+	const databaseOldPath = path.join(process.cwd(), `config`, `database.backup`);
 	spinner.stopAndPersist({
-		symbol: '🕵️‍♀️',
+		symbol: `🕵️‍♀️`,
 		text: ` Detected config/database.${config.projectType}, made a backup at 👉 config/database.backup \n`
 	});
 	try {
@@ -44,7 +44,7 @@ const checkAndBackupDB = async () => {
 	} catch (error) {
 		await generateError(error);
 		spinner.stopAndPersist({
-			symbol: '❌',
+			symbol: `❌`,
 			text: ` Unable to access config/database.${config.projectType} does it exist 🤔 - check and try again \n`
 		});
 	}
