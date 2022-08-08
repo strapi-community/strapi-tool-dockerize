@@ -1,7 +1,7 @@
-const createEnv = require('./envSetup');
-const appendEnvFile = require('./env');
+const createEnv = require(`./createEnv`);
+const appendEnv = require(`./appendEnv`);
 
 module.exports = {
 	createEnv,
-	appendEnvFile
+	appendEnv
 };

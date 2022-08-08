@@ -1,26 +1,26 @@
-const { createWriteStream, readFile } = require('fs');
+const { createWriteStream, readFile } = require(`fs`);
 const {
 	spinner,
 	replace,
 	chalk,
 	generateError,
 	config
-} = require('../../utils');
+} = require(`../../utils`);
 
-const logger = createWriteStream('.env', { flags: 'a' });
+const logger = createWriteStream(`.env`, { flags: `a` });
 
 const writeLine = line => logger.write(`\n${line}`);
 
-const appendEnvFile = async () => {
-	spinner.start(' 🪄  Working .env magic');
+const appendEnv = async () => {
+	spinner.start(` 🪄  Working .env magic`);
 
-	await readFile('.env', 'utf8', async (err, data) => {
-		if (data && data.includes('@strapi-community/dockerize variables ')) {
+	await readFile(`.env`, `utf8`, async (err, data) => {
+		if (data && data.includes(`@strapi-community/dockerize variables `)) {
 			await envUpdate(config.env);
 			return;
 		}
 
-		writeLine('# @strapi-community/dockerize variables \n');
+		writeLine(`# @strapi-community/dockerize variables \n`);
 		writeLine(`DATABASE_HOST=${config.dbhost}`);
 		writeLine(`DATABASE_PORT=${config.dbport}`);
 		writeLine(`DATABASE_NAME=${config.dbname}`);
@@ -28,20 +28,20 @@ const appendEnvFile = async () => {
 		writeLine(`DATABASE_PASSWORD=${config.dbpassword}`);
 		writeLine(
 			`NODE_ENV=${
-				config.env.toLowerCase() === 'both' ||
-				config.env.toLowerCase() === 'development'
-					? 'development'
-					: 'production'
+				config.env.toLowerCase() === `both` ||
+				config.env.toLowerCase() === `development`
+					? `development`
+					: `production`
 			}`
 		);
 		writeLine(
-			`DATABASE_CLIENT=${config.dbtype === 'postgresql' ? 'postgres' : 'mysql'}`
+			`DATABASE_CLIENT=${config.dbtype === `postgresql` ? `postgres` : `mysql`}`
 		);
 		spinner.stopAndPersist({
-			symbol: '🕵️',
+			symbol: `🕵️`,
 			text: `  Added ${chalk.bold.blue(
-				'Dockerize'
-			)} variables in ${chalk.yellow('.env')} \n`
+				`Dockerize`
+			)} variables in ${chalk.yellow(`.env`)} \n`
 		});
 	});
 };
@@ -61,9 +61,9 @@ const envUpdate = async env => {
 		],
 		to: [
 			`${env.toLowerCase()}`,
-			'development',
+			`development`,
 			`DATABASE_CLIENT=${
-				config.dbtype.toLowerCase() === 'postgresql' ? 'postgres' : 'mysql'
+				config.dbtype.toLowerCase() === `postgresql` ? `postgres` : `mysql`
 			}`,
 			`DATABASE_HOST=${config.dbhost}`,
 			`DATABASE_NAME=${config.dbname}`,
@@ -76,13 +76,13 @@ const envUpdate = async env => {
 	try {
 		await replace(options);
 		spinner.stopAndPersist({
-			symbol: '🕵️',
+			symbol: `🕵️`,
 			text: `  Updated ${chalk.bold.blue(
-				'Dockerize'
-			)} variables in ${chalk.yellow('.env')} \n`
+				`Dockerize`
+			)} variables in ${chalk.yellow(`.env`)} \n`
 		});
 	} catch (error) {
 		await generateError(error);
 	}
 };
-module.exports = appendEnvFile;
+module.exports = appendEnv;
