@@ -48,7 +48,7 @@ Please note the `new` keyword is required for this to take effect.
 
 ```markdown
 strapi-dockerize new
---dbclient=<dbclient>
+--dbtype=<dbclient>
 --dbhost=<dbhost>
 --dbport=<dbport>
 --dbname=<dbname>
