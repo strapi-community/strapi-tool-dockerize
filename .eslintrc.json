@@ -9,10 +9,11 @@
 		"ecmaVersion": "latest"
 	},
 	"rules": {
-		"no-empty": "warn",
+		"no-empty": "off",
 		"indent": ["warn", "tab"],
 		"linebreak-style": ["error", "unix"],
 		"quotes": ["error", "backtick"],
-		"semi": ["error", "always"]
+		"semi": ["error", "always"],
+		"no-unused-vars": "warn"
 	}
 }
