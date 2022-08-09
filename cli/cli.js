@@ -12,7 +12,7 @@ const flags = {
 		alias: `v`,
 		desc: `Print CLI version`
 	},
-	dbclient: {
+	dbtype: {
 		type: `string`,
 		default: `postgres`,
 		alias: `c`,

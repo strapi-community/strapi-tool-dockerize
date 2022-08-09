@@ -30,36 +30,60 @@ const detectDownloadsAndStars = async () => {
 const detectProjectType = async () => {
 	spinner.start(` 💻 Detecting Project type... `);
 	try {
+		if (config.quickStart) {
+			spinner.stopAndPersist({
+				symbol: `🍿`,
+				text: ` ${
+					config.projectType === `ts`
+						? `${chalk.bold.blueBright(`TypeScript`)}`
+						: `${chalk.bold.yellow(`JavaScript`)}`
+				} set by cli arguments \n`
+			});
+			return;
+		}
 		await access(path.join(process.cwd(), `tsconfig.json`));
 		setConfig({ projectType: `ts` });
 	} catch (error) {}
 
-	spinner.stopAndPersist({
-		symbol: `🍿`,
-		text: ` ${
-			config.projectType === `ts`
-				? `${chalk.bold.blueBright(`TypeScript`)}`
-				: `${chalk.bold.yellow(`JavaScript`)}`
-		} project detected \n`
-	});
+	if (!config.quickStart) {
+		spinner.stopAndPersist({
+			symbol: `🍿`,
+			text: ` ${
+				config.projectType === `ts`
+					? `${chalk.bold.blueBright(`TypeScript`)}`
+					: `${chalk.bold.yellow(`JavaScript`)}`
+			} project detected \n`
+		});
+	}
 };
 
 const detectPackageManager = async () => {
 	spinner.start(` 💻 Detecting package manager... `);
-
 	try {
+		if (config.quickStart) {
+			spinner.stopAndPersist({
+				symbol: `🍿`,
+				text: ` ${
+					config.packageManager === `yarn`
+						? `${chalk.bold.yellow(`Yarn`)}`
+						: `${chalk.bold.greenBright(`NPM`)}`
+				} set by cli arguments \n`
+			});
+			return;
+		}
 		await access(`yarn.lock`, constants.R_OK);
 		config.packageManager = `yarn`;
 	} catch (error) {
 		config.packageManager = `npm`;
 	}
-
-	spinner.stopAndPersist({
-		symbol: `📦`,
-		text: ` ${chalk.bold.yellow(
-			config.packageManager.toUpperCase()
-		)} detected \n`
-	});
+	if (!config.quickStart) {
+		spinner.stopAndPersist({
+			symbol: `📦`,
+			text: ` ${chalk.bold.yellow(
+				config.packageManager.toUpperCase()
+			)} detected \n`
+		});
+	}
 };
 
 module.exports = {

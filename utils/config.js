@@ -5,8 +5,8 @@ const _config = {
 	dockerComposeDir: path.join(__dirname, `../templates/compose`),
 	dockerfileDir: path.join(__dirname, `../templates/dockerfiles`),
 	outDir: path.join(process.cwd()),
-	projectType: `ts`,
-	packageManager: ``,
+	projectType: `js`,
+	packageManager: `yarn`,
 	env: `development`,
 	npmDownloads: 0,
 	githubStars: 0,
@@ -16,7 +16,8 @@ const _config = {
 	dbname: ``,
 	dbuser: ``,
 	dbpassword: ``,
-	dbport: null
+	dbport: null,
+	quickStart: false
 };
 const setConfig = newConfig => Object.assign(_config, newConfig);
 const config = _config;
