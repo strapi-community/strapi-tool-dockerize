@@ -75,7 +75,8 @@ const flags = {
 };
 const commands = {
 	help: { desc: `Print help info` },
-	new: { desc: `Create a new project` }
+	new: { desc: `Create a new project` },
+	reset: { desc: `Reset the project` }
 };
 
 const helpText = meowHelp({

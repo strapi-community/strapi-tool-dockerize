@@ -20,9 +20,14 @@
 
 - [🚦 Current Status](#---current-status)
 - [✨ Usage](#--usage)
-- [🚀 Features](#----features)
-- [🐳 Docker-compose support](#----docker-compose-support)
-- [🎗 Contributing](#----contributing)
+  - [🤖 Using CLI Arguments](#---using-cli-arguments)
+  - [🧹 Resetting project](#---resetting-project)
+- [🚀 Features](#---features)
+- [🐳 Docker-compose support](#---docker-compose-support)
+- [🎗 Contributing](#---contributing)
+- [⭐️ Show your support](#---show-your-support)
+- [🔗 Links](#---links)
+- [🌎 Community support](#---community-support)
 - [🙋‍♀️ Authors](#------authors)
 - [🔖 License](#---license)
 
@@ -41,13 +46,15 @@ npx @strapi-community/dockerize
 You can also call it directly with arguments
 
 ```bash
-strapi-dockerize new --dbclient=mysql --dbhost=localhost --dbport=1234 --dbname=strapi --dbusername=strapi --dbpassword=strapi --projecttype=js --packagemanager=yarn --usecompose=false --env=both
+npx @strapi-community/dockerize new --dbclient=mysql --dbhost=localhost --dbport=1234 --dbname=strapi --dbusername=strapi --dbpassword=strapi --projecttype=js --packagemanager=yarn --usecompose=false --env=both
 ```
+
+### 🤖 Using CLI Arguments
 
 Please note the `new` keyword is required for this to take effect.
 
 ```markdown
-strapi-dockerize new
+npx @strapi-community/dockerize new
 --dbtype=<dbclient>
 --dbhost=<dbhost>
 --dbport=<dbport>
@@ -60,6 +67,7 @@ strapi-dockerize new
 --env=<env>
 ```
 
+```markdown
 | 💻 Command     | 💬 Value                                | 🦄 Type | 🐲 Default    |
 | -------------- | --------------------------------------- | ------- | ------------- |
 | dbclient       | `postgres` \| `mysql` \| `mariadb`      | String  | `postgres`    |
@@ -72,6 +80,15 @@ strapi-dockerize new
 | packagemanager | `yarn` \| `npm`                         | String  | `yarn`        |
 | usecompose     | `true` \| `false`                       | Boolean | `false`       |
 | env            | `development` \| `production` \| `both` | String  | `development` |
+```
+
+### 🧹 Resetting project
+
+```bash
+@strapi-community/dockerize reset
+```
+
+_Note_ that **RESET** will delete the `config/env` folder with all of it's content
 
 ## 🚀 Features
 
@@ -112,7 +129,3 @@ Give a star if this project helped you.
 ## 🔖 License
 
 See the [LICENSE](./LICENSE.md) file for licensing information.
-
-```
-
-```
