@@ -3,4 +3,6 @@
 .git/
 build/
 node_modules/
+public/uploads/
+.env
 data/
