@@ -38,6 +38,41 @@ For more information on contributing please see [the contrib message below](#con
 npx @strapi-community/dockerize
 ```
 
+You can also call it directly with arguments
+
+```bash
+strapi-dockerize new --dbclient=mysql --dbhost=localhost --dbport=1234 --dbname=strapi --dbusername=strapi --dbpassword=strapi --projecttype=js --packagemanager=yarn --usecompose=false --env=both
+```
+
+Please note the `new` keyword is required for this to take effect.
+
+```markdown
+strapi-dockerize new
+--dbclient=<dbclient>
+--dbhost=<dbhost>
+--dbport=<dbport>
+--dbname=<dbname>
+--dbusername=<dbusername>
+--dbpassword=<dbpassword>
+--projecttype=<projecttype>
+--packagemanager=<packagemanager>
+--usecompose=<usecompose>
+--env=<env>
+```
+
+| 💻 Command     | 💬 Value                                | 🦄 Type | 🐲 Default    |
+| -------------- | --------------------------------------- | ------- | ------------- |
+| dbclient       | `postgres` \| `mysql` \| `mariadb`      | String  | `postgres`    |
+| dbhost         |                                         | String  | `localhost`   |
+| dbport         | `5432` \| `3306`                        | Number  | `5432`        |
+| dbname         |                                         | String  | `strapi`      |
+| dbusername     |                                         | String  | `strapi`      |
+| dbpassword     |                                         | String  |               |
+| projecttype    | `ts` \| `js`                            | String  | `js`          |
+| packagemanager | `yarn` \| `npm`                         | String  | `yarn`        |
+| usecompose     | `true` \| `false`                       | Boolean | `false`       |
+| env            | `development` \| `production` \| `both` | String  | `development` |
+
 ## 🚀 Features
 
 - Easy add support for docker
@@ -77,3 +112,7 @@ Give a star if this project helped you.
 ## 🔖 License
 
 See the [LICENSE](./LICENSE.md) file for licensing information.
+
+```
+
+```
