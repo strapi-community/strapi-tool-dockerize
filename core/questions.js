@@ -1,42 +1,76 @@
-const { prompt, toggle } = require(`enquirer`);
+const prompts = require(`prompts`);
+
 const { setConfig, config } = require(`../utils`);
 module.exports = async () => {
-	const dockerCompose = await toggle({
-		name: `useCompose`,
+	const dockerCompose = await prompts({
+		name: `dockerCompose`,
 		message: `Do you want to create a docker-compose file? 🐳`,
-		enabled: `Yes`,
-		disabled: `No`
+		active: `Yes`,
+		inactive: `No`,
+		type: `toggle`
 	});
-	setConfig({ dockerCompose });
+	setConfig(dockerCompose);
 	if (config.dockerCompose) {
-		const questions = await prompt([
+		const questions = await prompts([
 			{
 				type: `select`,
 				name: `env`,
 				message: `What enviroments do you want to configure?`,
-				choices: [`Development`, `Production`, `Both`]
+				choices: [
+					{
+						title: `Development`,
+						value: `development`,
+						description: `Creates a development environment`
+					},
+					{
+						title: `Production`,
+						value: `production`,
+						description: `Creates a production environment`
+					},
+					{
+						title: `Both`,
+						value: `both`,
+						description: `Creates development and production enviroments`
+					}
+				]
 			},
 			{
 				type: `select`,
 				name: `dbtype`,
 				message: `What database do you want to use?`,
 				hint: `SQLite is not an option when using docker-compose`,
-				choices: [`MySQL`, `MariaDB`, `PostgreSQL`]
+				choices: [
+					{
+						title: `MySQL`,
+						value: `mysql`,
+						description: `Setup with MySQL database and dependencies`
+					},
+					{
+						title: `MariaDB`,
+						value: `mariadb`,
+						description: `Setup with mariadb database and dependencies`
+					},
+					{
+						title: `PostgreSQL`,
+						value: `postgresql`,
+						description: `Setup with PostgreSQL database and dependencies`
+					}
+				]
 			},
 			{
-				type: `input`,
+				type: `text`,
 				name: `dbhost`,
 				message: `Database Host`,
 				initial: `localhost`
 			},
 			{
-				type: `input`,
+				type: `text`,
 				name: `dbname`,
 				message: `Database Name`,
 				initial: `strapi`
 			},
 			{
-				type: `input`,
+				type: `text`,
 				name: `dbuser`,
 				message: `Database Username`,
 				initial: `strapi`
@@ -49,27 +83,38 @@ module.exports = async () => {
 					value.length < 3 ? `Password is required (min 3 characters)` : true
 			}
 		]);
-		const dbPort = await prompt({
-			type: `numeral`,
+		const dbPort = await prompts({
+			type: `number`,
 			name: `dbport`,
 			message: `Database Port`,
-			initial: questions.dbtype.toLowerCase() === `postgresql` ? 5432 : 3306
+			initial: questions.dbtype === `postgresql` ? 5432 : 3306
 		});
 		setConfig({
 			...config,
 			...questions,
 			env: questions.env.toLowerCase(),
-			dbtype: questions.dbtype.toLowerCase(),
+			dbtype: questions.dbtype,
 			dbport: dbPort.dbport
 		});
 
 		return true;
 	} else {
-		const env = await prompt({
+		const env = await prompts({
 			type: `select`,
 			name: `answer`,
 			message: `What enviroment do you want to configure for?`,
-			choices: [`Development`, `Production`]
+			choices: [
+				{
+					title: `Development`,
+					value: `development`,
+					description: `Great for Development but biggest size`
+				},
+				{
+					title: `Production`,
+					value: `production`,
+					description: `Creates an additonal .prod file which is smaller and optimized for production`
+				}
+			]
 		});
 		setConfig({ env: env.answer.toLowerCase() });
 
