@@ -31,8 +31,18 @@ module.exports = async () => {
 						title: `Both`,
 						value: `both`,
 						description: `Creates development and production enviroments`
+					},
+					{
+						title: `Custom`,
+						value: `custom`,
+						description: `Custom enviroment name`
 					}
 				]
+			},
+			{
+				type: prev => (prev == `custom` ? `text` : null),
+				name: `env`,
+				message: `What is the name of the enviroment`
 			},
 			{
 				type: `select`,
