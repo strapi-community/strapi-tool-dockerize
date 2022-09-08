@@ -11,6 +11,7 @@ const _config = {
 	npmDownloads: 0,
 	githubStars: 0,
 	dockerCompose: false,
+	projectName: ``,
 	dbtype: `postgresql`,
 	dbhost: ``,
 	dbname: ``,

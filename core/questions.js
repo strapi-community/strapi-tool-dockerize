@@ -45,6 +45,12 @@ module.exports = async () => {
 				message: `What is the name of the enviroment`
 			},
 			{
+				type: `text`,
+				name: `projectName`,
+				message: `Whats the name of the project?`,
+				initial: `strapi`
+			},
+			{
 				type: `select`,
 				name: `dbtype`,
 				message: `What database do you want to use?`,
