@@ -1,3 +1,6 @@
+const { outputFile } = require(`fs-extra`);
+const { Liquid } = require(`liquidjs`);
+const path = require(`path`);
 const {
 	yarnLockToPackageLock,
 	checkForDataFolder,
@@ -8,19 +11,23 @@ const {
 	config
 } = require(`../utils`);
 
+const liquidEngine = new Liquid({
+	root: path.join(__dirname, `..`, `templates`),
+	extname: `.liquid`
+});
+
 const createDockerFiles = async () => {
-	spinner.start();
-	try {
-		await copyFile(
-			`${config.dockerfileDir}/development/Dockerfile.${config.packageManager}`,
-			`${config.outDir}/Dockerfile`
-		);
-		if (config.env === `production` || config.env === `both`) {
-			await copyFile(
-				`${config.dockerfileDir}/production/Dockerfile.${config.packageManager}`,
-				`${config.outDir}/Dockerfile.prod`
-			);
+	const prodExtension =
+		config.env === `production` || config.env === `both` ? `.prod` : ``;
+	const template = liquidEngine.renderFileSync(
+		`Dockerfile${prodExtension.replace(`.`, `-`)}`,
+		{
+			packageManager: config.packageManager
 		}
+	);
+	const filePath = path.join(config.outDir, `Dockerfile${prodExtension}`);
+	try {
+		await outputFile(filePath, template);
 		spinner.stopAndPersist({
 			symbol: `🐳`,
 			text: ` ${chalk.bold.blue(`Dockerfile`)} for ${chalk.yellow(
@@ -42,10 +49,14 @@ const createDockerFiles = async () => {
 
 const createDockerComposeFiles = async () => {
 	spinner.start(` 🐳  Creating docker-compose.yml file`);
-	await copyFile(
-		`${config.dockerComposeDir}/docker-compose.${config.dbtype.toLowerCase()}`,
-		`${config.outDir}/docker-compose.yml`
-	);
+	const template = liquidEngine.renderFileSync(`docker-compose`, {
+		name: config.projectName,
+		env: config.env,
+		dbtype: config.dbtype,
+		dbport: config.dbport
+	});
+	const filePath = path.join(config.outDir, `docker-compose.yml`);
+	await outputFile(filePath, template);
 	spinner.stopAndPersist({
 		symbol: `🐳`,
 		text: ` Added docker-compose file with ${chalk.bold.green(

@@ -10,7 +10,16 @@ const goodbye = async (quit = false) => {
 				`dockerized`
 			)} 🐳 - have a look at the logs above for more info. 🚀 \n`
 		});
+		if (config.dockerCompose) {
+			spinner.stopAndPersist({
+				symbol: `🐳`,
+				text: ` You can now start your project with ${chalk.bold.yellow(
+					`docker-compose up -d`
+				)}\n`
+			});
+		}
 	}
+
 	spinner.stopAndPersist({
 		symbol: `⭐️`,
 		text: ` ${chalk.bold.green(
