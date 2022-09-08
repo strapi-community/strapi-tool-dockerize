@@ -15,7 +15,7 @@ module.exports = async () => {
 			{
 				type: `select`,
 				name: `env`,
-				message: `What enviroments do you want to configure?`,
+				message: `What environments do you want to configure?`,
 				choices: [
 					{
 						title: `Development`,
@@ -30,7 +30,7 @@ module.exports = async () => {
 					{
 						title: `Both`,
 						value: `both`,
-						description: `Creates development and production enviroments`
+						description: `Creates development and production environments`
 					}
 				]
 			},
