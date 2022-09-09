@@ -25,7 +25,7 @@ const createDockerFiles = async () => {
 			packageManager: config.packageManager
 		}
 	);
-	const filePath = path.join(config.outDir, `Dockerfile${prodExtension}`);
+	const filePath = path.join(config.outDir, `Dockerfile`);
 	try {
 		await outputFile(filePath, template);
 		spinner.stopAndPersist({
