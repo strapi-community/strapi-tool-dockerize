@@ -24,7 +24,7 @@ const resetFiles = async () => {
 	spinner.start(` 🦄  ${chalk.yellow(`Searching for our files...`)} `);
 	for await (let file of FILES_TO_REMOVE) {
 		try {
-			await access(`${file.directory}/${file.file}`, constants.F_OK);
+			await access(`${file.directory}/${file.file}`);
 			await unlink(`${file.directory}/${file.file}`);
 			spinner.stopAndPersist({
 				symbol: `🧹`,
@@ -34,9 +34,9 @@ const resetFiles = async () => {
 			if (error.code === `ENOENT`) {
 				spinner.stopAndPersist({
 					symbol: `🧹`,
-					text: ` ${chalk.yellow(`Project looks clean `)} \n`
+					text: ` No ${chalk.yellow(`${file.file}`)} found \n`
 				});
-				break;
+				continue;
 			}
 		}
 	}
@@ -57,7 +57,7 @@ const resetDirectories = async () => {
 		if (error.code === `ENOENT`) {
 			spinner.stopAndPersist({
 				symbol: `🧹`,
-				text: ` ${chalk.yellow(`Directories looks clean`)} \n`
+				text: ` ${chalk.yellow(`Directories`)} looks clean \n`
 			});
 		}
 	}
