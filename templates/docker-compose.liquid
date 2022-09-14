@@ -17,12 +17,12 @@ services:
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
       NODE_ENV: ${NODE_ENV}
     volumes:
-      - ./config:/opt/app/config
-      - ./src:/opt/app/src
-      - ./package.json:/opt/package.json
-      - ./yarn.lock:/opt/yarn.lock
-      - ./.env:/opt/app/.env
-      - ./public/uploads:/opt/app/public/uploads
+      - ./config:/app/config
+      - ./src:/app/src
+      - ./package.json:/app/package.json
+      - ./yarn.lock:/app/yarn.lock
+      - ./.env:/app/.env
+      - ./public/uploads:/app/public/uploads
     ports:
       - '1337:1337'
     networks:
