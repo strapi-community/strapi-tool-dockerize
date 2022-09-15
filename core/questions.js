@@ -35,14 +35,14 @@ module.exports = async () => {
 					{
 						title: `Custom`,
 						value: `custom`,
-						description: `Custom enviroment name`
+						description: `Custom environment name`
 					}
 				]
 			},
 			{
 				type: prev => (prev == `custom` ? `text` : null),
 				name: `env`,
-				message: `What is the name of the enviroment`
+				message: `What is the name of the environment`
 			},
 			{
 				type: `text`,
@@ -64,7 +64,7 @@ module.exports = async () => {
 					{
 						title: `MariaDB`,
 						value: `mariadb`,
-						description: `Setup with mariadb database and dependencies`
+						description: `Setup with MariaDB database and dependencies`
 					},
 					{
 						title: `PostgreSQL`,
@@ -118,7 +118,7 @@ module.exports = async () => {
 		const env = await prompts({
 			type: `select`,
 			name: `answer`,
-			message: `What enviroment do you want to configure for?`,
+			message: `What environment do you want to configure for?`,
 			choices: [
 				{
 					title: `Development`,
@@ -128,7 +128,7 @@ module.exports = async () => {
 				{
 					title: `Production`,
 					value: `production`,
-					description: `Creates an additonal .prod file which is smaller and optimized for production`
+					description: `Creates an additional .prod file which is smaller and optimized for production`
 				}
 			]
 		});
