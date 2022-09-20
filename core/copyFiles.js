@@ -17,17 +17,24 @@ const liquidEngine = new Liquid({
 });
 
 const createDockerFiles = async () => {
-	const prodExtension =
-		config.env === `production` || config.env === `both` ? `.prod` : ``;
-	const template = liquidEngine.renderFileSync(
-		`Dockerfile${prodExtension.replace(`.`, `-`)}`,
-		{
-			packageManager: config.packageManager
-		}
-	);
+	const template = liquidEngine.renderFileSync(`Dockerfile`, {
+		packageManager: config.packageManager
+	});
+
 	const filePath = path.join(config.outDir, `Dockerfile`);
 	try {
 		await outputFile(filePath, template);
+		if (config.env === `production` || config.env === `both`) {
+			const prodTemplate = liquidEngine.renderFileSync(`Dockerfile-prod`, {
+				packageManager: config.packageManager
+			});
+			console.log(`Oh haii`);
+			await outputFile(
+				path.join(config.outDir, `Dockerfile.prod`),
+				prodTemplate
+			);
+		}
+
 		spinner.stopAndPersist({
 			symbol: `🐳`,
 			text: ` ${chalk.bold.blue(`Dockerfile`)} for ${chalk.yellow(
