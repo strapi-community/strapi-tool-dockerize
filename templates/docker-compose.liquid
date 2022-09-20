@@ -47,10 +47,10 @@ services:
 {% else %}
 {%- if dbtype == "mysql" %}
     image: mysql:5.7
+    command: --default-authentication-plugin=mysql_native_password
     {%- else%}
     image: mariadb:latest
     {%- endif %}
-    command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_USER: ${DATABASE_USERNAME}
       MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
