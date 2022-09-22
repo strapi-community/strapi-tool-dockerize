@@ -28,7 +28,6 @@ const createDockerFiles = async () => {
 			const prodTemplate = liquidEngine.renderFileSync(`Dockerfile-prod`, {
 				packageManager: config.packageManager
 			});
-			console.log(`Oh haii`);
 			await outputFile(
 				path.join(config.outDir, `Dockerfile.prod`),
 				prodTemplate
