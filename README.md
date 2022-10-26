@@ -55,6 +55,7 @@ Please note the `new` keyword is required for this to take effect.
 
 ```markdown
 npx @strapi-community/dockerize new
+--projectname=<projectname>
 --dbtype=<dbclient>
 --dbhost=<dbhost>
 --dbport=<dbport>
@@ -70,6 +71,7 @@ npx @strapi-community/dockerize new
 ```markdown
 | 💻 Command     | 💬 Value                                | 🦄 Type | 🐲 Default    |
 | -------------- | --------------------------------------- | ------- | ------------- |
+| projectname    |                                         | String  | `mystrapi`    |
 | dbclient       | `postgres` \| `mysql` \| `mariadb`      | String  | `postgres`    |
 | dbhost         |                                         | String  | `localhost`   |
 | dbport         | `5432` \| `3306`                        | Number  | `5432`        |
