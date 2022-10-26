@@ -6,6 +6,7 @@ const { setConfig } = require(`../utils`);
  */
 const quickStart = async flags => {
 	const {
+		projectname,
 		projecttype,
 		packagemanager,
 		env,
@@ -19,6 +20,7 @@ const quickStart = async flags => {
 	} = flags;
 
 	setConfig({
+		projectName: projectname.toLowerCase() || `mystrapi`,
 		projectType: projecttype.toLowerCase(),
 		packageManager: packagemanager.toLowerCase(),
 		env: env.toLowerCase(),
