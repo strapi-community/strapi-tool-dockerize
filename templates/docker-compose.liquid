@@ -36,7 +36,7 @@ services:
     restart: unless-stopped
     env_file: .env
 {%- if dbtype == "postgresql" %}
-    image: postgres:12.0-alpine
+    image: postgres:14.5-alpine
     environment:
       POSTGRES_USER: ${DATABASE_USERNAME}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
@@ -46,7 +46,7 @@ services:
       #- ./data:/var/lib/postgresql/data/ # if you want to use a bind folder
 {% else %}
 {%- if dbtype == "mysql" %}
-    image: mysql:5.7
+    image: mysql:latest
     command: --default-authentication-plugin=mysql_native_password
     {%- else%}
     image: mariadb:latest
