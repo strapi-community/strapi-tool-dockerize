@@ -47,7 +47,7 @@ const createDockerFiles = async () => {
 	}
 
 	await copyFile(
-		`${config.dockerfileDir}/.dockerignore`,
+		`${config.templateDir}/.dockerignore`,
 		`${config.outDir}/.dockerignore`
 	);
 	await checkForDataFolder();

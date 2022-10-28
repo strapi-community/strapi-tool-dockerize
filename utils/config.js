@@ -2,8 +2,7 @@ const path = require(`path`);
 
 const _config = {
 	url: `https://github.com/strapi-community/strapi-tool-dockerize`,
-	dockerComposeDir: path.join(__dirname, `../templates/compose`),
-	dockerfileDir: path.join(__dirname, `../templates/dockerfiles`),
+	templateDir: path.join(__dirname, `../templates`),
 	outDir: path.join(process.cwd()),
 	projectType: `js`,
 	packageManager: `yarn`,
