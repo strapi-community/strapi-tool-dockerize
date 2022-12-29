@@ -1,7 +1,7 @@
 const { createDockerComposeFiles, createDockerFiles } = require(`./copyFiles`);
 const installDependecies = require(`./dependencies`);
 const { checkAndBackupDB, generateDatabase } = require(`./database`);
-const { appendEnv, createEnv } = require(`./env`);
+const { appendEnv, createEnv, resetEnv } = require(`./env`);
 const questions = require(`./questions`);
 module.exports = {
 	createDockerComposeFiles,
@@ -11,5 +11,6 @@ module.exports = {
 	installDependecies,
 	questions,
 	appendEnv,
-	createEnv
+	createEnv,
+	resetEnv
 };

@@ -15,7 +15,7 @@ const appendEnv = async () => {
 	spinner.start(` 🪄  Working .env magic`);
 
 	await readFile(`.env`, `utf8`, async (err, data) => {
-		if (data && data.includes(`@strapi-community/dockerize variables `)) {
+		if (data && data.includes(`@strapi-community/dockerize variables`)) {
 			await envUpdate(config.env);
 			return;
 		}
@@ -37,6 +37,7 @@ const appendEnv = async () => {
 		writeLine(
 			`DATABASE_CLIENT=${config.dbtype === `postgresql` ? `postgres` : `mysql`}`
 		);
+		writeLine(`# @strapi-community/dockerize end variables \n`);
 		spinner.stopAndPersist({
 			symbol: `🕵️`,
 			text: `  Added ${chalk.bold.blue(

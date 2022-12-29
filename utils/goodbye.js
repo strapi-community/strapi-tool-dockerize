@@ -33,6 +33,12 @@ const goodbye = async (quit = false) => {
 		)} `
 	});
 	console.log(`👉  ${pkg.url} 👈 \n`);
+	console.log(
+		`${chalk.bold.yellow(
+			`☕️ Feeling generious, feel free to buy me a ☕️ 👇`
+		)} \n`
+	);
+	console.log(`🙏 ${pkg.openCollective} \n`);
 };
 
 module.exports = goodbye;

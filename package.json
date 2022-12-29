@@ -64,6 +64,7 @@
 	},
 	"homepage": "https://github.com/strapi-community/strapi-tool-dockerize#readme",
 	"url": "https://github.com/strapi-community/strapi-tool-dockerize",
+	"openCollective": "https://opencollective.com/strapi/projects/strapi-tool-dockerize",
 	"config": {
 		"commitizen": {
 			"path": "./node_modules/cz-conventional-changelog"

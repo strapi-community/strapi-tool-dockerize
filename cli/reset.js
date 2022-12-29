@@ -1,5 +1,6 @@
 const { unlink, rm } = require(`fs/promises`);
 const { access, constants, spinner, chalk } = require(`../utils`);
+const { resetEnv } = require(`../core`);
 
 const FILES_TO_REMOVE = [
 	{
@@ -41,6 +42,7 @@ const resetFiles = async () => {
 		}
 	}
 	await resetDirectories();
+	await resetEnv();
 };
 
 const resetDirectories = async () => {
