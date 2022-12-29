@@ -20,18 +20,21 @@ const quickStart = async flags => {
 	} = flags;
 
 	setConfig({
-		projectName: projectname.toLowerCase() || `mystrapi`,
-		projectType: projecttype.toLowerCase(),
-		packageManager: packagemanager.toLowerCase(),
-		env: env.toLowerCase(),
-		dockerCompose: usecompose.toLowerCase() === `false` ? false : true,
+		projectName: (projectname && projectname.toLowerCase()) || `mystrapi`,
+		projectType: (projecttype && projecttype.toLowerCase()) || `js`,
+		packageManager: (packagemanager && packagemanager.toLowerCase()) || `yarn`,
+		env: (env && env.toLowerCase()) || `development`,
+		dockerCompose:
+			usecompose && usecompose.toLowerCase() === `false` ? false : true,
 		dbtype:
-			dbtype.toLowerCase() === `postgres` ? `postgresql` : dbtype.toLowerCase(),
-		dbhost: dbhost,
-		dbport: dbport,
-		dbname: dbname,
-		dbuser: dbuser,
-		dbpassword: dbpassword,
+			dbtype && dbtype.toLowerCase() === `postgres`
+				? `postgresql`
+				: (dbtype && dbtype.toLowerCase()) || `postgresql`,
+		dbhost: dbhost || ``,
+		dbport: dbport || null,
+		dbname: dbname || ``,
+		dbuser: dbuser || ``,
+		dbpassword: dbpassword || ``,
 		quickStart: true
 	});
 	return true;
