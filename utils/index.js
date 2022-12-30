@@ -12,10 +12,12 @@ const {
 	constants,
 	copyFile
 } = require(`./utils`);
+const { createStrapiProject } = require(`./createStrapi`);
 const {
 	detectPackageManager,
 	detectProjectType,
-	detectDownloadsAndStars
+	detectDownloadsAndStars,
+	detectStrapiProject
 } = require(`./detection`);
 
 module.exports = {
@@ -32,7 +34,9 @@ module.exports = {
 	goodbye,
 	detectPackageManager,
 	detectProjectType,
+	detectStrapiProject,
 	setConfig,
 	config,
-	detectDownloadsAndStars
+	detectDownloadsAndStars,
+	createStrapiProject
 };

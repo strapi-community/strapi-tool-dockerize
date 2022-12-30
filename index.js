@@ -12,9 +12,12 @@ const questions = require(`./core/questions`);
 const {
 	detectProjectType,
 	detectPackageManager,
+	detectStrapiProject,
 	goodbye,
 	detectDownloadsAndStars,
-	config
+	config,
+	createStrapiProject,
+	moveFiles
 } = require(`./utils`);
 const {
 	appendEnv,
@@ -37,6 +40,10 @@ const { clear, debug } = flags;
 		await detectDownloadsAndStars();
 		await detectProjectType();
 		await detectPackageManager();
+		if (!(await detectStrapiProject())) {
+			await createStrapiProject();
+		}
+
 		if (input.includes(`reset`)) {
 			await reset();
 			goodbye();

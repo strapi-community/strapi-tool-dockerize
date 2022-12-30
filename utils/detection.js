@@ -2,6 +2,7 @@ const path = require(`path`);
 const { spinner, chalk, constants, access } = require(`./utils`);
 const { setConfig, config } = require(`./config`);
 const fetch = require(`node-fetch`);
+const { readFile } = require(`fs`).promises;
 
 const detectDownloadsAndStars = async () => {
 	spinner.start(` 🦄  ${chalk.yellow(`Prepping some magic`)} `);
@@ -86,8 +87,50 @@ const detectPackageManager = async () => {
 	}
 };
 
+const detectStrapiProject = async () => {
+	spinner.start(` 💻 Detecting Strapi project... `);
+	try {
+		const packageJson = await readFile(
+			path.join(process.cwd(), `package.json`),
+			`utf8`
+		);
+
+		const packageObj = JSON.parse(packageJson);
+		if (Object.prototype.hasOwnProperty.call(packageObj, `dependencies`)) {
+			if (
+				Object.prototype.hasOwnProperty.call(
+					packageObj.dependencies,
+					`@strapi/strapi`
+				)
+			) {
+				const strapiVersion = packageObj.dependencies[`@strapi/strapi`];
+				spinner.stopAndPersist({
+					symbol: `🚀`,
+					text: ` ${chalk.bold.yellowBright(
+						`Strapi ${strapiVersion}`
+					)} detected \n`
+				});
+				return true;
+			} else {
+				spinner.stopAndPersist({
+					symbol: `⛔️`,
+					text: ` ${chalk.bold.red(`Strapi project not detected`)} \n`
+				});
+				return false;
+			}
+		}
+	} catch (error) {
+		spinner.stopAndPersist({
+			symbol: `⛔️`,
+			text: ` ${chalk.bold.red(`Strapi project not detected`)} \n`
+		});
+		return false;
+	}
+};
+
 module.exports = {
 	detectPackageManager,
 	detectProjectType,
-	detectDownloadsAndStars
+	detectDownloadsAndStars,
+	detectStrapiProject
 };
