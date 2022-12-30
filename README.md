@@ -2,7 +2,9 @@
 <h1>@Strapi-community/dockerize</h1>
 	
 <p style="margin-top: 0;">Add docker support for a Strapi Project with ease 🚀</p>
-	
+
+_Feel free to buy [@Eventyret](https://www.github.com/Eventyret) a ☕️ if this tool was helpful_ [Open Collective](https://opencollective.com/strapi/projects/strapi-tool-dockerize)
+
 <p>
   <a href="https://discord.strapi.io">
     <img src="https://img.shields.io/discord/811989166782021633?color=blue&label=strapi-discord" alt="Strapi Discord">
@@ -18,22 +20,22 @@
 
 ## Table of Contents <!-- omit in toc -->
 
-- [🚦 Current Status](#---current-status)
-- [✨ Usage](#--usage)
-  - [🤖 Using CLI Arguments](#---using-cli-arguments)
-  - [🧹 Resetting project](#---resetting-project)
-- [🚀 Features](#---features)
-- [🐳 Docker-compose support](#---docker-compose-support)
-- [🎗 Contributing](#---contributing)
-- [⭐️ Show your support](#---show-your-support)
-- [🔗 Links](#---links)
-- [🌎 Community support](#---community-support)
-- [🙋‍♀️ Authors](#------authors)
-- [🔖 License](#---license)
+- [🚦 Current Status](#-current-status)
+- [✨ Usage](#-usage)
+  - [🤖 Using CLI Arguments](#-using-cli-arguments)
+  - [🧹 Resetting project](#-resetting-project)
+- [🚀 Features](#-features)
+- [🐳 Docker-compose support](#-docker-compose-support)
+- [🎗 Contributing](#-contributing)
+- [⭐️ Show your support](#️-show-your-support)
+- [🔗 Links](#-links)
+- [🌎 Community support](#-community-support)
+- [🙋‍♀️ Authors](#️-authors)
+- [🔖 License](#-license)
 
 ## 🚦 Current Status
 
-This package is currently under development and should be consider **BETA** in terms of state. I/We are currently accepting contributions and/or dedicated contributors to help develop and maintain this package.
+This package is currently under development and should be consider **STABLE** in terms of state. I/We are currently accepting contributions and/or dedicated contributors to help develop and maintain this package.
 
 For more information on contributing please see [the contrib message below](#contributing).
 
@@ -100,9 +102,9 @@ _Note_ that **RESET** will delete the `config/env` folder with all of it's conte
 
 ## 🐳 Docker-compose support
 
-- Postgres 12
-- MySQL 5.7
-- MariaDB
+- Postgres 14.5
+- MySQL 8
+- MariaDB 10
 
 ## 🎗 Contributing
 
@@ -113,6 +115,7 @@ If interested please feel free to email the lead maintainer Simen at: simen@dehl
 ## ⭐️ Show your support
 
 Give a star if this project helped you.
+Feel free to buy [@Eventyret] a ☕️ if it was helpful. [Open Collective](https://opencollective.com/strapi/projects/strapi-tool-dockerize)
 
 ## 🔗 Links
 
