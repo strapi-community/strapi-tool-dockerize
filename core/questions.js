@@ -1,13 +1,29 @@
 const prompts = require(`prompts`);
 
 const { setConfig, config } = require(`../utils`);
+
+const enableTerminalCursor = () => {
+	process.stdout.write(`\x1B[?25h`);
+};
+
+const onState = state => {
+	if (state.aborted) {
+		// If we don't re-enable the terminal cursor before exiting
+		// the program, the cursor will remain hidden
+		enableTerminalCursor();
+		process.stdout.write(`\n`);
+		process.exit(1);
+	}
+};
+
 module.exports = async () => {
 	const dockerCompose = await prompts({
 		name: `dockerCompose`,
 		message: `Do you want to create a docker-compose file? 🐳`,
 		active: `Yes`,
 		inactive: `No`,
-		type: `toggle`
+		type: `toggle`,
+		onState
 	});
 	setConfig(dockerCompose);
 	if (config.dockerCompose) {
@@ -37,18 +53,21 @@ module.exports = async () => {
 						value: `custom`,
 						description: `Custom environment name`
 					}
-				]
+				],
+				onState
 			},
 			{
 				type: prev => (prev == `custom` ? `text` : null),
 				name: `env`,
-				message: `What is the name of the environment`
+				message: `What is the name of the environment`,
+				onState
 			},
 			{
 				type: `text`,
 				name: `projectName`,
 				message: `Whats the name of the project?`,
-				initial: `strapi`
+				initial: `strapi`,
+				onState
 			},
 			{
 				type: `select`,
@@ -71,39 +90,45 @@ module.exports = async () => {
 						value: `postgresql`,
 						description: `Setup with PostgreSQL database and dependencies`
 					}
-				]
+				],
+				onState
 			},
 			{
 				type: `text`,
 				name: `dbhost`,
 				message: `Database Host`,
-				initial: `localhost`
+				initial: `localhost`,
+				onState
 			},
 			{
 				type: `text`,
 				name: `dbname`,
 				message: `Database Name`,
-				initial: `strapi`
+				initial: `strapi`,
+				onState
 			},
 			{
 				type: `text`,
 				name: `dbuser`,
 				message: `Database Username`,
-				initial: `strapi`
+				initial: `strapi`,
+				onState
 			},
 			{
 				type: `password`,
 				name: `dbpassword`,
 				message: `Database Password`,
 				validate: value =>
-					value.length < 3 ? `Password is required (min 3 characters)` : true
+					value.length < 3 ? `Password is required (min 3 characters)` : true,
+				onState
 			}
 		]);
 		const dbPort = await prompts({
 			type: `number`,
 			name: `dbport`,
 			message: `Database Port`,
-			initial: questions.dbtype === `postgresql` ? 5432 : 3306
+			initial: questions.dbtype === `postgresql` ? 5432 : 3306,
+			onState
 		});
 		setConfig({
 			...config,
@@ -130,7 +155,8 @@ module.exports = async () => {
 					value: `production`,
 					description: `Creates an additional .prod file which is smaller and optimized for production`
 				}
-			]
+			],
+			onState
 		});
 		setConfig({ env: env.answer.toLowerCase() });
 
