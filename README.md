@@ -1,6 +1,6 @@
 <div align="center">
 <h1>@Strapi-community/dockerize</h1>
-	
+	![Banner](.github/assets/banner.png)
 <p style="margin-top: 0;">Add docker support for a Strapi Project with ease 🚀</p>
 
 _Feel free to buy [@Eventyret](https://www.github.com/Eventyret) a ☕️ if this tool was helpful_ [Open Collective](https://opencollective.com/strapi/projects/strapi-tool-dockerize)
