@@ -24,7 +24,7 @@ services:
       - ./.env:/opt/app/.env
       - ./public/uploads:/opt/app/public/uploads
     ports:
-      - '9090:1337'
+      - '1337:1337'
     networks:
       - {{name}}
     depends_on:
@@ -69,7 +69,7 @@ services:
     container_name: {{name | downcase}}Adminer
     restart: unless-stopped
     ports:
-      - '1338:8080'
+      - '9090:8080'
     environment:
       - ADMINER_DEFAULT_SERVER={{name | downcase}}DB
     networks:
