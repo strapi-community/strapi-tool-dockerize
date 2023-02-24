@@ -24,7 +24,7 @@ services:
       - ./.env:/opt/app/.env
       - ./public/uploads:/opt/app/public/uploads
     ports:
-      - '1337:1337'
+      - '9090:1337'
     networks:
       - {{name}}
     depends_on:
