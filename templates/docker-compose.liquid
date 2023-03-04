@@ -20,7 +20,11 @@ services:
       - ./config:/opt/app/config
       - ./src:/opt/app/src
       - ./package.json:/opt/package.json
+{%- if packageManager == "npm" %}
+      - ./package-lock.json:/opt/package-lock.json
+{% else %}
       - ./yarn.lock:/opt/yarn.lock
+{% endif %}
       - ./.env:/opt/app/.env
       - ./public/uploads:/opt/app/public/uploads
     ports:
