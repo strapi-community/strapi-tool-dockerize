@@ -32,6 +32,7 @@ _Feel free to buy [@Eventyret](https://www.github.com/Eventyret) a ☕️ if thi
 - [🔗 Links](#-links)
 - [🌎 Community support](#-community-support)
 - [🙋‍♀️ Authors](#️-authors)
+- [🙋‍♂️ Contributors (Thank you 🙏)](#️-contributors-thank-you-)
 - [🔖 License](#-license)
 
 ## 🚦 Current Status
@@ -131,6 +132,13 @@ Feel free to buy [@Eventyret] a ☕️ if it was helpful. [Open Collective](http
 ## 🙋‍♀️ Authors
 
 - [@Eventyret / Simen Daehlin](https://github.com/Eventyret)
+
+## 🙋‍♂️ Contributors (Thank you 🙏)
+
+- [@DimitriGilbert](https://github.com/DimitriGilbert)
+- [@YEK-PLUS](https://github.com/YEK-PLUS)
+- [@RobbieClarken](https://github.com/RobbieClarken)
+- [@nevotheless](https://github.com/nevotheless)
 
 ## 🔖 License
 
