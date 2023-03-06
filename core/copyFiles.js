@@ -59,7 +59,8 @@ const createDockerComposeFiles = async () => {
 		name: config.projectName,
 		env: config.env,
 		dbtype: config.dbtype,
-		dbport: config.dbport
+		dbport: config.dbport,
+		packageManager: config.packageManager
 	});
 	const filePath = path.join(config.outDir, `docker-compose.yml`);
 	await outputFile(filePath, template);
