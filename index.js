@@ -29,11 +29,16 @@ const {
 const input = cli.input;
 const flags = cli.flags;
 const { clear, debug } = flags;
+const path = require(`path`);
+const { setConfig } = require('./utils/config');
+const process = require(`process`);
 
 (async () => {
 	init({ clear });
 	input.includes(`help`) && cli.showHelp(0);
 	debug && log(flags);
+
+	let projectPath = ``;
 
 	const useQuickStart = input.includes(`new`) ? quickStart(flags) : false;
 	try {
@@ -41,7 +46,7 @@ const { clear, debug } = flags;
 		await detectProjectType();
 		await detectPackageManager();
 		if (!(await detectStrapiProject())) {
-			await createStrapiProject();
+			projectPath = await createStrapiProject();
 		}
 
 		if (input.includes(`reset`)) {
@@ -49,6 +54,8 @@ const { clear, debug } = flags;
 			goodbye();
 			return;
 		}
+		process.chdir(projectPath);
+		setConfig({outDir: path.join(process.cwd())})
 		const askQuestions = useQuickStart ? false : await questions();
 		if (askQuestions || config.dockerCompose) {
 			await createDockerComposeFiles();

@@ -4,7 +4,8 @@ const { spawn } = require(`child_process`);
 const ora = require(`ora`);
 const spinner = ora({ text: `` });
 const chalk = require(`chalk`);
-const goodbye = require(`./goodbye`);
+const fs = require('fs');
+const goodbye = require('./goodbye');
 const createStrapiProject = async () => {
 	const newProject = await prompts({
 		name: `strapiProject`,
@@ -27,12 +28,59 @@ const createStrapiProject = async () => {
 				active: `Yes`,
 				inactive: `No`,
 				type: `toggle`
+			},
+			{
+				name: `projectPath`,
+				message: `Do you want to assign a path for new project ?`
+				 + ` (leave blank for current directory ) \n`,
+				type: `text`
 			}
 		]);
+
+		async function checkPathAccessibility(targetPath) {
+			try {
+			  await fs.access(targetPath, fs.constants.F_OK | fs.constants.R_OK);
+			  const stats = await fs.stat(targetPath);
+		  
+			  if (stats.isDirectory()) {
+				return true;
+			  }
+			} catch (err) {
+			  if (err.code === 'ENOENT') {
+				console.error(` ${chalk.bold.yellow(
+					`Path does not exist, continuing in current directory!`
+				)} \n`);
+			  } else {
+				console.error(` ${chalk.bold.red(
+					`Path is not accessible please use accessible path for creating project, exiting...`
+				)} \n`);
+				await goodbye();
+				process.exit;
+			  }
+			  throw err;
+			}
+		  }
+
+		const checkIfPathExists = extraQuestions.projectPath;
+
+		if (checkIfPathExists === '' || checkIfPathExists === 'undefined' || checkIfPathExists === null) {
+			extraQuestions.projectPath = '.';
+		} else {
+			await checkPathAccessibility(checkIfPathExists)
+				.then((result) => {
+					console.log(result);
+				})
+				.catch((error) => {
+					console.error(error.message);
+				});
+		}
+
+		const projectPath = `${extraQuestions.projectPath}/${extraQuestions.projectName}`;
+
 		const command = `npx`;
 		const args = [
 			`create-strapi-app@latest`,
-			extraQuestions.projectName,
+			projectPath,
 			`--quickstart`,
 			extraQuestions.typescript ? `--typescript` : ``,
 			`--no-run`
@@ -59,11 +107,10 @@ const createStrapiProject = async () => {
 		spinner.stopAndPersist({
 			symbol: `🚀`,
 			text: ` ${chalk.bold.yellow(
-				`Strapi Project created! please CD into ${extraQuestions.projectName} and run the tool again`
+				`Strapi Project created! at path  ${projectPath}`
 			)} \n`
 		});
-		await goodbye();
-		process.exit(1);
+		return projectPath;
 	} else {
 		process.exit(1);
 	}
