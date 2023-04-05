@@ -139,6 +139,7 @@ Feel free to buy [@Eventyret] a ☕️ if it was helpful. [Open Collective](http
 - [@YEK-PLUS](https://github.com/YEK-PLUS)
 - [@RobbieClarken](https://github.com/RobbieClarken)
 - [@nevotheless](https://github.com/nevotheless)
+- [@SudeepPatel-0812](https://github.com/SudeepPatel-0812)
 
 ## 🔖 License
 
