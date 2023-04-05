@@ -32,7 +32,7 @@ const createStrapiProject = async () => {
 			{
 				name: `projectPath`,
 				message: `Do you want to assign a path for new project ?`
-				 + ` (leave blank for current directory ) \n`,
+				 + ` (leave blank for current directory )`,
 				type: `text`
 			}
 		]);
@@ -48,14 +48,14 @@ const createStrapiProject = async () => {
 			} catch (err) {
 			  if (err.code === 'ENOENT') {
 				console.error(` ${chalk.bold.yellow(
-					`Path does not exist, continuing in current directory!`
+					`🟨 Path does not exist, continuing in current directory!`
 				)} \n`);
 			  } else {
 				console.error(` ${chalk.bold.red(
-					`Path is not accessible please use accessible path for creating project, exiting...`
+					`🛑 Path is not accessible please use accessible path for creating project, exiting...`
 				)} \n`);
 				await goodbye();
-				process.exit;
+				process.exit(1);
 			  }
 			  throw err;
 			}
