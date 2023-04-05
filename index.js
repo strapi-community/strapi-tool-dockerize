@@ -30,7 +30,7 @@ const input = cli.input;
 const flags = cli.flags;
 const { clear, debug } = flags;
 const path = require(`path`);
-const { setConfig } = require('./utils/config');
+const { setConfig } = require(`./utils/config`);
 const process = require(`process`);
 
 (async () => {
@@ -55,7 +55,7 @@ const process = require(`process`);
 			return;
 		}
 		process.chdir(projectPath);
-		setConfig({outDir: path.join(process.cwd())})
+		setConfig({outDir: path.join(process.cwd())});
 		const askQuestions = useQuickStart ? false : await questions();
 		if (askQuestions || config.dockerCompose) {
 			await createDockerComposeFiles();

@@ -4,8 +4,8 @@ const { spawn } = require(`child_process`);
 const ora = require(`ora`);
 const spinner = ora({ text: `` });
 const chalk = require(`chalk`);
-const fs = require('fs');
-const goodbye = require('./goodbye');
+const fs = require(`fs`);
+const goodbye = require(`./goodbye`);
 const createStrapiProject = async () => {
 	const newProject = await prompts({
 		name: `strapiProject`,
@@ -46,7 +46,7 @@ const createStrapiProject = async () => {
 				return true;
 			  }
 			} catch (err) {
-			  if (err.code === 'ENOENT') {
+			  if (err.code === `ENOENT`) {
 				console.error(` ${chalk.bold.yellow(
 					`🟨 Path does not exist, continuing in current directory!`
 				)} \n`);
@@ -63,8 +63,8 @@ const createStrapiProject = async () => {
 
 		const checkIfPathExists = extraQuestions.projectPath;
 
-		if (checkIfPathExists === '' || checkIfPathExists === 'undefined' || checkIfPathExists === null) {
-			extraQuestions.projectPath = '.';
+		if (checkIfPathExists === `` || checkIfPathExists === `undefined` || checkIfPathExists === null) {
+			extraQuestions.projectPath = `.`;
 		} else {
 			await checkPathAccessibility(checkIfPathExists)
 				.then((result) => {
