@@ -4,8 +4,8 @@ const { spawn } = require(`child_process`);
 const ora = require(`ora`);
 const spinner = ora({ text: `` });
 const chalk = require(`chalk`);
-const fs = require(`fs`);
 const goodbye = require(`./goodbye`);
+const path = require(`path`);
 const createStrapiProject = async () => {
 	const newProject = await prompts({
 		name: `strapiProject`,
@@ -32,47 +32,34 @@ const createStrapiProject = async () => {
 			{
 				name: `projectPath`,
 				message: `Do you want to assign a path for new project ?`
-				 + ` (leave blank for current directory )`,
-				type: `text`
+					+ ` (leave blank for current directory )`,
+				type: `text`,
+				initial: process.cwd()
 			}
 		]);
 
 		async function checkPathAccessibility(targetPath) {
-			try {
-			  await fs.access(targetPath, fs.constants.F_OK | fs.constants.R_OK);
-			  const stats = await fs.stat(targetPath);
-		  
-			  if (stats.isDirectory()) {
-				return true;
-			  }
-			} catch (err) {
-			  if (err.code === `ENOENT`) {
-				console.error(` ${chalk.bold.yellow(
-					`🟨 Path does not exist, continuing in current directory!`
-				)} \n`);
-			  } else {
-				console.error(` ${chalk.bold.red(
-					`🛑 Path is not accessible please use accessible path for creating project, exiting...`
-				)} \n`);
+			if (!path.isAbsolute(targetPath)) {
+				console.error(`${chalk.bold.red(
+					`🛑 Path is not accessible. Please use an accessible path for creating project, exiting...`
+				)}\n`);
 				await goodbye();
 				process.exit(1);
-			  }
-			  throw err;
+			} else {
+				console.log(`${chalk.bold.green(`\n 📝 Path is accessible. Creating folder!\n`)}`);
 			}
-		  }
+		}
 
 		const checkIfPathExists = extraQuestions.projectPath;
 
 		if (checkIfPathExists === `` || checkIfPathExists === `undefined` || checkIfPathExists === null) {
 			extraQuestions.projectPath = `.`;
 		} else {
-			await checkPathAccessibility(checkIfPathExists)
-				.then((result) => {
-					console.log(result);
-				})
-				.catch((error) => {
-					console.error(error.message);
-				});
+			await checkPathAccessibility(checkIfPathExists);
+		}
+
+		if(extraQuestions.projectPath !== process.cwd()) {
+			extraQuestions.initial = ``;
 		}
 
 		const projectPath = `${extraQuestions.projectPath}/${extraQuestions.projectName}`;
