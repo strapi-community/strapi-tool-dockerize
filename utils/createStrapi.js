@@ -41,12 +41,12 @@ const createStrapiProject = async () => {
 		async function checkPathAccessibility(targetPath) {
 			if (!path.isAbsolute(targetPath)) {
 				console.error(`${chalk.bold.red(
-					`🛑 Path is not accessible. Please use an accessible path for creating project, exiting...`
+					` \n 🛑 Path is not valid. Please use a valid path for creating project, exiting...`
 				)}\n`);
 				await goodbye();
 				process.exit(1);
 			} else {
-				console.log(`${chalk.bold.green(`\n 📝 Path is accessible. Creating folder!\n`)}`);
+				console.log(`${chalk.bold.green(`\n 📝 Path is valid, proceeding! \n`)}`);
 			}
 		}
 
