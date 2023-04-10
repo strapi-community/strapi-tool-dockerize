@@ -29,6 +29,9 @@ const {
 const input = cli.input;
 const flags = cli.flags;
 const { clear, debug } = flags;
+const path = require(`path`);
+const { setConfig } = require(`./utils/config`);
+const process = require(`process`);
 
 (async () => {
 	init({ clear });
@@ -41,7 +44,9 @@ const { clear, debug } = flags;
 		await detectProjectType();
 		await detectPackageManager();
 		if (!(await detectStrapiProject())) {
-			await createStrapiProject();
+			const projectPath = await createStrapiProject();
+			process.chdir(projectPath);
+			setConfig({outDir: path.join(process.cwd())});
 		}
 
 		if (input.includes(`reset`)) {

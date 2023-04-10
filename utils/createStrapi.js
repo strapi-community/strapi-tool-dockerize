@@ -5,6 +5,7 @@ const ora = require(`ora`);
 const spinner = ora({ text: `` });
 const chalk = require(`chalk`);
 const goodbye = require(`./goodbye`);
+const path = require(`path`);
 const createStrapiProject = async () => {
 	const newProject = await prompts({
 		name: `strapiProject`,
@@ -27,12 +28,46 @@ const createStrapiProject = async () => {
 				active: `Yes`,
 				inactive: `No`,
 				type: `toggle`
+			},
+			{
+				name: `projectPath`,
+				message: `Do you want to assign a path for new project ?`
+					+ ` (leave blank for current directory )`,
+				type: `text`,
+				initial: process.cwd()
 			}
 		]);
+
+		async function checkPathAccessibility(targetPath) {
+			if (!path.isAbsolute(targetPath)) {
+				console.error(`${chalk.bold.red(
+					` \n 🛑 Path is not valid. Please use a valid path for creating project, exiting...`
+				)}\n`);
+				await goodbye();
+				process.exit(1);
+			} else {
+				console.log(`${chalk.bold.green(`\n 📝 Path is valid, proceeding! \n`)}`);
+			}
+		}
+
+		const checkIfPathExists = extraQuestions.projectPath;
+
+		if (checkIfPathExists === `` || checkIfPathExists === `undefined` || checkIfPathExists === null) {
+			extraQuestions.projectPath = `.`;
+		} else {
+			await checkPathAccessibility(checkIfPathExists);
+		}
+
+		if(extraQuestions.projectPath !== process.cwd()) {
+			extraQuestions.initial = ``;
+		}
+
+		const projectPath = `${extraQuestions.projectPath}/${extraQuestions.projectName}`;
+
 		const command = `npx`;
 		const args = [
 			`create-strapi-app@latest`,
-			extraQuestions.projectName,
+			projectPath,
 			`--quickstart`,
 			extraQuestions.typescript ? `--typescript` : ``,
 			`--no-run`
@@ -59,11 +94,10 @@ const createStrapiProject = async () => {
 		spinner.stopAndPersist({
 			symbol: `🚀`,
 			text: ` ${chalk.bold.yellow(
-				`Strapi Project created! please CD into ${extraQuestions.projectName} and run the tool again`
+				`Strapi Project created! at path  ${projectPath}`
 			)} \n`
 		});
-		await goodbye();
-		process.exit(1);
+		return projectPath;
 	} else {
 		process.exit(1);
 	}
