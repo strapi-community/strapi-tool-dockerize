@@ -52,7 +52,7 @@
 		"cz-conventional-changelog": "^3.3.0",
 		"eslint": "^8.21.0",
 		"prettier": "^2.7.1",
-		"semantic-release": "^19.0.3"
+		"semantic-release": "^21.0.1"
 	},
 	"main": "index.js",
 	"repository": {
