@@ -25,11 +25,11 @@ COPY . .
 {%- if packageManager == "yarn" %}
 RUN ["yarn", "build"]
 {%- else %}
-RUN ["npm", "run","build"]
+RUN ["npm", "run", "build"]
 {%- endif %}
 EXPOSE 1337
 {%- if packageManager == "yarn" %}
 CMD ["yarn", "develop"]
 {%- else %}
-CMD ["npm", "run","develop"]
+CMD ["npm", "run", "develop"]
 {% endif %}
