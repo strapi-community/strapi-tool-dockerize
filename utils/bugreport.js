@@ -5,13 +5,13 @@ const generateError = async error => {
 	const url = newGithubIssueUrl({
 		repo: `strapi-tool-dockerize`,
 		user: `strapi-community`,
-		title: `Error: ${error.message}`,
+		title: `Error: Please add a title`,
 		template: `BUG_REPORT.md`,
 		assignee: `eventyret`,
 		body: `## 🐛  Bug Report
-
+		
+<!-- Please give as much information as possible just submitting this with no other information from yourself, the issue will just be closed -->
 ## 🤷‍♀️ What did you do
-
 <!-- A clear and concise description of the behavior. -->
 
 ## ⛔️  Error log
