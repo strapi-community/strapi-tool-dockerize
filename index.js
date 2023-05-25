@@ -17,7 +17,7 @@ const {
 	detectDownloadsAndStars,
 	config,
 	createStrapiProject,
-	moveFiles
+	detectDockerFiles
 } = require(`./utils`);
 const {
 	appendEnv,
@@ -46,7 +46,7 @@ const process = require(`process`);
 		if (!(await detectStrapiProject())) {
 			const projectPath = await createStrapiProject();
 			process.chdir(projectPath);
-			setConfig({outDir: path.join(process.cwd())});
+			setConfig({ outDir: path.join(process.cwd()) });
 		}
 
 		if (input.includes(`reset`)) {
@@ -56,11 +56,13 @@ const process = require(`process`);
 		}
 		const askQuestions = useQuickStart ? false : await questions();
 		if (askQuestions || config.dockerCompose) {
+			await detectDockerFiles();
 			await createDockerComposeFiles();
 			await appendEnv();
 			await createEnv();
 			await installDependecies();
 		}
+		await detectDockerFiles();
 		await createDockerFiles();
 		goodbye();
 	} catch (error) {
