@@ -19,6 +19,7 @@ const {
 	detectDownloadsAndStars,
 	detectStrapiProject
 } = require(`./detection`);
+const { detectDockerFiles } = require(`./backup`);
 
 module.exports = {
 	yarnLockToPackageLock,
@@ -38,5 +39,6 @@ module.exports = {
 	setConfig,
 	config,
 	detectDownloadsAndStars,
-	createStrapiProject
+	createStrapiProject,
+	detectDockerFiles
 };
