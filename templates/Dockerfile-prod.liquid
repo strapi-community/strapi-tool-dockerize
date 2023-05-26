@@ -23,7 +23,6 @@ RUN npm run build
 
 # Creating final production image
 FROM node:16-alpine
-RUN addgroup -g 1001 strapi && adduser -u 1001 -G strapi -s /bin/sh -D strapi
 RUN apk add --no-cache vips-dev
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
@@ -33,8 +32,8 @@ WORKDIR /opt/app
 COPY --from=build /opt/app ./
 ENV PATH /opt/node_modules/.bin:$PATH
 
-RUN chown -R strapi:strapi /opt/app
-USER strapi
+RUN chown -R node:node /opt/app
+USER node
 EXPOSE 1337
 {%- if packageManager == "yarn" %}
 CMD ["yarn", "start"]
