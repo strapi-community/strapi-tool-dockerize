@@ -38,6 +38,7 @@ const createStrapiProject = async () => {
 			}
 		]);
 
+		/* eslint-disable */
 		async function checkPathAccessibility(targetPath) {
 			if (!path.isAbsolute(targetPath)) {
 				console.error(`${chalk.bold.red(

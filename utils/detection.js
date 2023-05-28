@@ -2,6 +2,9 @@ const path = require(`path`);
 const { spinner, chalk, constants, access } = require(`./utils`);
 const { setConfig, config } = require(`./config`);
 const fetch = require(`node-fetch`);
+const { checkInstalledPackages } = require(`./packageDetection`);
+const prompts = require(`prompts`);
+const { checkForYarnPackage } = require(`./yarnPackageHelper`);
 const { readFile } = require(`fs`).promises;
 
 const detectDownloadsAndStars = async () => {
@@ -60,6 +63,7 @@ const detectProjectType = async () => {
 
 const detectPackageManager = async () => {
 	spinner.start(` 💻 Detecting package manager... `);
+	spinner.stop();
 	try {
 		if (config.quickStart) {
 			spinner.stopAndPersist({
@@ -70,23 +74,72 @@ const detectPackageManager = async () => {
 						: `${chalk.bold.greenBright(`NPM`)}`
 				} set by cli arguments \n`
 			});
+			await checkForYarnPackage();
 			return;
 		}
-		await access(`yarn.lock`, constants.R_OK);
-		config.packageManager = `yarn`;
 	} catch (error) {
 		config.packageManager = `npm`;
-	}
-	if (!config.quickStart) {
 		spinner.stopAndPersist({
 			symbol: `📦`,
-			text: ` ${chalk.bold.yellow(
+			text: ` Exception Occured! falling back to ${chalk.bold.blueBright(
 				config.packageManager.toUpperCase()
-			)} detected \n`
+			)} \n`
 		});
 	}
-};
 
+	if (!config.quickStart) {
+		const installedPackages = await checkInstalledPackages();
+		if (installedPackages.length === 2) {
+			spinner.stopAndPersist({
+				symbol: `📂`,
+				text: `Detected Yarn & NPM ... \n`
+			});
+			const choosePackageManager = await prompts([
+				{
+					name: `packageManager`,
+					message: `Which package manager do you want to use ? (Strapi Recommends yarn)`,
+					type: `select`,
+					choices: [
+						{
+							title: `Yarn`,
+							value: `yarn`,
+						},
+						{
+							title: `NPM`,
+							value: `npm`,
+						},
+					]
+				}
+			]);
+			config.packageManager = choosePackageManager[`packageManager`];
+			spinner.stopAndPersist({
+				symbol: `\n📦`,
+				text: `Using ${chalk.bold.blueBright(
+					config.packageManager.toUpperCase()
+				)} \n`
+			});
+			return;
+		} else {
+			try {
+				await access(`yarn.lock`, constants.R_OK);
+				config.packageManager = `yarn`;
+				if (!installedPackages.includes(`yarn`)) {
+					await checkForYarnPackage();
+				}
+				return;
+			} catch (error) {
+				config.packageManager = `npm`;
+			}			  
+			spinner.stopAndPersist({
+				symbol: `📦`,
+				text: ` ${chalk.bold.yellow(
+					config.packageManager.toUpperCase()
+				)} detected \n`
+			});
+			return;
+		}
+	}
+};
 const detectStrapiProject = async () => {
 	spinner.start(` 💻 Detecting Strapi project... `);
 	try {
