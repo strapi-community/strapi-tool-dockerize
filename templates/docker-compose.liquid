@@ -60,6 +60,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
       MYSQL_PASSWORD: ${DATABASE_PASSWORD}
       MYSQL_DATABASE: ${DATABASE_NAME}
+      MYSQL_ROOT_HOST: '%'
     volumes:
       - {{name | downcase}}-data:/var/lib/mysql
       #- ./data:/var/lib/postgresql/data/ # if you want to use a bind folder
