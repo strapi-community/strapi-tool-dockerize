@@ -59,8 +59,8 @@ services:
     networks:
       - {{name | downcase}}
       
-  {{name | downcase}}Adminer:
-    container_name: {{name | downcase}}Adminer
+  {{name | downcase}}-adminer:
+    container_name: {{name | downcase}}adminer
     image: adminer
     restart: unless-stopped
     ports:
