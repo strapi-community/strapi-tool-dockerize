@@ -8,7 +8,7 @@ services:
     env_file: .env
     environment:
       DATABASE_CLIENT: ${DATABASE_CLIENT}
-      DATABASE_HOST: {{name | downcase}}DB
+      DATABASE_HOST: {{name | downcase}}-db
       DATABASE_NAME: ${DATABASE_NAME}
       DATABASE_USERNAME: ${DATABASE_USERNAME}
       DATABASE_PORT: ${DATABASE_PORT}
@@ -21,10 +21,10 @@ services:
     networks:
       - {{name}}
     depends_on:
-      - {{name}}DB
+      - {{name}}-db
       
-  {{name | downcase}}DB:
-    container_name: {{name | downcase}}DB
+  {{name | downcase}}-db:
+    container_name: {{name | downcase}}-db
     platform: linux/amd64 #for platform error on Apple M1 chips
     restart: unless-stopped
     env_file: .env
@@ -66,11 +66,11 @@ services:
     ports:
       - '9090:8080'
     environment:
-      - ADMINER_DEFAULT_SERVER={{name | downcase}}DB
+      - ADMINER_DEFAULT_SERVER={{name | downcase}}-db
     networks:
       - {{name | downcase}}
     depends_on:
-      - {{name}}DB
+      - {{name}}-db
 
 volumes:
   {{name | downcase}}-data:
