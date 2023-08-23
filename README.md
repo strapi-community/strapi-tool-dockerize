@@ -91,7 +91,7 @@ npx @strapi-community/dockerize new
 ### 🧹 Resetting project
 
 ```bash
-@strapi-community/dockerize reset
+npx @strapi-community/dockerize reset
 ```
 
 _Note_ that **RESET** will delete the `config/env` folder with all of it's content
