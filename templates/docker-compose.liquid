@@ -33,7 +33,7 @@ services:
       - {{name}}
     depends_on:
       - {{name}}DB
-      
+
   {{name | downcase}}DB:
     container_name: {{name | downcase}}DB
     platform: linux/amd64 #for platform error on Apple M1 chips
@@ -51,7 +51,7 @@ services:
 {% else %}
 {%- if dbtype == "mysql" %}
     image: mysql:latest
-    command: --default-authentication-plugin=mysql_native_password
+    command: "--character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci  --default-authentication-plugin=mysql_native_password"
     {%- else%}
     image: mariadb:latest
     {%- endif %}
@@ -69,7 +69,7 @@ services:
       - '{{dbport}}:{{dbport}}'
     networks:
       - {{name | downcase}}
-      
+
   {{name | downcase}}Adminer:
     container_name: {{name | downcase}}Adminer
     image: adminer
