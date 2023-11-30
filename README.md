@@ -58,33 +58,31 @@ npx @strapi-community/dockerize new --dbclient=mysql --dbhost=localhost --dbport
 Please note the `new` keyword is required for this to take effect.
 
 ```markdown
-npx @strapi-community/dockerize new
---projectname=<projectname>
---dbtype=<dbclient>
+npx @strapi-community/dockerize
+--dbtype=<dbtype>
 --dbhost=<dbhost>
 --dbport=<dbport>
 --dbname=<dbname>
---dbusername=<dbusername>
+--dbuser=<dbuser>
 --dbpassword=<dbpassword>
---projecttype=<projecttype>
+--type=<type>
 --packagemanager=<packagemanager>
---usecompose=<usecompose>
+--useCompose=<useCompose>
 --env=<env>
 ```
 
 ```markdown
 | 💻 Command     | 💬 Value                                | 🦄 Type | 🐲 Default    |
 | -------------- | --------------------------------------- | ------- | ------------- |
-| projectname    |                                         | String  | `mystrapi`    |
-| dbclient       | `postgres` \| `mysql` \| `mariadb`      | String  | `postgres`    |
+| dbtype         | `postgres` \| `mysql` \| `mariadb`      | String  | `postgres`    |
 | dbhost         |                                         | String  | `localhost`   |
 | dbport         | `5432` \| `3306`                        | Number  | `5432`        |
 | dbname         |                                         | String  | `strapi`      |
-| dbusername     |                                         | String  | `strapi`      |
-| dbpassword     |                                         | String  |               |
-| projecttype    | `ts` \| `js`                            | String  | `js`          |
+| dbuser         |                                         | String  | `strapi`      |
+| dbpassword     |                                         | String  | `strapi`      |
+| type           | `ts` \| `js`                            | String  | `js`          |
 | packagemanager | `yarn` \| `npm`                         | String  | `yarn`        |
-| usecompose     | `true` \| `false`                       | Boolean | `false`       |
+| useCompose     | `true` \| `false`                       | Boolean | `false`       |
 | env            | `development` \| `production` \| `both` | String  | `development` |
 ```
 
