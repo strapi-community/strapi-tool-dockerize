@@ -71,7 +71,8 @@ const createStrapiProject = async () => {
 			projectPath,
 			`--quickstart`,
 			extraQuestions.typescript ? `--typescript` : ``,
-			`--no-run`
+			`--no-run`,
+			'--skip-cloud'
 		];
 
 		const childProcess = spawn(command, args);
