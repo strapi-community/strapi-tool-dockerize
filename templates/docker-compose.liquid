@@ -51,7 +51,7 @@ services:
 {% else %}
 {%- if dbtype == "mysql" %}
     image: mysql:latest
-    command: "--character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci  --default-authentication-plugin=mysql_native_password"
+    command: "--character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci  --mysql-native-password=ON"
     {%- else%}
     image: mariadb:latest
     {%- endif %}
