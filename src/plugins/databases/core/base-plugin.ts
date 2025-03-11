@@ -2,29 +2,33 @@ import { DatabasePluginConfig, DatabaseAnswers, Question } from './types';
 import { generateSecurePassword } from '../../../utils/passwords';
 import { getDockerImageVersions } from '../../../utils/docker-versions';
 
-export class BaseDatabasePlugin {
-  protected config: DatabasePluginConfig;
-  private cachedVersions: string[] = [];
+export interface DatabasePlugin {
+  config: DatabasePluginConfig;
+  getQuestions: () => Promise<Question[]>;
+  processAnswers: (answers: Record<string, any>) => DatabaseAnswers;
+  getTemplateVariables: (answers: DatabaseAnswers) => Record<string, any>;
+  validate: (answers: DatabaseAnswers) => boolean;
+  validateField: (field: string, value: any) => boolean;
+}
 
-  constructor(config: DatabasePluginConfig) {
-    this.config = config;
-  }
+export function createDatabasePlugin(config: DatabasePluginConfig): DatabasePlugin {
+  let cachedVersions: string[] = [];
 
-  protected async getVersions(): Promise<string[]> {
-    if (this.cachedVersions.length === 0) {
+  async function getVersions(): Promise<string[]> {
+    if (cachedVersions.length === 0) {
       try {
-        this.cachedVersions = await getDockerImageVersions(this.config.image.name);
+        cachedVersions = await getDockerImageVersions(config.image.name);
       } catch (error) {
         // If we can't fetch versions, return a default list
-        this.cachedVersions = [this.config.defaultVersion];
+        cachedVersions = [config.defaultVersion];
       }
     }
-    return this.cachedVersions;
+    return cachedVersions;
   }
 
-  async getQuestions(): Promise<Question[]> {
-    const versions = await this.getVersions();
-    const prefix = this.config.envPrefix;
+  async function getQuestions(): Promise<Question[]> {
+    const versions = await getVersions();
+    const prefix = config.envPrefix;
 
     const baseQuestions: Question[] = [
       {
@@ -58,9 +62,9 @@ export class BaseDatabasePlugin {
         name: 'PASSWORD_TYPE',
         message: 'How would you like to set the database password?',
         choices: [
-          'generate',    // Generate a secure password
-          'custom',      // Use a custom password
-          'existing'     // Use existing password from .env
+          { label: 'Generate', value: 'generate', hint: 'Generate a secure password' },
+          { label: 'Custom', value: 'custom', hint: 'Use a custom password' },
+          { label: 'Existing', value: 'existing', hint: 'Use existing password from .env' }
         ],
         default: 'generate'
       },
@@ -78,35 +82,41 @@ export class BaseDatabasePlugin {
       {
         type: 'text',
         name: `${prefix}_PORT`,
-        message: `Which port should ${this.config.name} use? (Press enter for default ${this.config.defaultPort})`,
-        default: this.config.defaultPort.toString()
+        message: `Which port should ${config.name} use? (Press enter for default ${config.defaultPort})`,
+        default: config.defaultPort.toString(),
+        validate: (value) => {
+          const port = parseInt(value);
+          if (isNaN(port)) return 'Port must be a number';
+          if (port < 1024 || port > 65535) return 'Port must be between 1024 and 65535';
+          return true;
+        }
       },
       {
         type: 'select',
         name: `${prefix}_VERSION`,
-        message: `Which ${this.config.name} version would you like to use?`,
+        message: `Which ${config.name} version would you like to use?`,
         choices: versions.map(version => ({
           value: version,
-          label: `${this.config.name} ${version}`,
+          label: `${config.name} ${version}`,
           hint: version.includes('alpine') ? 'Recommended for production' : undefined
         })),
-        default: versions.find(v => v === this.config.defaultVersion) || versions[0]
+        default: versions.find(v => v === config.defaultVersion) || versions[0]
       }
     ];
 
-    return [...baseQuestions, ...(this.config.additionalQuestions || [])];
+    return [...baseQuestions, ...(config.additionalQuestions || [])];
   }
 
-  processAnswers(answers: Record<string, any>): DatabaseAnswers {
-    const prefix = this.config.envPrefix;
+  function processAnswers(answers: Record<string, any>): DatabaseAnswers {
+    const prefix = config.envPrefix;
     const processed: DatabaseAnswers = {
       database: answers[`${prefix}_DATABASE`],
       username: answers[`${prefix}_USER`],
       password: answers.PASSWORD_TYPE === 'generate' 
         ? generateSecurePassword()
         : answers[`${prefix}_PASSWORD`],
-      port: answers[`${prefix}_PORT`] || this.config.defaultPort.toString(),
-      version: answers[`${prefix}_VERSION`] || this.config.defaultVersion
+      port: answers[`${prefix}_PORT`] || config.defaultPort.toString(),
+      version: answers[`${prefix}_VERSION`] || config.defaultVersion
     };
 
     // Remove helper fields
@@ -115,24 +125,43 @@ export class BaseDatabasePlugin {
     return processed;
   }
 
-  getTemplateVariables(answers: DatabaseAnswers): Record<string, any> {
+  function getTemplateVariables(answers: DatabaseAnswers): Record<string, any> {
     return {
       database: {
-        type: this.config.name.toLowerCase(),
+        type: config.name.toLowerCase(),
         name: answers.database,
         user: answers.username,
         password: answers.password,
         port: answers.port,
-        host: this.config.containerName
+        host: config.containerName
       },
       volumes: {
-        data: this.config.volumePath
+        data: config.volumePath
       },
       image: {
-        name: this.config.image.name,
+        name: config.image.name,
         tag: answers.version
       },
-      healthcheck: this.config.healthcheck
+      healthcheck: config.healthcheck
     };
   }
+
+  function validate(answers: DatabaseAnswers): boolean {
+    if (!config.validations) return true;
+    return config.validations.config(answers);
+  }
+
+  function validateField(field: string, value: any): boolean {
+    if (!config.validations || !config.validations[field]) return true;
+    return config.validations[field]!(value);
+  }
+
+  return {
+    config,
+    getQuestions,
+    processAnswers,
+    getTemplateVariables,
+    validate,
+    validateField
+  };
 } 

@@ -1,25 +1,9 @@
-import { BaseDatabasePlugin } from '../core/base-plugin';
-import { DatabasePluginConfig, DatabaseAnswers } from '../core/types';
+import { createDatabasePlugin } from '../core/base-plugin';
+import { config } from './config';
+import { getTemplateVariables } from './template-variables';
 
-export class PostgreSQLPlugin extends BaseDatabasePlugin {
-  constructor() {
-    const config: DatabasePluginConfig = {
-      name: 'PostgreSQL',
-      defaultPort: 5432,
-      containerName: 'strapi-postgres',
-      volumePath: '/var/lib/postgresql/data',
-      envPrefix: 'POSTGRES',
-      defaultVersion: '16-alpine',
-      image: {
-        name: 'postgres'
-      },
-      healthcheck: {
-        test: (answers: DatabaseAnswers) => `pg_isready -U ${answers.username}`,
-        interval: '10s',
-        timeout: '5s',
-        retries: 5
-      }
-    };
-    super(config);
-  }
-} 
+const plugin = createDatabasePlugin(config);
+
+plugin.getTemplateVariables = getTemplateVariables;
+
+export default plugin; 

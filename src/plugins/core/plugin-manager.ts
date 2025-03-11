@@ -1,4 +1,4 @@
-import { BaseDatabasePlugin } from '../databases/core/base-plugin';
+import { DatabasePlugin } from '../databases/core/base-plugin';
 import { DatabaseAnswers, Question } from '../databases/core/types';
 import { PostgreSQLPlugin } from '../databases/postgresql';
 import { MySQLPlugin } from '../databases/mysql';
@@ -6,7 +6,7 @@ import { MariaDBPlugin } from '../databases/mariadb';
 import { SQLitePlugin } from '../databases/sqlite';
 
 export class PluginManager {
-  private plugins: Map<string, BaseDatabasePlugin>;
+  private plugins: Map<string, DatabasePlugin>;
 
   constructor() {
     this.plugins = new Map();
@@ -16,14 +16,14 @@ export class PluginManager {
   private loadBuiltinPlugins(): void {
     // Load built-in plugins
     const builtinPlugins = [
-      new PostgreSQLPlugin(),
-      new MySQLPlugin(),
-      new MariaDBPlugin(),
-      new SQLitePlugin()
-    ] as BaseDatabasePlugin[];
+      PostgreSQLPlugin,
+      MySQLPlugin,
+      MariaDBPlugin,
+      SQLitePlugin
+    ];
 
     for (const plugin of builtinPlugins) {
-      this.plugins.set(plugin.constructor.name.toLowerCase().replace('plugin', ''), plugin);
+      this.plugins.set(plugin.config.name.toLowerCase(), plugin);
     }
   }
 
@@ -37,7 +37,7 @@ export class PluginManager {
   /**
    * Get a plugin by database type
    */
-  getPlugin(type: string): BaseDatabasePlugin | undefined {
+  getPlugin(type: string): DatabasePlugin | undefined {
     return this.plugins.get(type.toLowerCase());
   }
 

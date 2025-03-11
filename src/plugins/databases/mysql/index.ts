@@ -1,71 +1,21 @@
-import { BaseDatabasePlugin } from '../core/base-plugin';
-import { DatabasePluginConfig, DatabaseAnswers } from '../core/types';
-import { Question } from '../../core/types';
+import { createDatabasePlugin } from '../core/base-plugin';
+import { config } from './config';
+import { getTemplateVariables } from './template-variables';
 
-export class MySQLPlugin extends BaseDatabasePlugin {
-  constructor() {
-    const config: DatabasePluginConfig = {
-      name: 'MySQL',
-      defaultPort: 3306,
-      containerName: 'strapi-mysql',
-      volumePath: '/var/lib/mysql',
-      envPrefix: 'MYSQL',
-      defaultVersion: '8.0',
-      image: {
-        name: 'mysql'
-      },
-      healthcheck: {
-        test: (answers: DatabaseAnswers) => 
-          `mysqladmin ping -h localhost -u ${answers.username} --password=${answers.password}`,
-        interval: '10s',
-        timeout: '5s',
-        retries: 5
-      },
-      additionalEnvVars: [
-        'MYSQL_ROOT_PASSWORD',
-        'MYSQL_ALLOW_EMPTY_PASSWORD',
-        'MYSQL_RANDOM_ROOT_PASSWORD'
-      ]
-    };
-    super(config);
-  }
+const plugin = createDatabasePlugin(config);
 
-  // Override getQuestions to add MySQL-specific options
-  getQuestions(): Question[] {
-    return [
-      ...super.getQuestions(),
-      {
-        type: 'select',
-        name: 'charset',
-        message: 'Select character set:',
-        default: 'utf8mb4',
-        choices: [
-          { label: 'UTF8MB4 (Recommended)', value: 'utf8mb4', hint: 'Full Unicode support' },
-          { label: 'UTF8', value: 'utf8', hint: 'Basic Unicode support' },
-          { label: 'Latin1', value: 'latin1', hint: 'Legacy encoding' }
-        ]
-      },
-      {
-        type: 'select',
-        name: 'collation',
-        message: 'Select collation:',
-        default: 'utf8mb4_unicode_ci',
-        choices: [
-          { label: 'UTF8MB4 Unicode CI', value: 'utf8mb4_unicode_ci', hint: 'Recommended for most applications' },
-          { label: 'UTF8MB4 General CI', value: 'utf8mb4_general_ci', hint: 'Slightly faster, less accurate' },
-          { label: 'UTF8MB4 Binary', value: 'utf8mb4_bin', hint: 'Binary comparison' }
-        ]
-      }
-    ];
-  }
+plugin.getTemplateVariables = getTemplateVariables;
 
+export default plugin;
+
+export const MySQLPlugin = {
   getConnectionString(config: DatabaseConfig): string {
     return `mysql://${config.username}:${config.password}@${config.host}:${config.port}/${config.database}`;
-  }
+  },
 
   getDefaultPort(): number {
     return 3306;
-  }
+  },
 
   getDefaultConfig(): Partial<DatabaseConfig> {
     return {
@@ -74,19 +24,19 @@ export class MySQLPlugin extends BaseDatabasePlugin {
       database: 'strapi',
       username: 'strapi'
     };
-  }
+  },
 
   getDockerServiceName(): string {
     return 'strapi-mysql';
-  }
+  },
 
   getDockerImage(): string {
     return 'mysql';
-  }
+  },
 
   getDockerImageTag(): string {
     return '8.0';
-  }
+  },
 
   validateConnectionString(url: string): boolean {
     try {
@@ -95,7 +45,7 @@ export class MySQLPlugin extends BaseDatabasePlugin {
     } catch {
       return false;
     }
-  }
+  },
 
   validateConfig(config: DatabaseConfig): boolean {
     return !!(
@@ -107,7 +57,7 @@ export class MySQLPlugin extends BaseDatabasePlugin {
       config.username &&
       config.password
     );
-  }
+  },
 
   getEnvironmentVariables(answers: Record<string, any>): Record<string, string> {
     return {
@@ -119,4 +69,4 @@ export class MySQLPlugin extends BaseDatabasePlugin {
       MYSQL_COLLATION_SERVER: answers.collation || 'utf8mb4_unicode_ci'
     };
   }
-} 
+}; 

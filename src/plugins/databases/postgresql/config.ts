@@ -1,25 +1,28 @@
-export function getTemplateVariables(config: Record<string, any>): Record<string, any> {
-  return {
-    database: {
-      type: 'postgresql',
-      name: config.POSTGRES_DB,
-      user: config.POSTGRES_USER,
-      password: config.POSTGRES_PASSWORD,
-      port: config.POSTGRES_PORT || 5432,
-      host: 'postgres' // Container name in docker-compose
-    },
-    volumes: {
-      data: '/var/lib/postgresql/data'
-    },
-    image: {
-      name: 'postgres',
-      tag: config.POSTGRES_VERSION || '16-alpine'
-    },
-    healthcheck: {
-      test: `pg_isready -U ${config.POSTGRES_USER}`,
-      interval: '10s',
-      timeout: '5s',
-      retries: 5
-    }
-  };
-} 
+import { DatabasePluginConfig } from '../core/types';
+import { questions } from './questions';
+import { validateConfig, validateSchema, validateSSLMode, validateConnectionString } from './validations';
+
+export const config: DatabasePluginConfig = {
+  name: 'PostgreSQL',
+  defaultPort: 5432,
+  containerName: 'strapi-postgres',
+  volumePath: '/var/lib/postgresql/data',
+  envPrefix: 'POSTGRES',
+  defaultVersion: '16-alpine',
+  image: {
+    name: 'postgres'
+  },
+  healthcheck: {
+    test: (answers) => `pg_isready -U ${answers.username}`,
+    interval: '10s',
+    timeout: '5s',
+    retries: 5
+  },
+  additionalQuestions: questions,
+  validations: {
+    config: validateConfig,
+    schema: validateSchema,
+    sslMode: validateSSLMode,
+    connectionString: validateConnectionString
+  }
+}; 
