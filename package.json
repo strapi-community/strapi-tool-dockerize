@@ -1,60 +1,100 @@
 {
 	"name": "@strapi-community/dockerize",
-	"description": "Easy add docker support for a Strapi Project",
-	"version": "0.0.0-development",
+	"description": "Create Docker and Docker-compose files for your Strapi project with ease",
+	"version": "2.0.0-beta.1",
 	"license": "MIT",
-	"bin": {
-		"strapi-strapi-tool-dockerize": "index.js",
-		"strapi-dockerize": "index.js"
+	"type": "module",
+	"engines": {
+		"node": ">=18.0.0"
 	},
-	"author": "Simen Daehlin <simen.dehlin@gmail.com> (https://dehlin.dev)",
-	"keywords": [
-		"strapi-tool-dockerize",
-		"Simen Daehlin",
-		"Strapi",
-		"Strapi Community"
-	],
+	"bin": {
+		"strapi-dockerize": "./dist/cli.js"
+	},
 	"files": [
-		"index.js",
-		"utils",
-		"templates",
-		"cli",
-		"core",
-		"providers",
-		"utils"
+		"dist",
+		"templates"
 	],
 	"scripts": {
-		"format": "prettier --write \"./**/*.{js,json}\"",
-		"semantic-release": "semantic-release --branches main",
-		"commit": "git-cz",
-		"acp": "git add . && npm run commit",
-		"lint": "eslint --ext .js --fix \"./**/*.js\""
+		"build": "tsup",
+		"dev": "tsup --watch",
+		"clean": "rimraf dist",
+		"format": "prettier --write \"src/**/*.{ts,tsx,md}\"",
+		"lint": "eslint \"src/**/*.{ts,tsx}\" --fix",
+		"test": "vitest",
+		"test:watch": "vitest watch",
+		"test:coverage": "vitest run --coverage",
+		"test:ui": "vitest --ui",
+		"typecheck": "tsc --noEmit",
+		"prepare": "husky install",
+		"prepublishOnly": "npm run build",
+		"release": "semantic-release",
+		"dev:cli": "tsx src/cli.tsx",
+		"link": "npm link",
+		"unlink": "npm unlink",
+		"dev:watch": "tsx watch src/cli.tsx"
 	},
 	"dependencies": {
-		"chalk": "^4.1.2",
-		"cli-alerts": "^1.2.2",
-		"cli-handle-error": "^4.4.0",
-		"cli-handle-unhandled": "^1.1.1",
-		"cli-meow-help": "^3.1.0",
-		"cli-welcome": "^2.2.2",
-		"execa": "5.1.1",
-		"fs-extra": "^10.1.0",
-		"liquidjs": "^10.3.3",
-		"meow": "^9.0.0",
-		"new-github-issue-url": "^0.2.1",
-		"node-fetch": "^2.6.7",
-		"open": "^8.4.0",
-		"ora": "^5.4.1",
-		"prompts": "^2.4.2",
-		"replace-in-file": "^6.3.5"
+		"@inkjs/ui": "^1.0.0",
+		"chalk": "^5.3.0",
+		"commander": "^11.1.0",
+		"conf": "^12.0.0",
+		"env-paths": "^3.0.0",
+		"execa": "^8.0.1",
+		"fs-extra": "^11.2.0",
+		"ink": "^4.4.1",
+		"ink-big-text": "^2.0.0",
+		"ink-gradient": "^3.0.0",
+		"ink-spinner": "^5.0.0",
+		"ink-text-input": "^5.0.1",
+		"ink-select-input": "^5.0.0",
+		"liquidjs": "^10.10.1",
+		"node-fetch": "^3.3.2",
+		"ora": "^8.0.1",
+		"react": "^18.2.0",
+		"zod": "^3.22.4"
 	},
 	"devDependencies": {
-		"cz-conventional-changelog": "^3.3.0",
-		"eslint": "^8.21.0",
-		"prettier": "^2.7.1",
-		"semantic-release": "^21.0.1"
+		"@commitlint/cli": "^18.4.3",
+		"@commitlint/config-conventional": "^18.4.3",
+		"@types/fs-extra": "^11.0.4",
+		"@types/ink-big-text": "^1.2.4",
+		"@types/ink-gradient": "^2.0.4",
+		"@types/node": "^20.10.5",
+		"@types/react": "^18.2.45",
+		"@typescript-eslint/eslint-plugin": "^6.15.0",
+		"@typescript-eslint/parser": "^6.15.0",
+		"@vitest/coverage-v8": "^1.1.0",
+		"eslint": "^8.56.0",
+		"eslint-config-prettier": "^9.1.0",
+		"eslint-plugin-prettier": "^5.1.0",
+		"eslint-plugin-react": "^7.33.2",
+		"eslint-plugin-react-hooks": "^4.6.0",
+		"husky": "^8.0.3",
+		"lint-staged": "^15.2.0",
+		"prettier": "^3.1.1",
+		"rimraf": "^5.0.5",
+		"semantic-release": "^22.0.12",
+		"tsup": "^8.0.1",
+		"typescript": "^5.3.3",
+		"vitest": "^1.1.0",
+		"@vitest/ui": "^1.1.0",
+		"ink-testing-library": "^3.0.0",
+		"strip-ansi": "^7.1.0",
+		"tsx": "^4.7.0"
 	},
-	"main": "index.js",
+	"peerDependencies": {
+		"react": "^18.2.0"
+	},
+	"keywords": [
+		"strapi",
+		"docker",
+		"docker-compose",
+		"cli",
+		"typescript",
+		"strapi-tool",
+		"strapi-community"
+	],
+	"author": "Simen Daehlin <simen.dehlin@gmail.com> (https://dehlin.dev)",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/strapi-community/strapi-tool-dockerize.git"
@@ -63,11 +103,15 @@
 		"url": "https://github.com/strapi-community/strapi-tool-dockerize/issues"
 	},
 	"homepage": "https://github.com/strapi-community/strapi-tool-dockerize#readme",
-	"url": "https://github.com/strapi-community/strapi-tool-dockerize",
-	"openCollective": "https://opencollective.com/strapi/projects/strapi-tool-dockerize",
-	"config": {
-		"commitizen": {
-			"path": "./node_modules/cz-conventional-changelog"
-		}
+	"lint-staged": {
+		"*.{ts,tsx}": [
+			"eslint --fix",
+			"prettier --write"
+		]
+	},
+	"commitlint": {
+		"extends": [
+			"@commitlint/config-conventional"
+		]
 	}
 }
