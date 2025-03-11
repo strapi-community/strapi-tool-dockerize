@@ -1,8 +1,5 @@
-import { createDatabasePlugin } from '../core/base-plugin';
+import { createDatabasePlugin } from '@plugins/databases/core/base-plugin';
+import { postgresConfig } from './config';
 
-export default createDatabasePlugin({
-  name: 'PostgreSQL',
-  defaultPort: 5432,
-  containerName: 'postgres',
-  volumePath: '/var/lib/postgresql/data'
-}); 
+// Creates a full PostgreSQL plugin with all common functionality
+export default createDatabasePlugin(postgresConfig); 

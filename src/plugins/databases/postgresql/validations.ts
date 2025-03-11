@@ -1,4 +1,5 @@
 import { DatabaseAnswers } from '../core/types';
+import { ValidationRules } from '@types';
 
 export function validateConnectionString(url: string): boolean {
   try {
@@ -24,7 +25,24 @@ export function validateSchema(schema: string): boolean {
   return /^[a-zA-Z0-9_-]+$/.test(schema);
 }
 
-export function validateSSLMode(mode: string): boolean {
-  const validModes = ['disable', 'require', 'verify-ca', 'verify-full'];
-  return validModes.includes(mode);
-} 
+export const validateDatabase: ValidationRules = {
+  required: true,
+  pattern: /^[a-zA-Z0-9_]+$/,
+  minLength: 1
+};
+
+export const validateUsername: ValidationRules = {
+  required: true,
+  pattern: /^[a-zA-Z0-9_]+$/,
+  minLength: 1
+};
+
+export const validatePassword: ValidationRules = {
+  required: true,
+  minLength: 8
+};
+
+export const validateSSLMode: ValidationRules = {
+  required: false,
+  custom: (value: string) => ['disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'].includes(value)
+}; 

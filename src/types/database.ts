@@ -58,4 +58,4 @@ export interface DatabasePlugin {
   getTemplateVariables(answers: DatabaseAnswers): TemplateVariables;
   validateConfig(answers: DatabaseAnswers): ValidationResult;
   validateConnectionString(url: string): boolean;
-} 
+}

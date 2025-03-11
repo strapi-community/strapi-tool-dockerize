@@ -1,28 +1,43 @@
-import { DatabasePluginConfig } from '../core/types';
-import { questions } from './questions';
-import { validateConfig, validateSchema, validateSSLMode, validateConnectionString } from './validations';
+import { DatabasePluginConfig, ValidationRules } from '@types';
+import { validateDatabase, validateUsername, validatePassword, validateSSLMode } from './validations';
 
-export const config: DatabasePluginConfig = {
+export const postgresConfig: DatabasePluginConfig = {
   name: 'PostgreSQL',
   defaultPort: 5432,
-  containerName: 'strapi-postgres',
+  containerName: 'postgres',
   volumePath: '/var/lib/postgresql/data',
-  envPrefix: 'POSTGRES',
-  defaultVersion: '16-alpine',
   image: {
-    name: 'postgres'
+    name: 'postgres',
+    tag: 'latest'
   },
+  defaultVersion: '16-alpine',
+  envPrefix: 'POSTGRES',
   healthcheck: {
-    test: (answers) => `pg_isready -U ${answers.username}`,
+    command: 'pg_isready',
     interval: '10s',
     timeout: '5s',
     retries: 5
   },
-  additionalQuestions: questions,
   validations: {
-    config: validateConfig,
-    schema: validateSchema,
-    sslMode: validateSSLMode,
-    connectionString: validateConnectionString
-  }
+    database: validateDatabase,
+    username: validateUsername,
+    password: validatePassword,
+    sslMode: validateSSLMode
+  },
+  additionalQuestions: [
+    {
+      type: 'select',
+      name: 'POSTGRES_SSL_MODE',
+      message: 'Select SSL mode:',
+      choices: [
+        { value: 'disable', label: 'Disable' },
+        { value: 'allow', label: 'Allow' },
+        { value: 'prefer', label: 'Prefer' },
+        { value: 'require', label: 'Require' },
+        { value: 'verify-ca', label: 'Verify CA' },
+        { value: 'verify-full', label: 'Verify Full' }
+      ],
+      default: 'disable'
+    }
+  ]
 }; 

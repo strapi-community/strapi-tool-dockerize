@@ -1,17 +1,13 @@
-import { DatabasePluginConfig, DatabaseAnswers, Question } from './types';
-import { generateSecurePassword } from '../../../utils/passwords';
-import { getDockerImageVersions } from '../../../utils/docker-versions';
-
-export interface DatabasePlugin {
-  name: string;
-  defaultPort: number;
-  containerName: string;
-  volumePath: string;
-  getDefaultPort(): number;
-  validateConfig(answers: any): boolean;
-  validateConnectionString(connectionString: string): boolean;
-  getTemplateVariables(config: any): Record<string, any>;
-}
+import {
+  DatabaseAnswers,
+  DatabasePlugin,
+  DatabasePluginConfig,
+  Question,
+  TemplateVariables,
+  ValidationResult
+} from '@types';
+import { getDockerImageVersions } from '@utils/docker-versions';
+import { generateSecurePassword } from '@utils/passwords';
 
 export function createDatabasePlugin(config: DatabasePluginConfig): DatabasePlugin {
   let cachedVersions: string[] = [];
@@ -21,7 +17,6 @@ export function createDatabasePlugin(config: DatabasePluginConfig): DatabasePlug
       try {
         cachedVersions = await getDockerImageVersions(config.image.name);
       } catch (error) {
-        // If we can't fetch versions, return a default list
         cachedVersions = [config.defaultVersion];
       }
     }
@@ -65,8 +60,7 @@ export function createDatabasePlugin(config: DatabasePluginConfig): DatabasePlug
         message: 'How would you like to set the database password?',
         choices: [
           { label: 'Generate', value: 'generate', hint: 'Generate a secure password' },
-          { label: 'Custom', value: 'custom', hint: 'Use a custom password' },
-          { label: 'Existing', value: 'existing', hint: 'Use existing password from .env' }
+          { label: 'Custom', value: 'custom', hint: 'Use a custom password' }
         ],
         default: 'generate'
       },
@@ -84,7 +78,7 @@ export function createDatabasePlugin(config: DatabasePluginConfig): DatabasePlug
       {
         type: 'text',
         name: `${prefix}_PORT`,
-        message: `Which port should ${config.name} use? (Press enter for default ${config.defaultPort})`,
+        message: `Which port should ${config.name} use?`,
         default: config.defaultPort.toString(),
         validate: (value) => {
           const port = parseInt(value);
@@ -109,6 +103,77 @@ export function createDatabasePlugin(config: DatabasePluginConfig): DatabasePlug
     return [...baseQuestions, ...(config.additionalQuestions || [])];
   }
 
+  function validateConfig(answers: DatabaseAnswers): ValidationResult {
+    const errors: string[] = [];
+    const requiredFields = ['database', 'username', 'password', 'port'];
+    
+    for (const field of requiredFields) {
+      if (!answers[field]) {
+        errors.push(`${field} is required`);
+      }
+    }
+
+    if (config.validations) {
+      Object.entries(config.validations).forEach(([field, rules]) => {
+        const value = answers[field];
+        if (rules.required && !value) {
+          errors.push(`${field} is required`);
+        }
+        if (rules.minLength && value?.toString().length < rules.minLength) {
+          errors.push(`${field} must be at least ${rules.minLength} characters`);
+        }
+        if (rules.maxLength && value?.toString().length > rules.maxLength) {
+          errors.push(`${field} must be at most ${rules.maxLength} characters`);
+        }
+        if (rules.pattern && !rules.pattern.test(value?.toString() || '')) {
+          errors.push(`${field} has invalid format`);
+        }
+        if (rules.custom && !rules.custom(value)) {
+          errors.push(`${field} validation failed`);
+        }
+      });
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
+  }
+
+  function validateConnectionString(connectionString: string): boolean {
+    const pattern = new RegExp(`^${config.name.toLowerCase()}:\/\/[^:]+:[^@]+@[^:]+:\d+\/\w+$`);
+    return pattern.test(connectionString);
+  }
+
+  function getTemplateVariables(answers: DatabaseAnswers): TemplateVariables {
+    const prefix = config.envPrefix;
+    return {
+      database: {
+        type: config.name.toLowerCase(),
+        name: answers.database,
+        user: answers.username,
+        password: answers.password,
+        port: answers.port.toString(),
+        host: 'localhost'
+      },
+      environment: {
+        [`${prefix}_DATABASE`]: answers.database,
+        [`${prefix}_USER`]: answers.username,
+        [`${prefix}_PASSWORD`]: answers.password,
+        [`${prefix}_ROOT_PASSWORD`]: answers.rootPassword || answers.password,
+        [`${prefix}_CHARACTER_SET_SERVER`]: answers.charset || 'utf8mb4',
+        [`${prefix}_COLLATION_SERVER`]: answers.collation || 'utf8mb4_unicode_ci'
+      },
+      volumes: {
+        data: config.volumePath
+      },
+      image: {
+        name: config.image.name,
+        tag: answers.version || config.defaultVersion
+      }
+    };
+  }
+
   function processAnswers(answers: Record<string, any>): DatabaseAnswers {
     const prefix = config.envPrefix;
     const processed: DatabaseAnswers = {
@@ -121,72 +186,16 @@ export function createDatabasePlugin(config: DatabasePluginConfig): DatabasePlug
       version: answers[`${prefix}_VERSION`] || config.defaultVersion
     };
 
-    // Remove helper fields
     delete answers.PASSWORD_TYPE;
-
     return processed;
   }
 
-  function getTemplateVariables(answers: DatabaseAnswers): Record<string, any> {
-    return {
-      database: {
-        type: config.name.toLowerCase(),
-        name: answers.database,
-        user: answers.username,
-        password: answers.password,
-        port: answers.port,
-        host: config.containerName
-      },
-      volumes: {
-        data: config.volumePath
-      },
-      image: {
-        name: config.image.name,
-        tag: answers.version
-      },
-      healthcheck: config.healthcheck
-    };
-  }
-
-  function validate(answers: DatabaseAnswers): boolean {
-    if (!config.validations) return true;
-    return config.validations.config(answers);
-  }
-
-  function validateField(field: string, value: any): boolean {
-    if (!config.validations || !config.validations[field]) return true;
-    return config.validations[field]!(value);
-  }
-
   return {
-    name: config.name,
-    defaultPort: config.defaultPort,
-    containerName: config.containerName,
-    volumePath: config.volumePath,
-
-    getDefaultPort() {
-      return this.defaultPort;
-    },
-
-    validateConfig(answers: any) {
-      const requiredFields = ['database', 'username', 'password', 'port'];
-      return requiredFields.every(field => answers[field]);
-    },
-
-    validateConnectionString(connectionString: string) {
-      // Basic connection string validation
-      // Should match format: protocol://username:password@hostname:port/database
-      const connectionStringPattern = /^[a-zA-Z]+:\/\/[^:]+:[^@]+@[^:]+:\d+\/\w+$/;
-      return connectionStringPattern.test(connectionString);
-    },
-
-    getTemplateVariables(config: any) {
-      return {
-        port: config.port || this.defaultPort,
-        database: config.database,
-        username: config.username,
-        password: config.password
-      };
-    }
+    ...config,
+    validateConfig,
+    validateConnectionString,
+    getTemplateVariables,
+    getQuestions,
+    processAnswers
   };
 } 

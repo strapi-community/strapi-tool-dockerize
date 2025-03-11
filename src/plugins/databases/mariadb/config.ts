@@ -1,33 +1,37 @@
-import { DatabasePluginConfig } from '../core/types';
-import { questions } from './questions';
-import { validateConfig, validateCharset, validateRootPassword, validateConnectionString } from './validations';
+import { DatabasePluginConfig } from '@types';
 
-export const config: DatabasePluginConfig = {
+export const mariadbConfig: DatabasePluginConfig = {
   name: 'MariaDB',
   defaultPort: 3306,
-  containerName: 'strapi-mariadb',
+  containerName: 'mariadb',
   volumePath: '/var/lib/mysql',
   envPrefix: 'MARIADB',
-  defaultVersion: '10.11',  // LTS version
+  defaultVersion: '11.2',
   image: {
-    name: 'mariadb'
+    name: 'mariadb',
+    tag: '11.2'
   },
   healthcheck: {
-    test: (answers) => `mysqladmin ping -h localhost -u ${answers.username} --password=${answers.password}`,
+    command: "mariadb-admin ping -h localhost",
     interval: '10s',
     timeout: '5s',
     retries: 5
   },
-  additionalEnvVars: [
-    'MARIADB_ROOT_PASSWORD',
-    'MARIADB_ALLOW_EMPTY_PASSWORD',
-    'MARIADB_RANDOM_ROOT_PASSWORD'
-  ],
-  additionalQuestions: questions,
   validations: {
-    config: validateConfig,
-    charset: validateCharset,
-    rootPassword: validateRootPassword,
-    connectionString: validateConnectionString
-  }
+    database: {
+      required: true,
+      pattern: /^[a-zA-Z0-9_]+$/,
+      minLength: 1
+    },
+    username: {
+      required: true,
+      pattern: /^[a-zA-Z0-9_]+$/,
+      minLength: 1
+    },
+    password: {
+      required: true,
+      minLength: 8
+    }
+  },
+  additionalQuestions: []
 }; 

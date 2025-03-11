@@ -13,8 +13,13 @@
     "outDir": "dist",
     "declaration": true,
     "paths": {
-      "@/*": ["./src/*"]
-    }
+      "@/*": ["src/*"],
+      "@types": ["src/types"],
+      "@types/*": ["src/types/*"],
+      "@utils/*": ["src/utils/*"],
+      "@plugins/*": ["src/plugins/*"]
+    },
+    "baseUrl": "."
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
