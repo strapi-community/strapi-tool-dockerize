@@ -169,8 +169,9 @@ This document outlines the planned features, improvements, and tasks for V2 of t
    - Existing database config
    - Existing Docker files
    - Environment files
+   - Node.js version detection
 
-2. **Environment Selection**
+2. **Environment Selection** ✅
    ```
    ? Select environment setup:
    ❯ Development (Optimized for local development with hot-reload)
@@ -178,7 +179,7 @@ This document outlines the planned features, improvements, and tasks for V2 of t
    ❯ Both (Development + Production setup)
    ```
 
-3. **Production Setup** (Only if Production/Both selected)
+3. **Production Setup** ✅
    - If Production was selected:
      ```
      ? Choose deployment setup:
@@ -191,7 +192,7 @@ This document outlines the planned features, improvements, and tasks for V2 of t
      - Development: docker-compose.yml
      - Production: Both Dockerfile and docker-compose.prod.yml
 
-4. **Database Configuration**
+4. **Database Configuration** ✅
    ```
    ? Select database setup:
    ❯ PostgreSQL (Recommended for production)
@@ -203,20 +204,31 @@ This document outlines the planned features, improvements, and tasks for V2 of t
    - Show warning if SQLite selected for production
    - Additional configuration based on database type
 
-5. **Node.js Configuration**
+5. **Node.js Configuration** ✅
    ```
    ? Select Node.js version:
-   ❯ LTS (Recommended, currently Node.js 20)
-   ❯ Current (Latest stable)
+   ❯ Project Version (if detected)
+   ❯ Node 20 LTS (v20.11.1) - Latest minor version
+   ❯ Node 18 LTS (v18.19.1) - Latest minor version
+   ❯ Latest (v21.x) - Not LTS
    ❯ Custom Version
    ```
+   - Auto-detects project version from:
+     - .nvmrc
+     - .node-version
+     - local node_modules
+     - system Node.js
+   - Shows latest minor version for each LTS major
+   - Validates custom version input
 
-#### Smart Defaults & Validation
+#### Smart Defaults & Validation ✅
 - [x] Use detected values when available
 - [x] Skip questions if valid configuration exists
 - [x] Validate database credentials
 - [x] Ensure password strength
 - [x] Verify port availability
+- [x] Validate Node.js versions
+- [x] Smart version selection based on project
 
 ### Current Progress
 - [x] Basic project structure
@@ -224,20 +236,21 @@ This document outlines the planned features, improvements, and tasks for V2 of t
 - [x] Project detection
 - [x] Interactive UI with Ink
 - [x] Basic flow implementation
+- [x] Node.js version management
 - [ ] Database configuration
 - [ ] Docker file generation
 - [ ] Environment handling
 - [ ] Plugin system
 
 ### Next Steps
-1. Implement database configuration handlers
-2. Create Docker template system
-3. Add environment variable management
+1. Implement Docker file generation based on selected options
+2. Add environment variable management
+3. Create database configuration handlers
 4. Implement plugin system for extensibility
 
 ### 5. Project Detection & Configuration 🔍
-- [ ] Improve Strapi version detection
-- [ ] Add Node.js version compatibility check
+- [x] Improve Strapi version detection
+- [x] Add Node.js version compatibility check
 - [ ] Implement project structure validation
 - [ ] Add support for custom Strapi configurations
 - [ ] Implement configuration file support
@@ -329,3 +342,30 @@ This document outlines the planned features, improvements, and tasks for V2 of t
    - Additional template support
    - Performance optimizations
    - Community-requested features 
+
+## Example Usage
+
+```typescript
+// Initialize the generator
+const generator = new DockerGenerator('/path/to/plugins');
+await generator.initialize();
+
+// Get available databases
+const databases = generator.getAvailableDatabases();
+
+// Generate Docker files
+await generator.generate({
+  environment: 'development',
+  database: {
+    type: 'postgresql',
+    config: {
+      host: 'localhost',
+      port: 5432,
+      // ... other config
+    }
+  },
+  node: {
+    version: '20.11.1'
+  }
+}, './output');
+``` 

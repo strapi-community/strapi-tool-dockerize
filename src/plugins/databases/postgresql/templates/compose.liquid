@@ -1,0 +1,17 @@
+{{ serviceName }}:
+  image: {{ image }}:{{ tag }}
+  restart: unless-stopped
+  environment:
+    {% for key, value in environment %}
+    {{ key }}: {{ value }}
+    {% endfor %}
+  volumes:
+    - {{ serviceName }}-data:/var/lib/postgresql/data
+  ports:
+    - "{{ port }}:5432"
+  networks:
+    - strapi-network
+
+volumes:
+  {{ serviceName }}-data:
+    name: {{ serviceName }}-data 

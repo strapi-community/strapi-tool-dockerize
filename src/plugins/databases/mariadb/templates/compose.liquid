@@ -1,0 +1,23 @@
+{{ serviceName }}:
+  image: {{ image }}:{{ tag }}
+  restart: unless-stopped
+  environment:
+    {% for key, value in environment %}
+    {{ key }}: {{ value }}
+    {% endfor %}
+  command: --character-set-server={{ environment.MARIADB_CHARACTER_SET_SERVER }} --collation-server={{ environment.MARIADB_COLLATION_SERVER }}
+  volumes:
+    - {{ serviceName }}-data:/var/lib/mysql
+  ports:
+    - "{{ port }}:3306"
+  networks:
+    - strapi-network
+  healthcheck:
+    test: ["CMD", "mariadb-admin", "ping", "-h", "localhost"]
+    interval: 10s
+    timeout: 5s
+    retries: 5
+
+volumes:
+  {{ serviceName }}-data:
+    name: {{ serviceName }}-data 

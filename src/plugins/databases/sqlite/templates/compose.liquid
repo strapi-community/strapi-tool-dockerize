@@ -1,0 +1,18 @@
+# SQLite storage configuration
+{% if storage == 'volume' %}
+volumes:
+  {{ volume.name }}:
+    name: {{ volume.name }}
+
+# Add to Strapi service:
+volumes:
+  - {{ volume.name }}:{{ volume.mountPath }}
+{% else %}
+# Add to Strapi service:
+volumes:
+  - ./{{ environment.DATABASE_FILENAME }}:{{ environment.DATABASE_PATH }}
+{% endif %}
+
+environment:
+  DATABASE_FILENAME: {{ environment.DATABASE_FILENAME }}
+  DATABASE_PATH: {{ environment.DATABASE_PATH }} 
