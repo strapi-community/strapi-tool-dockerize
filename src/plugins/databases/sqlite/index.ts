@@ -4,9 +4,6 @@ import { getTemplateVariables } from './template-variables';
 
 const plugin = createDatabasePlugin(config);
 
-// Override template variables
-const baseGetTemplateVariables = plugin.getTemplateVariables;
-plugin.getTemplateVariables = (answers) => 
-  getTemplateVariables(baseGetTemplateVariables(answers), answers);
+plugin.getTemplateVariables = getTemplateVariables;
 
-export const SQLitePlugin = plugin; 
+export default plugin; 

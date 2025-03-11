@@ -1,9 +1,24 @@
 import { createDatabasePlugin } from '../core/base-plugin';
 import { config } from './config';
-import { getTemplateVariables } from './template-variables';
 
-const plugin = createDatabasePlugin(config);
+function getTemplateVariables(config: any) {
+  return {
+    port: config.port || this.defaultPort,
+    database: config.database,
+    username: config.username,
+    password: config.password,
+    rootPassword: config.rootPassword || config.password
+  };
+}
 
+const plugin = createDatabasePlugin({
+  name: 'MySQL',
+  defaultPort: 3306,
+  containerName: 'mysql',
+  volumePath: '/var/lib/mysql'
+});
+
+// Override the template variables method
 plugin.getTemplateVariables = getTemplateVariables;
 
 export default plugin;

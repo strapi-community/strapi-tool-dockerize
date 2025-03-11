@@ -1,9 +1,8 @@
 import { createDatabasePlugin } from '../core/base-plugin';
-import { config } from './config';
-import { getTemplateVariables } from './template-variables';
 
-const plugin = createDatabasePlugin(config);
-
-plugin.getTemplateVariables = getTemplateVariables;
-
-export default plugin; 
+export default createDatabasePlugin({
+  name: 'PostgreSQL',
+  defaultPort: 5432,
+  containerName: 'postgres',
+  volumePath: '/var/lib/postgresql/data'
+}); 

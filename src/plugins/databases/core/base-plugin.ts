@@ -3,12 +3,14 @@ import { generateSecurePassword } from '../../../utils/passwords';
 import { getDockerImageVersions } from '../../../utils/docker-versions';
 
 export interface DatabasePlugin {
-  config: DatabasePluginConfig;
-  getQuestions: () => Promise<Question[]>;
-  processAnswers: (answers: Record<string, any>) => DatabaseAnswers;
-  getTemplateVariables: (answers: DatabaseAnswers) => Record<string, any>;
-  validate: (answers: DatabaseAnswers) => boolean;
-  validateField: (field: string, value: any) => boolean;
+  name: string;
+  defaultPort: number;
+  containerName: string;
+  volumePath: string;
+  getDefaultPort(): number;
+  validateConfig(answers: any): boolean;
+  validateConnectionString(connectionString: string): boolean;
+  getTemplateVariables(config: any): Record<string, any>;
 }
 
 export function createDatabasePlugin(config: DatabasePluginConfig): DatabasePlugin {
@@ -157,11 +159,34 @@ export function createDatabasePlugin(config: DatabasePluginConfig): DatabasePlug
   }
 
   return {
-    config,
-    getQuestions,
-    processAnswers,
-    getTemplateVariables,
-    validate,
-    validateField
+    name: config.name,
+    defaultPort: config.defaultPort,
+    containerName: config.containerName,
+    volumePath: config.volumePath,
+
+    getDefaultPort() {
+      return this.defaultPort;
+    },
+
+    validateConfig(answers: any) {
+      const requiredFields = ['database', 'username', 'password', 'port'];
+      return requiredFields.every(field => answers[field]);
+    },
+
+    validateConnectionString(connectionString: string) {
+      // Basic connection string validation
+      // Should match format: protocol://username:password@hostname:port/database
+      const connectionStringPattern = /^[a-zA-Z]+:\/\/[^:]+:[^@]+@[^:]+:\d+\/\w+$/;
+      return connectionStringPattern.test(connectionString);
+    },
+
+    getTemplateVariables(config: any) {
+      return {
+        port: config.port || this.defaultPort,
+        database: config.database,
+        username: config.username,
+        password: config.password
+      };
+    }
   };
 } 
