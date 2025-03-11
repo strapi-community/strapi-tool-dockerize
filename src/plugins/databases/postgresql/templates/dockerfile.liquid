@@ -1,0 +1,53 @@
+# Base on Node.js {{ node.version }}
+FROM node:{{ node.version }}-alpine
+
+# Install dependencies and build-time packages
+RUN apk add --no-cache \
+    build-base \
+    gcc \
+    autoconf \
+    automake \
+    zlib-dev \
+    libpng-dev \
+    vips-dev \
+    postgresql-client
+
+# Create app directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+{% if environment == 'production' %}
+RUN npm ci --only=production
+{% else %}
+RUN npm install
+{% endif %}
+
+# Copy app source
+COPY . .
+
+# Build if production
+{% if environment == 'production' %}
+RUN npm run build
+{% endif %}
+
+# Set environment variables
+ENV NODE_ENV={{ environment }}
+ENV DATABASE_CLIENT=postgres
+ENV DATABASE_HOST={{ database.host }}
+ENV DATABASE_PORT={{ database.port }}
+ENV DATABASE_NAME={{ database.name }}
+ENV DATABASE_USERNAME={{ database.user }}
+ENV DATABASE_PASSWORD={{ database.password }}
+
+# Expose port
+EXPOSE 1337
+
+# Start command
+{% if environment == 'production' %}
+CMD ["npm", "start"]
+{% else %}
+CMD ["npm", "run", "develop"]
+{% endif %} 

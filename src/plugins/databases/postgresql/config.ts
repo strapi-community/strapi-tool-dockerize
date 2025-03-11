@@ -13,7 +13,13 @@ export function getTemplateVariables(config: Record<string, any>): Record<string
     },
     image: {
       name: 'postgres',
-      tag: '16-alpine'
+      tag: config.POSTGRES_VERSION || '16-alpine'
+    },
+    healthcheck: {
+      test: `pg_isready -U ${config.POSTGRES_USER}`,
+      interval: '10s',
+      timeout: '5s',
+      retries: 5
     }
   };
 } 

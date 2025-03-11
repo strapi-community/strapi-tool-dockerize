@@ -1,11 +1,34 @@
-import { BaseDatabasePlugin } from '../base';
-import { DatabaseConfig } from '../types';
+import { BaseDatabasePlugin } from '../core/base-plugin';
+import { DatabasePluginConfig, DatabaseAnswers } from '../core/types';
 import { Question } from '../../core/types';
 
 export class MySQLPlugin extends BaseDatabasePlugin {
-  name = 'mysql';
-  version = '1.0.0';
-  description = 'MySQL database plugin for Strapi';
+  constructor() {
+    const config: DatabasePluginConfig = {
+      name: 'MySQL',
+      defaultPort: 3306,
+      containerName: 'strapi-mysql',
+      volumePath: '/var/lib/mysql',
+      envPrefix: 'MYSQL',
+      defaultVersion: '8.0',
+      image: {
+        name: 'mysql'
+      },
+      healthcheck: {
+        test: (answers: DatabaseAnswers) => 
+          `mysqladmin ping -h localhost -u ${answers.username} --password=${answers.password}`,
+        interval: '10s',
+        timeout: '5s',
+        retries: 5
+      },
+      additionalEnvVars: [
+        'MYSQL_ROOT_PASSWORD',
+        'MYSQL_ALLOW_EMPTY_PASSWORD',
+        'MYSQL_RANDOM_ROOT_PASSWORD'
+      ]
+    };
+    super(config);
+  }
 
   // Override getQuestions to add MySQL-specific options
   getQuestions(): Question[] {

@@ -1,11 +1,34 @@
-import { BaseDatabasePlugin } from '../base';
-import { DatabaseConfig } from '../types';
+import { BaseDatabasePlugin } from '../core/base-plugin';
+import { DatabasePluginConfig, DatabaseAnswers } from '../core/types';
 import { Question } from '../../core/types';
 
 export class MariaDBPlugin extends BaseDatabasePlugin {
-  name = 'mariadb';
-  version = '1.0.0';
-  description = 'MariaDB database plugin for Strapi';
+  constructor() {
+    const config: DatabasePluginConfig = {
+      name: 'MariaDB',
+      defaultPort: 3306,
+      containerName: 'strapi-mariadb',
+      volumePath: '/var/lib/mysql',
+      envPrefix: 'MARIADB',
+      defaultVersion: '10.11',  // LTS version
+      image: {
+        name: 'mariadb'
+      },
+      healthcheck: {
+        test: (answers: DatabaseAnswers) => 
+          `mysqladmin ping -h localhost -u ${answers.username} --password=${answers.password}`,
+        interval: '10s',
+        timeout: '5s',
+        retries: 5
+      },
+      additionalEnvVars: [
+        'MARIADB_ROOT_PASSWORD',
+        'MARIADB_ALLOW_EMPTY_PASSWORD',
+        'MARIADB_RANDOM_ROOT_PASSWORD'
+      ]
+    };
+    super(config);
+  }
 
   // Override getQuestions to add MariaDB-specific options
   getQuestions(): Question[] {

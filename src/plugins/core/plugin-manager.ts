@@ -1,124 +1,76 @@
-import fs from 'fs';
-import path from 'path';
-import { Plugin } from './types';
-import { DatabasePlugin } from '../databases/types';
+import { BaseDatabasePlugin } from '../databases/core/base-plugin';
+import { DatabaseAnswers, Question } from '../databases/core/types';
+import { PostgreSQLPlugin } from '../databases/postgresql';
+import { MySQLPlugin } from '../databases/mysql';
+import { MariaDBPlugin } from '../databases/mariadb';
+import { SQLitePlugin } from '../databases/sqlite';
 
 export class PluginManager {
-  private plugins: Map<string, Plugin>;
-  private pluginsPath: string;
+  private plugins: Map<string, BaseDatabasePlugin>;
 
-  constructor(pluginsPath: string) {
+  constructor() {
     this.plugins = new Map();
-    this.pluginsPath = pluginsPath;
+    this.loadBuiltinPlugins();
   }
 
-  // Load all plugins from the plugins directory
-  async loadPlugins(): Promise<void> {
-    try {
-      // Get all database plugin directories
-      const databasesPath = path.join(this.pluginsPath, 'databases');
-      const entries = fs.readdirSync(databasesPath, { withFileTypes: true });
-      
-      for (const entry of entries) {
-        if (entry.isDirectory()) {
-          const pluginPath = path.join(databasesPath, entry.name);
-          await this.loadPlugin(pluginPath);
-        }
-      }
-    } catch (error) {
-      console.error('Error loading plugins:', error);
+  private loadBuiltinPlugins(): void {
+    // Load built-in plugins
+    const builtinPlugins = [
+      new PostgreSQLPlugin(),
+      new MySQLPlugin(),
+      new MariaDBPlugin(),
+      new SQLitePlugin()
+    ] as BaseDatabasePlugin[];
+
+    for (const plugin of builtinPlugins) {
+      this.plugins.set(plugin.constructor.name.toLowerCase().replace('plugin', ''), plugin);
     }
   }
 
-  // Load a specific plugin from a directory
-  private async loadPlugin(pluginPath: string): Promise<void> {
-    try {
-      const indexPath = path.join(pluginPath, 'index.ts');
-      if (fs.existsSync(indexPath)) {
-        const plugin = await import(indexPath);
-        const pluginInstance = this.instantiatePlugin(plugin);
-        if (pluginInstance) {
-          this.plugins.set(pluginInstance.name, pluginInstance);
-        }
-      }
-    } catch (error) {
-      console.error(`Error loading plugin from ${pluginPath}:`, error);
-    }
+  /**
+   * Get a list of available database types
+   */
+  getDatabaseTypes(): string[] {
+    return Array.from(this.plugins.keys());
   }
 
-  // Create an instance of the plugin
-  private instantiatePlugin(plugin: any): Plugin | null {
-    const PluginClass = Object.values(plugin)[0];
-    if (typeof PluginClass === 'function') {
-      try {
-        return new PluginClass();
-      } catch (error) {
-        console.error('Error instantiating plugin:', error);
-      }
-    }
-    return null;
+  /**
+   * Get a plugin by database type
+   */
+  getPlugin(type: string): BaseDatabasePlugin | undefined {
+    return this.plugins.get(type.toLowerCase());
   }
 
-  // Get a specific database plugin
-  getDatabasePlugin(name: string): DatabasePlugin | undefined {
-    const plugin = this.plugins.get(name);
-    if (plugin?.type === 'database') {
-      return plugin as DatabasePlugin;
-    }
-    return undefined;
-  }
-
-  // Get all available database plugins
-  getAllDatabasePlugins(): DatabasePlugin[] {
-    return Array.from(this.plugins.values())
-      .filter(plugin => plugin.type === 'database') as DatabasePlugin[];
-  }
-
-  // Load templates for a specific plugin
-  async loadTemplates(pluginName: string): Promise<Record<string, string>> {
-    const templates: Record<string, string> = {};
-    const plugin = this.plugins.get(pluginName);
-    
+  /**
+   * Get questions for a specific database type
+   */
+  async getQuestions(type: string): Promise<Question[]> {
+    const plugin = this.getPlugin(type);
     if (!plugin) {
-      return templates;
+      throw new Error(`Unknown database type: ${type}`);
     }
-
-    const templatesPath = path.join(this.pluginsPath, plugin.type + 's', pluginName, 'templates');
-    if (!fs.existsSync(templatesPath)) {
-      return templates;
-    }
-
-    const files = fs.readdirSync(templatesPath);
-    for (const file of files) {
-      if (file.endsWith('.liquid')) {
-        const templateName = path.basename(file, '.liquid');
-        const templateContent = fs.readFileSync(path.join(templatesPath, file), 'utf-8');
-        templates[templateName] = templateContent;
-      }
-    }
-
-    return templates;
+    return plugin.getQuestions();
   }
 
-  // Generate Docker configuration based on selected database
-  async generateDockerConfig(databaseType: string, answers: Record<string, any>): Promise<{
-    templates: Record<string, string>;
-    variables: Record<string, any>;
-  }> {
-    const plugin = this.getDatabasePlugin(databaseType);
+  /**
+   * Process answers for a specific database type
+   */
+  processAnswers(type: string, answers: Record<string, any>): DatabaseAnswers {
+    const plugin = this.getPlugin(type);
     if (!plugin) {
-      throw new Error(`Database plugin ${databaseType} not found`);
+      throw new Error(`Unknown database type: ${type}`);
     }
+    return plugin.processAnswers(answers);
+  }
 
-    // Load templates
-    const templates = await this.loadTemplates(databaseType);
-
-    // Get template variables from plugin
-    const templateData = plugin.getTemplates(answers)[0]; // Get first template for now
-    
-    return {
-      templates,
-      variables: templateData.variables
-    };
+  /**
+   * Get template variables for a specific database type
+   */
+  getTemplateVariables(type: string, answers: DatabaseAnswers): Record<string, any> {
+    const plugin = this.getPlugin(type);
+    if (!plugin) {
+      throw new Error(`Unknown database type: ${type}`);
+    }
+    return plugin.getTemplateVariables(answers);
   }
 } 

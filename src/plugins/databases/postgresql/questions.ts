@@ -1,4 +1,5 @@
 import { Question } from '../../core/types';
+import { generateSecurePassword } from '../../../utils/passwords';
 
 export function getQuestions(): Question[] {
   return [
@@ -29,11 +30,23 @@ export function getQuestions(): Question[] {
       }
     },
     {
+      type: 'select',
+      name: 'PASSWORD_TYPE',
+      message: 'How would you like to set the database password?',
+      choices: [
+        'generate',    // Generate a secure password
+        'custom',      // Use a custom password
+        'existing'     // Use existing password from .env
+      ],
+      default: 'generate'
+    },
+    {
       type: 'text',
       name: 'POSTGRES_PASSWORD',
-      message: 'What is your database password?',
+      message: 'Enter your database password:',
+      when: (answers) => answers.PASSWORD_TYPE === 'custom',
       validate: (value) => {
-        if (!value) return 'Database password is required';
+        if (!value) return 'Password is required';
         if (value.length < 8) return 'Password must be at least 8 characters long';
         return true;
       }
@@ -51,4 +64,18 @@ export function getQuestions(): Question[] {
       }
     }
   ];
+}
+
+export function processAnswers(answers: Record<string, any>): Record<string, any> {
+  const processed = { ...answers };
+
+  // Generate password if requested
+  if (answers.PASSWORD_TYPE === 'generate') {
+    processed.POSTGRES_PASSWORD = generateSecurePassword();
+  }
+
+  // Remove PASSWORD_TYPE as it's not needed in final config
+  delete processed.PASSWORD_TYPE;
+
+  return processed;
 } 
