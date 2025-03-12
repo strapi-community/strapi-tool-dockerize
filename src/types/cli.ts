@@ -15,7 +15,7 @@ export interface CLIPlugin extends Plugin {
 }
 
 export interface Question {
-  type: 'text' | 'password' | 'select' | 'multiselect' | 'confirm';
+  type: `text` | `password` | `select` | `multiselect` | `confirm`;
   name: string;
   message: string;
   choices?: Choice[];
@@ -24,7 +24,11 @@ export interface Question {
   when?: (answers: Record<string, any>) => boolean;
 }
 
-
+export interface MenuItem {
+  label: string;
+  value: string;
+  hint?: string;
+}
 
 export interface Choice {
   title: string;

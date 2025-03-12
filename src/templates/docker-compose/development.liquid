@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  strapi:
+    build: 
+      context: .
+      target: development
+    environment:
+      - NODE_ENV=development
+      {% for env in environment %}
+      - {{env.key}}={{env.value}}
+      {% endfor %}
+    ports:
+      - "1337:1337"
+      {% if debugPort %}
+      - "{{debugPort}}:{{debugPort}}"
+      {% endif %}
+    volumes:
+      - .:/app
+      - /app/node_modules
+    develop:
+      watch:
+        - action: sync
+          path: ./
+          target: /app
+          ignore:
+            - node_modules/
+            - .git/
+            - .env
+            - "*.lock"
+        {% if watchPaths %}
+        {% for path in watchPaths %}
+        - action: sync
+          path: {{path}}
+          target: /app/{{path}}
+        {% endfor %}
+        {% endif %}
+    {% if debugPort %}
+    command: ["npm", "run", "develop", "--inspect=0.0.0.0:{{debugPort}}"]
+    {% else %}
+    command: ["npm", "run", "develop"]
+    {% endif %}
+
+  {% if database %}
+  database:
+    image: {{database.image}}
+    environment:
+      {% for env in database.environment %}
+      - {{env.key}}={{env.value}}
+      {% endfor %}
+    volumes:
+      - {{database.volume}}:/data
+    ports:
+      - "{{database.port}}:{{database.port}}"
+  {% endif %} 
