@@ -1,20 +1,22 @@
 import { DatabaseAnswers, ValidationResult } from '@types';
+import { validateRequired, validatePort } from '../../core/utils';
 
-export function validateConfig(config: DatabaseAnswers): ValidationResult {
+export function validateConfig(answers: DatabaseAnswers): ValidationResult {
   const errors: string[] = [];
 
-  const requiredFields = ['database', 'username', 'password', 'port'];
-  for (const field of requiredFields) {
-    if (!config[field]) {
-      errors.push(`${field} is required`);
-    }
+  // Base validation
+  const requiredValidation = validateRequired(answers.database, 'database');
+  const portValidation = validatePort(answers.port);
+
+  errors.push(...requiredValidation.errors, ...portValidation.errors);
+
+  // MySQL specific validation
+  if (answers.charset && !['utf8mb4', 'utf8', 'latin1'].includes(answers.charset)) {
+    errors.push('Invalid character set');
   }
 
-  if (config.port) {
-    const port = parseInt(config.port.toString());
-    if (isNaN(port) || port < 1024 || port > 65535) {
-      errors.push('Port must be a number between 1024 and 65535');
-    }
+  if (answers.collation && !answers.collation.startsWith(answers.charset || '')) {
+    errors.push('Collation must match character set');
   }
 
   return {

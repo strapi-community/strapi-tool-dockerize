@@ -1,11 +1,5 @@
-import {
-  DatabaseAnswers,
-  DatabasePlugin,
-  DatabasePluginConfig,
-  Question,
-  TemplateVariables,
-  ValidationResult
-} from '@types';
+import { Question } from "@/types/cli";
+import { DatabasePlugin, DatabasePluginConfig } from "@/types/database";
 import { getDockerImageVersions } from '@utils/docker-versions';
 import { generateSecurePassword } from '@utils/passwords';
 
@@ -59,8 +53,8 @@ export function createDatabasePlugin(config: DatabasePluginConfig): DatabasePlug
         name: 'PASSWORD_TYPE',
         message: 'How would you like to set the database password?',
         choices: [
-          { label: 'Generate', value: 'generate', hint: 'Generate a secure password' },
-          { label: 'Custom', value: 'custom', hint: 'Use a custom password' }
+          { title: 'Generate', value: 'generate', description: 'Generate a secure password' },
+          { title: 'Custom', value: 'custom', description: 'Use a custom password' }
         ],
         default: 'generate'
       },
@@ -68,7 +62,7 @@ export function createDatabasePlugin(config: DatabasePluginConfig): DatabasePlug
         type: 'text',
         name: `${prefix}_PASSWORD`,
         message: 'Enter your database password:',
-        when: (answers) => answers.PASSWORD_TYPE === 'custom',
+        when: (answers: Record<string, any>) => answers.PASSWORD_TYPE === 'custom',
         validate: (value) => {
           if (!value) return 'Password is required';
           if (value.length < 8) return 'Password must be at least 8 characters long';
@@ -92,9 +86,9 @@ export function createDatabasePlugin(config: DatabasePluginConfig): DatabasePlug
         name: `${prefix}_VERSION`,
         message: `Which ${config.name} version would you like to use?`,
         choices: versions.map(version => ({
+          title: `${config.name} ${version}`,
           value: version,
-          label: `${config.name} ${version}`,
-          hint: version.includes('alpine') ? 'Recommended for production' : undefined
+          description: version.includes('alpine') ? 'Recommended for production' : undefined
         })),
         default: versions.find(v => v === config.defaultVersion) || versions[0]
       }
@@ -105,7 +99,7 @@ export function createDatabasePlugin(config: DatabasePluginConfig): DatabasePlug
 
   function validateConfig(answers: DatabaseAnswers): ValidationResult {
     const errors: string[] = [];
-    const requiredFields = ['database', 'username', 'password', 'port'];
+    const requiredFields = ['database', 'username', 'password', 'port'] as const;
     
     for (const field of requiredFields) {
       if (!answers[field]) {
@@ -115,7 +109,7 @@ export function createDatabasePlugin(config: DatabasePluginConfig): DatabasePlug
 
     if (config.validations) {
       Object.entries(config.validations).forEach(([field, rules]) => {
-        const value = answers[field];
+        const value = answers[field as keyof DatabaseAnswers];
         if (rules.required && !value) {
           errors.push(`${field} is required`);
         }
@@ -145,7 +139,7 @@ export function createDatabasePlugin(config: DatabasePluginConfig): DatabasePlug
     return pattern.test(connectionString);
   }
 
-  function getTemplateVariables(answers: DatabaseAnswers): TemplateVariables {
+  function getTemplateVariables(answers: DatabaseAnswers): DatabaseTemplateVariables {
     const prefix = config.envPrefix;
     return {
       database: {

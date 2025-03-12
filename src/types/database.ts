@@ -1,5 +1,9 @@
-export interface DatabasePluginConfig {
-  name: string;
+import { BasePluginConfig } from './core-plugin';
+import { ValidationResult, ValidationRules } from './validation';
+import { Question } from './cli';
+
+export interface DatabasePluginConfig extends BasePluginConfig {
+  type: 'database';
   defaultPort: number;
   containerName: string;
   volumePath: string;
@@ -15,6 +19,8 @@ export interface DatabasePluginConfig {
     timeout: string;
     retries: number;
   };
+  validations?: Record<string, ValidationRules>;
+  additionalQuestions?: Question[];
 }
 
 export interface DatabaseAnswers {
@@ -26,14 +32,10 @@ export interface DatabaseAnswers {
   charset?: string;
   collation?: string;
   rootPassword?: string;
+  [key: string]: string | undefined;
 }
 
-export interface ValidationResult {
-  isValid: boolean;
-  errors: string[];
-}
-
-export interface TemplateVariables {
+export interface DatabaseTemplateVariables {
   database: {
     type: string;
     name: string;
@@ -52,10 +54,10 @@ export interface TemplateVariables {
   };
 }
 
-export interface DatabasePlugin {
-  name: string;
-  defaultPort: number;
-  getTemplateVariables(answers: DatabaseAnswers): TemplateVariables;
+export interface DatabasePlugin extends DatabasePluginConfig {
+  getTemplateVariables(answers: DatabaseAnswers): DatabaseTemplateVariables;
   validateConfig(answers: DatabaseAnswers): ValidationResult;
   validateConnectionString(url: string): boolean;
+  getQuestions: () => Promise<Question[]>;
+  processAnswers: (answers: Record<string, any>) => DatabaseAnswers;
 }

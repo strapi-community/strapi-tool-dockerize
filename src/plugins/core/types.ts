@@ -1,61 +1,41 @@
-export interface DatabasePluginConfig {
-  name: string;
-  defaultPort: number;
-  containerName: string;
-  volumePath: string;
-  envPrefix: string;
-  defaultVersion: string;
-  image: {
-    name: string;
-    tag: string;
-  };
-  healthcheck?: {
-    test: string[] | string;
-    interval: string;
-    timeout: string;
-    retries: number;
+import { 
+  DatabasePlugin as BaseDBPlugin, 
+  DatabasePluginConfig as BaseDBConfig, 
+  DatabaseTemplateVariables as BaseTemplateVars,
+  DatabaseAnswers
+} from '@/types/database';
+
+import {
+  Question,
+  ValidationRules,
+  PluginUtils,
+  PluginTemplateUtils
+} from '@/types/plugin';
+
+// Extend base plugin types with additional functionality
+export interface DatabasePlugin extends BaseDBPlugin {
+  getQuestions: () => Promise<Question[]>;
+  processAnswers: (answers: Record<string, any>) => DatabaseAnswers;
+}
+
+export interface DatabasePluginConfig extends BaseDBConfig {
+  validations?: Record<string, ValidationRules>;
+  additionalQuestions?: Question[];
+}
+
+// Template types
+export interface TemplateVariables extends BaseTemplateVars {
+  database: BaseTemplateVars['database'] & {
+    charset?: string;
+    collation?: string;
   };
 }
 
-export interface DatabaseAnswers {
-  database: string;
-  username: string;
-  password: string;
-  port: string;
-  version?: string;
-  charset?: string;
-  collation?: string;
-  rootPassword?: string;
-}
-
-export interface ValidationResult {
-  isValid: boolean;
-  errors: string[];
-}
-
-export interface TemplateVariables {
-  database: {
-    type: string;
-    name: string;
-    user: string;
-    password: string;
-    port: string;
-    host: string;
-  };
-  environment: Record<string, string>;
-  volumes: {
-    data: string;
-  };
-  image: {
-    name: string;
-    tag: string;
-  };
-}
-
-export interface DatabasePlugin {
-  name: string;
-  defaultPort: number;
-  getTemplateVariables(answers: DatabaseAnswers): TemplateVariables;
-  validateConfig(answers: DatabaseAnswers): ValidationResult;
-  validateConnectionString(url: string): boolean;
-} 
+// Re-export plugin types
+export type {
+  Question,
+  ValidationRules,
+  PluginUtils,
+  PluginTemplateUtils,
+  DatabaseAnswers
+}; 

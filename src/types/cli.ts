@@ -1,13 +1,13 @@
+import { PluginType, Plugin } from './core-plugin';
+import { ValidationResult } from './validation';
+
 export interface CLIOptions {
   debug?: boolean;
   color?: boolean;
   yes?: boolean;
 }
 
-export interface Plugin {
-  type: 'database' | 'provider' | 'template';
-  name: string;
-  version: string;
+export interface CLIPlugin extends Plugin {
   getQuestions: () => Question[];
   validateAnswers: (answers: Record<string, unknown>) => ValidationResult;
   getTemplates: (answers: Record<string, unknown>) => Template[];
@@ -21,17 +21,15 @@ export interface Question {
   choices?: Choice[];
   default?: string | boolean | number;
   validate?: (value: string) => true | string;
+  when?: (answers: Record<string, any>) => boolean;
 }
+
+
 
 export interface Choice {
   title: string;
   value: string;
   description?: string;
-}
-
-export interface ValidationResult {
-  valid: boolean;
-  errors?: string[];
 }
 
 export interface Template {
