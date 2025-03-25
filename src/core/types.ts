@@ -1,5 +1,12 @@
 export interface DatabaseConfig {
   type: string;
+  connection?: {
+    host: string;
+    port: number;
+    database: string;
+    username: string;
+    password: string;
+  };
   database?: string;
   username?: string;
   password?: string;
@@ -14,7 +21,11 @@ export interface EnvFile {
 }
 
 export interface ProjectInfo {
+  strapiVersion: string;
+  type: string;
   databaseType?: string;
   envFile?: EnvFile;
-  // Add other project info fields as needed
+  projectPath: string;
+  hasDockerfile: boolean;
+  hasDockerCompose: boolean;
 } 

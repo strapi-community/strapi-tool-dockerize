@@ -1,63 +1,65 @@
-import { BasePluginConfig } from './core-plugin';
-import { ValidationResult, ValidationRules } from './validation';
-import { Question } from './cli';
+import type { Question } from './cli';
+import type { DockerSetupTask } from './docker';
+import type { ValidationRules } from './validation';
 
-export interface DatabasePluginConfig extends BasePluginConfig {
-  type: 'database';
-  defaultPort: number;
-  containerName: string;
-  volumePath: string;
-  envPrefix: string;
-  defaultVersion: string;
-  image: {
-    name: string;
-    tag: string;
+interface DatabaseConfig {
+  type: string;
+  connection?: {
+    host: string;
+    port: number;
+    database: string;
+    username: string;
+    password: string;
   };
-  healthcheck?: {
-    test: string[] | string;
-    interval: string;
-    timeout: string;
-    retries: number;
+  database?: string;
+  username?: string;
+  password?: string;
+  port?: string;
+  host?: string;
+  filename?: string;
+}
+
+interface DatabaseAnswers {
+  database?: DatabaseConfig;
+  docker?: {
+    type: 'dockerfile' | 'compose';
+    environment: 'development' | 'production' | 'both';
   };
+}
+
+interface DatabasePlugin {
+  name: string;
+  description: string;
+  version: string;
+  getQuestions: () => Promise<Question[]>;
+  processAnswers: (answers: Record<string, unknown>) => DatabaseAnswers;
+  validateConfig: (config: DatabaseAnswers) => Promise<boolean>;
+  getDockerTasks: () => Promise<DockerSetupTask[]>;
+  validateDockerTask: (taskId: string, config: DatabaseAnswers) => boolean;
+  updateTaskStatus: (tasks: DockerSetupTask[], taskId: string, status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped') => void;
+}
+
+interface DatabasePluginConfig {
   validations?: Record<string, ValidationRules>;
   additionalQuestions?: Question[];
 }
 
-export interface DatabaseAnswers {
-  database: string;
-  username: string;
-  password: string;
-  port: string;
-  version?: string;
-  charset?: string;
-  collation?: string;
-  rootPassword?: string;
-  [key: string]: string | undefined;
-}
-
-export interface DatabaseTemplateVariables {
+interface DatabaseTemplateVariables {
   database: {
     type: string;
+    version: string;
+    port: number;
+    host: string;
     name: string;
     user: string;
-    password: string;
-    port: string;
-    host: string;
-  };
-  environment: Record<string, string>;
-  volumes: {
-    data: string;
-  };
-  image: {
-    name: string;
-    tag: string;
+    charset?: string;
+    collation?: string;
+    [key: string]: unknown;
   };
 }
 
-export interface DatabasePlugin extends DatabasePluginConfig {
-  getTemplateVariables(answers: DatabaseAnswers): DatabaseTemplateVariables;
-  validateConfig(answers: DatabaseAnswers): ValidationResult;
-  validateConnectionString(url: string): boolean;
-  getQuestions: () => Promise<Question[]>;
-  processAnswers: (answers: Record<string, any>) => DatabaseAnswers;
-}
+export type { DatabasePlugin };
+export type { DatabaseAnswers };
+export type { DatabaseConfig };
+export type { DatabasePluginConfig };
+export type { DatabaseTemplateVariables };

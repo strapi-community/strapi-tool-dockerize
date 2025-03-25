@@ -1,27 +1,9 @@
-import { PluginType, Plugin } from './core-plugin';
-import { ValidationResult } from './validation';
+import type { ValidationResult } from './validation';
 
 export interface CLIOptions {
   debug?: boolean;
   color?: boolean;
   yes?: boolean;
-}
-
-export interface CLIPlugin extends Plugin {
-  getQuestions: () => Question[];
-  validateAnswers: (answers: Record<string, unknown>) => ValidationResult;
-  getTemplates: (answers: Record<string, unknown>) => Template[];
-  getEnvironmentVariables: (answers: Record<string, unknown>) => EnvVar[];
-}
-
-export interface Question {
-  type: `text` | `password` | `select` | `multiselect` | `confirm`;
-  name: string;
-  message: string;
-  choices?: Choice[];
-  default?: string | boolean | number;
-  validate?: (value: string) => true | string;
-  when?: (answers: Record<string, any>) => boolean;
 }
 
 export interface MenuItem {
@@ -30,10 +12,12 @@ export interface MenuItem {
   hint?: string;
 }
 
-export interface Choice {
-  title: string;
-  value: string;
-  description?: string;
+export interface Question {
+  name: string;
+  type: string;
+  message: string;
+  choices?: MenuItem[];
+  default?: unknown;
 }
 
 export interface Template {
@@ -46,4 +30,49 @@ export interface EnvVar {
   key: string;
   value: string;
   description?: string;
+}
+
+export interface CLIPlugin {
+  getQuestions: () => Question[];
+  validateAnswers: (answers: Record<string, unknown>) => ValidationResult;
+  getTemplates: (answers: Record<string, unknown>) => Template[];
+  getEnvironmentVariables: (answers: Record<string, unknown>) => EnvVar[];
+}
+
+export interface GenerationSubtask {
+  message: string;
+  status: `pending` | `running` | `done`;
+}
+
+export interface GenerationStep {
+  step: `dockerfile` | `compose` | `env` | `done`;
+  message: string;
+  subtasks: GenerationSubtask[];
+}
+
+export interface GenerationStatus {
+  step: GenerationStep[`step`];
+  currentSubtask: number;
+}
+
+export type EnvironmentType = `development` | `production` | `both`;
+export type DockerType = `dockerfile` | `compose`;
+export type DatabaseType = `postgresql` | `mysql` | `mariadb` | `sqlite`;
+export type StorageType = `volume` | `bind` | `tmpfs`;
+
+export interface DatabaseConfig {
+  host: string;
+  port: number;
+  name: string;
+  username: string;
+  password: string;
+}
+
+export interface SetupConfig {
+  environment: EnvironmentType | null;
+  dockerType: DockerType | null;
+  database: DatabaseType | null;
+  storageType?: StorageType;
+  nodeVersion?: string;
+  databaseConfig?: DatabaseConfig;
 } 

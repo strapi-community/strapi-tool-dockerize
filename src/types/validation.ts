@@ -1,18 +1,21 @@
 export interface ValidationResult {
   isValid: boolean;
-  errors: string[];
+  message?: string;
 }
 
 export interface ValidationRules {
   required?: boolean;
-  minLength?: number;
-  maxLength?: number;
   pattern?: RegExp;
-  custom?: (value: any) => boolean | string;
+  message?: string;
+}
+
+export interface ValidationUtils {
+  validateRequired: (value: unknown) => ValidationResult;
+  validatePattern: (value: string, pattern: RegExp) => ValidationResult;
 }
 
 export interface BaseValidation {
-  validateRequired: (value: any, fieldName: string) => ValidationResult;
+  validateRequired: (value: unknown, fieldName: string) => ValidationResult;
   validatePort: (port: string) => ValidationResult;
 }
 
@@ -20,5 +23,5 @@ export interface DatabaseValidation extends BaseValidation {
   validateCharset?: (charset: string) => ValidationResult;
   validateCollation?: (collation: string) => ValidationResult;
   validateSSL?: (sslMode: string) => ValidationResult;
-  validateConfig?: (config: Record<string, any>) => ValidationResult;
+  validateConfig?: (config: Record<string, unknown>) => ValidationResult;
 }

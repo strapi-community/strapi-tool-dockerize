@@ -1,10 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Text } from 'ink';
-import SelectInput from 'ink-select-input';
-import TextInput from 'ink-text-input';
-import { ProjectInfo } from '../utils/detection/index.js';
-import { detectNodeVersion, NodeVersions } from '../utils/detection/node-version.js';
-import { MenuItem } from '../types/cli.js';
+import { ProjectInfo } from "@/core/types";
+import { DockerSetupTask } from "@/plugins";
+import { BaseDockerTasks } from "@/plugins/core/docker-tasks";
+import { getDatabasePlugin } from "@/plugins/databases";
+import { MenuItem } from "@/types/cli";
+import { NodeVersions, detectNodeVersion } from "@/utils/detection/node-version";
+import { generateDockerConfiguration } from "@/utils/generation";
+import { Box, Text, useApp } from "ink";
+import SelectInput from "ink-select-input";
+import Spinner from "ink-spinner";
+import TextInput from "ink-text-input";
+import React, { useState, useEffect } from "react";
 
 interface ProjectSetupProps {
 	projectInfo: ProjectInfo;
@@ -51,20 +56,37 @@ interface DatabaseFormState {
 	password: string;
 }
 
+interface GenerationSubtask {
+	message: string;
+	status: `pending` | `running` | `done`;
+}
+
+interface GenerationStep {
+	step: `dockerfile` | `compose` | `env` | `done`;
+	message: string;
+	subtasks: GenerationSubtask[];
+}
+
+interface GenerationStatus {
+	step: GenerationStep[`step`];
+	currentSubtask: number;
+}
+
 export const ProjectSetup: React.FC<ProjectSetupProps> = ({ projectInfo }) => {
-	const [currentStep, setCurrentStep] = useState<SetupStep>(`review`);
+	const { exit } = useApp();
+	const [currentStep, setCurrentStep] = useState<SetupStep>('review');
 	const [config, setConfig] = useState<SetupConfig>({
 		environment: null,
 		dockerType: null,
 		database: projectInfo.databaseType as DatabaseType || null,
 		storageType: undefined,
 		nodeVersion: undefined,
-		databaseConfig: projectInfo.envFile.databaseConfig ? {
-			host: projectInfo.envFile.databaseConfig.connection.host || `localhost`,
-			port: projectInfo.envFile.databaseConfig.connection.port || 5432,
-			name: projectInfo.envFile.databaseConfig.connection.database || `strapi`,
-			username: projectInfo.envFile.databaseConfig.connection.username || `strapi`,
-			password: projectInfo.envFile.databaseConfig.connection.password || ``
+		databaseConfig: projectInfo?.envFile?.databaseConfig ? {
+			host: projectInfo?.envFile?.databaseConfig?.connection?.host || 'localhost',
+			port: projectInfo?.envFile?.databaseConfig?.connection?.port || 5432,
+			name: projectInfo?.envFile?.databaseConfig?.connection?.database || 'strapi',
+			username: projectInfo?.envFile?.databaseConfig?.connection?.username || 'strapi',
+			password: projectInfo?.envFile?.databaseConfig?.connection?.password || ''
 		} : undefined
 	});
 
@@ -72,34 +94,148 @@ export const ProjectSetup: React.FC<ProjectSetupProps> = ({ projectInfo }) => {
 		availableVersions: {
 			ltsVersions: [{
 				majorVersion: 20,
-				version: `20.11.1`,
-				name: `Hydrogen`,
-				date: `2024-02-14`
+				version: '20.11.1',
+				name: 'Hydrogen',
+				date: '2024-02-14'
 			}],
-			current: `21.7.1`,
-			recommended: `20.11.1`
+			current: '21.7.1',
+			recommended: '20.11.1'
 		}
 	});
 
-	const [customVersion, setCustomVersion] = useState(``);
-
+	const [customVersion, setCustomVersion] = useState('');
 	const [dbForm, setDbForm] = useState<DatabaseFormState>({
-		host: ``,
-		port: ``,
-		database: ``,
-		username: ``,
-		password: ``
+		host: '',
+		port: '',
+		database: '',
+		username: '',
+		password: ''
 	});
+	const [currentField, setCurrentField] = useState<keyof DatabaseFormState>('host');
+	const [error, setError] = useState<string | null>(null);
+	const [generationStatus, setGenerationStatus] = useState<GenerationStatus>({
+		step: 'dockerfile',
+		currentSubtask: 0
+	});
+	const [generationSteps, setGenerationSteps] = useState<GenerationStep[]>([]);
 
-	const [currentField, setCurrentField] = useState<keyof DatabaseFormState>(`host`);
-
+	// Load node versions
 	useEffect(() => {
 		const loadNodeVersions = async () => {
 			const versions = await detectNodeVersion(projectInfo.projectPath);
 			setNodeVersions(versions);
 		};
-		loadNodeVersions();
+		void loadNodeVersions();
 	}, [projectInfo.projectPath]);
+
+	// Handle generation steps
+	useEffect(() => {
+		if (currentStep !== 'generate') return;
+
+		const generateFiles = async () => {
+			try {
+				const steps = await getGenerationSteps();
+				// Initialize the first step as running and others as pending
+				const initialSteps = steps.map((step, stepIndex) => ({
+					...step,
+					subtasks: step.subtasks.map((subtask, subtaskIndex) => ({
+						...subtask,
+						status: (stepIndex === 0 && subtaskIndex === 0 ? 'running' : 'pending') as 'pending' | 'running' | 'done'
+					}))
+				}));
+				setGenerationSteps(initialSteps);
+				setGenerationStatus({ step: steps[0].step, currentSubtask: 0 });
+				
+				await generateDockerConfiguration({
+					config,
+					updateStatus: (newStatus: GenerationStatus | ((prev: GenerationStatus) => GenerationStatus)) => {
+						setGenerationStatus(prev => {
+							const updatedStatus = typeof newStatus === 'function' ? newStatus(prev) : newStatus;
+							
+							// Update the steps immediately after updating status
+							setGenerationSteps(prevSteps => {
+								const newSteps = prevSteps.map(step => {
+									// If this is the current step
+									if (step.step === updatedStatus.step) {
+										return {
+											...step,
+											subtasks: step.subtasks.map((subtask, index) => ({
+												...subtask,
+												status: index < updatedStatus.currentSubtask ? ('done' as const)
+													: index === updatedStatus.currentSubtask ? ('running' as const)
+													: ('pending' as const)
+											}))
+										};
+									}
+									
+									// If this step is complete (we've moved past it)
+									if (prevSteps.findIndex(s => s.step === updatedStatus.step) > prevSteps.findIndex(s => s.step === step.step)) {
+										return {
+											...step,
+											subtasks: step.subtasks.map(subtask => ({
+												...subtask,
+												status: 'done' as const
+											}))
+										};
+									}
+									
+									// If this is a future step
+									if (prevSteps.findIndex(s => s.step === updatedStatus.step) < prevSteps.findIndex(s => s.step === step.step)) {
+										return {
+											...step,
+											subtasks: step.subtasks.map(subtask => ({
+												...subtask,
+												status: 'pending' as const
+											}))
+										};
+									}
+									
+									return step;
+								});
+								
+								return newSteps;
+							});
+							
+							return updatedStatus;
+						});
+					}
+				});
+			} catch (err) {
+				console.error('Failed to generate Docker configuration:', err);
+				setError('Failed to generate Docker configuration. Please check the logs and try again.');
+			}
+		};
+
+		void generateFiles();
+	}, [currentStep, config]);
+
+	const getGenerationSteps = async (): Promise<GenerationStep[]> => {
+		// Get base Docker tasks
+		const baseTasks = BaseDockerTasks.getBaseTasks();
+		
+		// Get database-specific tasks if needed
+		let databaseTasks: DockerSetupTask[] = [];
+		if (config.dockerType === `compose` && config.database) {
+			const dbPlugin = getDatabasePlugin(config.database);
+			if (dbPlugin) {
+				databaseTasks = await dbPlugin.getDockerTasks();
+			}
+		}
+
+		// Convert tasks to generation steps
+		const convertTaskToStep = (task: DockerSetupTask): GenerationStep => ({
+			step: task.id as `dockerfile` | `compose` | `env` | `done`,
+			message: task.title,
+			subtasks: (task.subtasks || []).map(subtask => ({
+				message: subtask.title,
+				status: `pending`
+			}))
+		});
+
+		// Combine and convert all tasks
+		const allTasks = [...baseTasks, ...databaseTasks];
+		return allTasks.map(convertTaskToStep);
+	};
 
 	const handleEnvironmentSelect = ({ value }: { value: string }) => {
 		const envType = value as EnvironmentType;
@@ -178,30 +314,34 @@ export const ProjectSetup: React.FC<ProjectSetupProps> = ({ projectInfo }) => {
 		{
 			label: `Development`,
 			value: `development`,
-			hint: `Optimized for local development with hot-reload`
+			hint: `Hot-reload enabled, optimized for local development`
 		},
 		{
 			label: `Production`,
 			value: `production`,
-			hint: `Optimized for deployment`
+			hint: `Optimized for performance and security`
 		},
 		{
-			label: `Both`,
+			label: `Both (Development + Production)`,
 			value: `both`,
-			hint: `Development + Production setup`
+			hint: `Separate configs for dev and prod environments`
 		}
 	];
 
 	const dockerItems: MenuItem[] = [
 		{
-			label: `Simple Dockerfile only`,
+			label: `Simple Dockerfile`,
 			value: `dockerfile`,
-			hint: `Lightweight, single container deployment`
+			hint: config.environment && config.environment === `both`
+				? `Single Dockerfile with dev/prod stages`
+				: `Lightweight, single container setup`
 		},
 		{
-			label: `Dockerfile with Docker Compose`,
+			label: `Docker Compose Setup`,
 			value: `compose`,
-			hint: `Multi-container setup with database`
+			hint: config.environment && config.environment === `both`
+				? `Separate compose files for dev/prod with databases`
+				: `Multi-container setup with database`
 		}
 	];
 
@@ -259,7 +399,7 @@ export const ProjectSetup: React.FC<ProjectSetupProps> = ({ projectInfo }) => {
 			value: nodeVersions.projectVersion,
 			hint: `Currently used in project`
 		}] : []),
-		...nodeVersions.availableVersions.ltsVersions.map((lts) => ({
+		...nodeVersions.availableVersions.ltsVersions.map((lts: { majorVersion: number; version: string; name: string }) => ({
 			label: `Node ${lts.majorVersion} LTS (v${lts.version})`,
 			value: lts.version,
 			hint: `${lts.name} - Latest minor version`
@@ -460,20 +600,206 @@ export const ProjectSetup: React.FC<ProjectSetupProps> = ({ projectInfo }) => {
 				</Box>
 			);
 
-		case `generate`:
+		case `generate`: {
+			const currentStepIndex = generationSteps.findIndex(s => s.step === generationStatus.step);
+
 			return (
 				<Box flexDirection="column">
 					<Text>Configuration Summary:</Text>
 					<Text>• Environment: {config.environment}</Text>
 					<Text>• Docker Setup: {config.dockerType === `dockerfile` ? `Dockerfile only` : `Docker Compose`}</Text>
-					<Text>• Database: {config.database}</Text>
+					{config.database && <Text>• Database: {config.database}</Text>}
 					{config.database === `sqlite` && (
 						<Text>• Storage: {config.storageType}</Text>
 					)}
 					<Text>• Node.js: {config.nodeVersion}</Text>
-					<Text>Generating Docker configuration...</Text>
+					
+					<Box marginTop={1} flexDirection="column">
+						{error ? (
+							<Box flexDirection="column" marginY={1}>
+								<Text color="red">⚠️ Error during generation:</Text>
+								<Text>{error}</Text>
+								<Text dimColor>Please check the logs and try again</Text>
+								<SelectInput
+									items={[
+										{ label: `Try Again`, value: `retry` },
+										{ label: `Exit`, value: `exit` }
+									]}
+									onSelect={({ value }) => {
+										if (value === `retry`) {
+											setError(null);
+											void getGenerationSteps();
+										} else {
+											exit();
+										}
+									}}
+								/>
+							</Box>
+						) : generationStatus.step === `done` ? (
+							<>
+								<Text color="green">✨ Configuration complete! ✨</Text>
+								<Box marginY={1}>
+									<Text>Your Docker configuration has been generated successfully.</Text>
+								</Box>
+								
+								<Box marginY={1} flexDirection="column">
+									<Text bold>Generated files:</Text>
+									<Text>• Dockerfile - Base container configuration</Text>
+									{config.environment === `both` && (
+										<>
+											<Text>• .env.development - Development environment variables</Text>
+											<Text>• .env.production - Production environment variables</Text>
+										</>
+									)}
+									{config.dockerType === `compose` ? (
+										<>
+											<Text>• docker-compose.yml - Development services configuration</Text>
+											{config.environment === `both` && (
+												<Text>• docker-compose.prod.yml - Production services configuration</Text>
+											)}
+										</>
+									) : (
+										<Text>• .env - Environment configuration</Text>
+									)}
+								</Box>
+
+								<Box marginY={1} flexDirection="column">
+									<Text bold>Quick Start Guide:</Text>
+									{config.environment && config.environment === `both` ? (
+										<>
+											<Text>Development:</Text>
+											<Text color="cyan">1. docker compose up</Text>
+											<Text dimColor>   Hot-reload enabled, best for development</Text>
+											
+											<Text>Production:</Text>
+											<Text color="cyan">1. docker compose -f docker-compose.prod.yml up -d</Text>
+											<Text dimColor>   Optimized for performance</Text>
+											
+											<Text bold>Switching Environments:</Text>
+											<Text>• Use .env.development for development settings</Text>
+											<Text>• Use .env.production for production settings</Text>
+										</>
+									) : (
+										<>
+											<Text>1. Review the generated files</Text>
+											{config.dockerType === `compose` ? (
+												<>
+													<Text>2. Start your containers:</Text>
+													<Text>   <Text color="cyan">docker compose up</Text></Text>
+													<Text>3. Visit <Text color="cyan">http://localhost:1337</Text></Text>
+												</>
+											) : (
+												<>
+													<Text>2. Build your image:</Text>
+													<Text>   <Text color="cyan">docker build -t my-strapi-app .</Text></Text>
+													<Text>3. Run the container:</Text>
+													<Text>   <Text color="cyan">docker run -p 1337:1337 my-strapi-app</Text></Text>
+												</>
+											)}
+										</>
+									)}
+								</Box>
+
+								{config.environment === `production` && (
+									<Box marginY={1} flexDirection="column">
+										<Text bold>Production Optimizations:</Text>
+										<Text>• Enable build cache: <Text color="cyan">DOCKER_BUILDKIT=1 docker build .</Text></Text>
+										<Text>• Use multi-stage builds to reduce image size</Text>
+										<Text>• Consider using Docker volumes for uploads</Text>
+										{config.database === `postgresql` && (
+											<Text>• Configure PostgreSQL for production use</Text>
+										)}
+									</Box>
+								)}
+
+								{config.dockerType === `compose` && (
+									<Box marginY={1} flexDirection="column">
+										<Text bold>Pro Tips:</Text>
+										<Text>• Scale your app: <Text color="cyan">docker compose up -d --scale strapi=2</Text></Text>
+										<Text>• View logs: <Text color="cyan">docker compose logs -f</Text></Text>
+										<Text>• Database backup: <Text color="cyan">docker compose exec db pg_dump...</Text></Text>
+									</Box>
+								)}
+
+								<Box marginY={1} flexDirection="column">
+									<Text bold>Documentation & Resources:</Text>
+									<Text>• Full guide: <Text color="blue">https://docs.strapi.io/dev-docs/deployment/docker</Text></Text>
+									<Text>• Community: <Text color="blue">https://discord.strapi.io</Text></Text>
+									<Text>• Examples: <Text color="blue">https://github.com/strapi/strapi-docker-examples</Text></Text>
+								</Box>
+
+								<Box marginY={1} flexDirection="column">
+									<Text bold>Support the project:</Text>
+									<Text>• Star us on GitHub: <Text color="blue">https://github.com/strapi/strapi-tool-dockerize</Text></Text>
+									<Text>• Buy me a coffee: <Text color="yellow">https://buymeacoffee.com/simendaehlin</Text></Text>
+									<Text>• Report issues: <Text color="blue">https://github.com/strapi/strapi-tool-dockerize/issues</Text></Text>
+								</Box>
+
+								<Box marginTop={1}>
+									<Text dimColor>Press <Text color="green">Enter</Text> to exit</Text>
+								</Box>
+
+								<SelectInput
+									items={[{ label: `Exit`, value: `exit` }]}
+									onSelect={() => exit()}
+								/>
+							</>
+						) : (
+							generationSteps.map((step, index) => {
+								if (index < currentStepIndex) {
+									return (
+										<Box key={step.step} flexDirection="column">
+											<Text>✓ {step.message}</Text>
+											{step.subtasks.map((subtask, i) => (
+												<Box key={i} marginLeft={2}>
+													<Text>✓ {subtask.message}</Text>
+												</Box>
+											))}
+										</Box>
+									);
+								}
+								if (index === currentStepIndex) {
+									return (
+										<Box key={step.step} flexDirection="column">
+											<Box>
+												<Text color="green"><Spinner type="dots" /></Text>
+												<Text> {step.message}</Text>
+											</Box>
+											{step.subtasks.map((subtask, i) => (
+												<Box key={i} marginLeft={2}>
+													{subtask.status === 'done' && (
+														<Text>✓ {subtask.message}</Text>
+													)}
+													{subtask.status === 'running' && (
+														<Box>
+															<Text color="yellow"><Spinner type="dots" /></Text>
+															<Text> {subtask.message}</Text>
+														</Box>
+													)}
+													{subtask.status === 'pending' && (
+														<Text dimColor>⋯ {subtask.message}</Text>
+													)}
+												</Box>
+											))}
+										</Box>
+									);
+								}
+								return (
+									<Box key={step.step} flexDirection="column">
+										<Text dimColor>⋯ {step.message}</Text>
+										{step.subtasks.map((subtask, i) => (
+											<Box key={i} marginLeft={2}>
+												<Text dimColor>⋯ {subtask.message}</Text>
+											</Box>
+										))}
+									</Box>
+								);
+							})
+						)}
+					</Box>
 				</Box>
 			);
+		}
 
 		default:
 			return <Text>Setting up your Docker environment...</Text>;

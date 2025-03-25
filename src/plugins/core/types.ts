@@ -1,41 +1,39 @@
-import { 
-  DatabasePlugin as BaseDBPlugin, 
-  DatabasePluginConfig as BaseDBConfig, 
-  DatabaseTemplateVariables as BaseTemplateVars,
-  DatabaseAnswers
+import type { 
+  DatabaseTemplateVariables,
+  DatabaseAnswers,
+  DatabasePluginConfig as BasePluginConfig
 } from '@/types/database';
 
-import {
+import type {
   Question,
   ValidationRules,
   PluginUtils,
   PluginTemplateUtils
 } from '@/types/plugin';
 
-// Extend base plugin types with additional functionality
-export interface DatabasePlugin extends BaseDBPlugin {
-  getQuestions: () => Promise<Question[]>;
-  processAnswers: (answers: Record<string, any>) => DatabaseAnswers;
-}
+import type { DockerSetupTask } from '@/types/docker';
 
-export interface DatabasePluginConfig extends BaseDBConfig {
+// Extended plugin config type
+export interface DatabasePluginConfig extends BasePluginConfig {
   validations?: Record<string, ValidationRules>;
   additionalQuestions?: Question[];
 }
 
-// Template types
-export interface TemplateVariables extends BaseTemplateVars {
-  database: BaseTemplateVars['database'] & {
+// Extended template variables type
+export interface TemplateVariables extends DatabaseTemplateVariables {
+  database: DatabaseTemplateVariables['database'] & {
     charset?: string;
     collation?: string;
   };
 }
 
-// Re-export plugin types
+// Re-export imported types
 export type {
+  DatabaseTemplateVariables,
+  DatabaseAnswers,
   Question,
   ValidationRules,
   PluginUtils,
   PluginTemplateUtils,
-  DatabaseAnswers
+  DockerSetupTask
 }; 
