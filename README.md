@@ -37,7 +37,7 @@ _Feel free to buy [@Eventyret](https://www.github.com/Eventyret) a ☕️ if thi
 
 ## 🚦 Current Status
 
-This package is currently under development and should be consider **STABLE** in terms of state. I/We are currently accepting contributions and/or dedicated contributors to help develop and maintain this package.
+This package is currently under development and should be considered **STABLE** in terms of state. I/We are currently accepting contributions and/or dedicated contributors to help develop and maintain this package.
 
 For more information on contributing please see [the contrib message below](#contributing).
 
