@@ -18,8 +18,7 @@
 		"build": "tsup",
 		"dev": "tsup --watch",
 		"clean": "rimraf dist",
-		"format": "prettier --write \"src/**/*.{ts,tsx,md}\"",
-		"lint": "eslint \"src/**/*.{ts,tsx}\" --fix",
+		"lint": "oxlint .",
 		"test": "vitest",
 		"test:watch": "vitest watch",
 		"test:coverage": "vitest run --coverage",
@@ -65,22 +64,12 @@
 		"@types/ink-text-input": "^2.0.5",
 		"@types/node": "^20.10.5",
 		"@types/react": "^18.2.45",
-		"@typescript-eslint/eslint-plugin": "^7.1.0",
-		"@typescript-eslint/parser": "^7.1.0",
 		"@vitest/coverage-v8": "^1.1.0",
 		"@vitest/ui": "^1.1.0",
 		"dotenv": "^16.4.7",
-		"eslint": "^8.57.0",
-		"eslint-config-prettier": "^9.1.0",
-		"eslint-import-resolver-typescript": "^3.8.5",
-		"eslint-plugin-import": "^2.31.0",
-		"eslint-plugin-prettier": "^5.1.0",
-		"eslint-plugin-react": "^7.33.2",
-		"eslint-plugin-react-hooks": "^4.6.0",
 		"husky": "^8.0.3",
 		"ink-testing-library": "^3.0.0",
 		"lint-staged": "^15.2.0",
-		"prettier": "^3.2.5",
 		"rimraf": "^5.0.5",
 		"semantic-release": "^22.0.12",
 		"strip-ansi": "^7.1.0",
@@ -110,12 +99,6 @@
 		"url": "https://github.com/strapi-community/strapi-tool-dockerize/issues"
 	},
 	"homepage": "https://github.com/strapi-community/strapi-tool-dockerize#readme",
-	"lint-staged": {
-		"*.{ts,tsx}": [
-			"eslint --fix",
-			"prettier --write"
-		]
-	},
 	"commitlint": {
 		"extends": [
 			"@commitlint/config-conventional"
