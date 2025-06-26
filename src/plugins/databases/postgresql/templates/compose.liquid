@@ -1,0 +1,35 @@
+version: '3'
+services:
+  postgres:
+    image: {{ image.name }}:{{ image.tag }}
+    environment:
+      POSTGRES_DB: {{ database.name }}
+      POSTGRES_USER: {{ database.user }}
+      POSTGRES_PASSWORD: {{ database.password }}
+    volumes:
+      - postgres_data:{{ volumes.data }}
+    ports:
+      - '{{ database.port }}:5432'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U {{ database.user }}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  strapi:
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: {{ database.name }}
+      DATABASE_USERNAME: {{ database.user }}
+      DATABASE_PASSWORD: {{ database.password }}
+      {% if environment == 'production' %}
+      NODE_ENV: production
+      {% endif %}
+
+volumes:
+  postgres_data: 

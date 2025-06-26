@@ -8,7 +8,7 @@
 		"node": ">=18.0.0"
 	},
 	"bin": {
-		"strapi-dockerize": "./dist/cli.js"
+		"strapi-dockerize": "./dist/index.js"
 	},
 	"files": [
 		"dist",
@@ -33,6 +33,8 @@
 		"dev:watch": "tsx watch src/cli.tsx"
 	},
 	"dependencies": {
+		"@clack/core": "^0.5.0",
+		"@clack/prompts": "^0.11.0",
 		"@inkjs/ui": "^1.0.0",
 		"@types/ink-spinner": "^3.0.4",
 		"chalk": "^5.3.0",
@@ -47,7 +49,7 @@
 		"ink-select-input": "^5.0.0",
 		"ink-spinner": "^5.0.0",
 		"ink-text-input": "^5.0.1",
-		"liquidjs": "^10.10.1",
+		"liquidjs": "^10.21.1",
 		"node-fetch": "^3.3.2",
 		"ora": "^8.0.1",
 		"react": "^18.2.0",
@@ -103,5 +105,8 @@
 		"extends": [
 			"@commitlint/config-conventional"
 		]
+	},
+	"volta": {
+		"node": "22.17.0"
 	}
 }

@@ -1,0 +1,44 @@
+services:
+  strapi:
+    container_name: strapi
+    build: .
+    image: strapi:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_CLIENT: sqlite
+      DATABASE_FILENAME: ./data/{{ database.name }}
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+      APP_KEYS: ${APP_KEYS}
+      NODE_ENV: {{ environment }}
+    volumes:
+      - ./config:/opt/app/config
+      - ./src:/opt/app/src
+      {% if packageManager == 'yarn' %}
+      - ./package.json:/opt/package.json
+      - ./yarn.lock:/opt/yarn.lock
+      {% elsif packageManager == 'pnpm' %}
+      - ./package.json:/opt/package.json
+      - ./pnpm-lock.yaml:/opt/pnpm-lock.yaml
+      {% else %}
+      - ./package.json:/opt/package.json
+      - ./package-lock.json:/opt/package-lock.json
+      {% endif %}
+      - ./.env:/opt/app/.env
+      - ./public/uploads:/opt/app/public/uploads
+      # SQLite database file storage
+      - ./data/{{ database.name }}:/opt/app/data/{{ database.name }}
+      - strapi-sqlite-data:/opt/app/data
+    ports:
+      - "1337:1337"
+    networks:
+      - strapi
+
+volumes:
+  strapi-sqlite-data:
+
+networks:
+  strapi:
+    name: Strapi
+    driver: bridge 

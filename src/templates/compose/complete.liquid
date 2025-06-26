@@ -1,0 +1,99 @@
+services:
+  strapi:
+    container_name: strapi
+    build: .
+    image: strapi:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_CLIENT: {{ database.client }}
+      DATABASE_HOST: {{ database.serviceName }}
+      DATABASE_PORT: {{ database.port }}
+      DATABASE_NAME: {{ database.name }}
+      DATABASE_USERNAME: {{ database.user }}
+      DATABASE_PASSWORD: {{ database.password }}
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+      APP_KEYS: ${APP_KEYS}
+      NODE_ENV: {{ environment }}
+    volumes:
+      - ./config:/opt/app/config
+      - ./src:/opt/app/src
+      {% if packageManager == 'yarn' %}
+      - ./package.json:/opt/package.json
+      - ./yarn.lock:/opt/yarn.lock
+      {% elsif packageManager == 'pnpm' %}
+      - ./package.json:/opt/package.json
+      - ./pnpm-lock.yaml:/opt/pnpm-lock.yaml
+      {% else %}
+      - ./package.json:/opt/package.json
+      - ./package-lock.json:/opt/package-lock.json
+      {% endif %}
+      - ./.env:/opt/app/.env
+      - ./public/uploads:/opt/app/public/uploads
+    ports:
+      - "1337:1337"
+    networks:
+      - strapi
+    depends_on:
+      - {{ database.serviceName }}
+
+  {{ database.serviceName }}:
+    container_name: {{ database.serviceName }}
+    {% if database.type == 'mysql' %}platform: linux/amd64 #for platform error on Apple M1 chips{% endif %}
+    restart: unless-stopped
+    env_file: .env
+    image: {{ database.image }}:{{ database.tag }}
+    {% if database.client == 'mysql' %}
+    command: --default-authentication-plugin=mysql_native_password --character-set-server={{ database.charset }} --collation-server={{ database.collation }}
+    {% elsif database.client == 'postgres' %}
+    # PostgreSQL doesn't need special commands
+    {% endif %}
+    environment:
+      {% if database.client == 'postgres' %}
+      POSTGRES_USER: {{ database.user }}
+      POSTGRES_PASSWORD: {{ database.password }}
+      POSTGRES_DB: {{ database.name }}
+      {% elsif database.type == 'mariadb' %}
+      MARIADB_USER: {{ database.user }}
+      MARIADB_ROOT_PASSWORD: {{ database.password }}
+      MARIADB_PASSWORD: {{ database.password }}
+      MARIADB_DATABASE: {{ database.name }}
+      {% elsif database.client == 'mysql' %}
+      MYSQL_USER: {{ database.user }}
+      MYSQL_ROOT_PASSWORD: {{ database.password }}
+      MYSQL_PASSWORD: {{ database.password }}
+      MYSQL_DATABASE: {{ database.name }}
+      {% endif %}
+    volumes:
+      {% if database.client == 'postgres' %}
+      - strapi-data:/var/lib/postgresql/data/
+      {% else %}
+      - strapi-data:/var/lib/mysql
+      {% endif %}
+      {% if database.client == 'postgres' %}#- ./data:/var/lib/postgresql/data # if you want to use a bind folder{% else %}#- ./data:/var/lib/mysql # if you want to use a bind folder{% endif %}
+    ports:
+      {% if database.client == 'postgres' %}- "{{ database.port }}:5432"{% else %}- "{{ database.port }}:3306"{% endif %}
+    networks:
+      - strapi
+    {% if database.client == 'postgres' %}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U {{ database.user }}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    {% elsif database.client == 'mysql' %}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    {% endif %}
+
+volumes:
+  strapi-data:
+
+networks:
+  strapi:
+    name: Strapi
+    driver: bridge 
