@@ -2,12 +2,9 @@ import { text, confirm } from "@clack/prompts";
 
 export async function questions() {
   const dbPath = await text({
-    message: "Database file path:",
+    message: "Database file path (press Enter for default):",
     placeholder: "./data/strapi.db",
     defaultValue: "./data/strapi.db",
-    validate: (value) => {
-      if (!value) return "Database path is required";
-    },
   });
 
   const createBackup = await confirm({
@@ -16,7 +13,7 @@ export async function questions() {
   });
 
   return {
-    path: dbPath,
+    path: dbPath || "./data/strapi.db", // Fallback to default
     createBackup,
     // SQLite doesn't need host/port/user/password
     host: "localhost",

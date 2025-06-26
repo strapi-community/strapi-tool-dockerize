@@ -36,8 +36,6 @@ export const sqlitePlugin: DatabasePlugin = {
   },
 
   async generateFiles(config: Record<string, any>): Promise<void> {
-    console.log("🗄️  Generating SQLite Docker configuration...");
-
     const liquid = new Liquid();
 
     // For SQLite, we create a simple compose service that just uses file-based storage

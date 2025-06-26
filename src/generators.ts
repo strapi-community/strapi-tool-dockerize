@@ -13,8 +13,6 @@ export async function generateDockerFiles(
   project: StrapiProject,
   config: DockerConfig
 ): Promise<void> {
-  console.log("🐳 Generating complete Docker setup...");
-
   const liquid = new Liquid();
   const secrets = generateSecrets();
 
@@ -132,13 +130,4 @@ export async function generateDockerFiles(
 
   // Write all files with smart env handling
   await writeFilesWithEnv(files, envFile, project.path);
-
-  // Show next steps
-  console.log("\n🎯 Next steps:");
-  console.log("1. Review the generated files");
-  console.log("2. Run: docker-compose up -d");
-  console.log("3. Your Strapi app will be available at http://localhost:1337");
-  console.log(
-    "\n⚠️  Keep your .env file secure - it contains sensitive secrets!"
-  );
 }

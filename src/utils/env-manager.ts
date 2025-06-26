@@ -5,6 +5,11 @@ export function debugEnvMerge(
   existingEnvPath: string,
   dockerSections: EnvSection[]
 ): void {
+  // Only show debug info in development mode
+  if (process.env.NODE_ENV !== "development") {
+    return;
+  }
+
   console.log("🔍 Debug: Analyzing .env file merge...");
 
   if (existsSync(existingEnvPath)) {

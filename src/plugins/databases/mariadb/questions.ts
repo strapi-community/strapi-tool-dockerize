@@ -2,24 +2,24 @@ import { text, select, password } from "@clack/prompts";
 
 export async function questions() {
   const dbName = await text({
-    message: "Database name:",
+    message: "Database name (press Enter for default):",
     placeholder: "strapi",
     defaultValue: "strapi",
     validate: (value) => {
-      if (!value) return "Database name is required";
-      if (!/^[a-zA-Z0-9_-]+$/.test(value)) {
+      const val = value || "strapi";
+      if (!/^[a-zA-Z0-9_-]+$/.test(val)) {
         return "Database name can only contain letters, numbers, underscores and hyphens";
       }
     },
   });
 
   const dbUser = await text({
-    message: "Database user:",
+    message: "Database user (press Enter for default):",
     placeholder: "strapi",
     defaultValue: "strapi",
     validate: (value) => {
-      if (!value) return "Database user is required";
-      if (!/^[a-zA-Z0-9_-]+$/.test(value)) {
+      const val = value || "strapi";
+      if (!/^[a-zA-Z0-9_-]+$/.test(val)) {
         return "Username can only contain letters, numbers, underscores and hyphens";
       }
     },
@@ -53,11 +53,12 @@ export async function questions() {
   }
 
   const dbPort = await text({
-    message: "Database port:",
+    message: "Database port (press Enter for default):",
     placeholder: "3306",
     defaultValue: "3306",
     validate: (value) => {
-      const port = parseInt(value);
+      const val = value || "3306";
+      const port = parseInt(val);
       if (isNaN(port)) return "Port must be a number";
       if (port < 1024 || port > 65535)
         return "Port must be between 1024 and 65535";
@@ -65,10 +66,10 @@ export async function questions() {
   });
 
   return {
-    name: dbName,
-    user: dbUser,
+    name: dbName || "strapi",
+    user: dbUser || "strapi",
     password: dbPassword,
-    port: parseInt(dbPort as string),
+    port: parseInt((dbPort as string) || "3306"),
     host: "localhost",
   };
 }

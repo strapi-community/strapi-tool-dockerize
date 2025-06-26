@@ -3,6 +3,7 @@
 import {
   intro,
   outro,
+  note,
   text,
   select,
   confirm,
@@ -55,23 +56,30 @@ async function main() {
   const project = await detectStrapiProject();
 
   if (!project.isStrapi) {
-    outro(
-      "❌ This doesn't appear to be a Strapi project. Please run this command in a Strapi project directory."
-    );
+    outro("❌ This doesn't appear to be a Strapi project.");
     process.exit(1);
   }
 
-  console.log(`✅ Detected Strapi project: ${project.name}`);
-  console.log(`📦 Package manager: ${project.packageManager}`);
-  console.log(`🔧 Type: ${project.type}`);
+  // Show project details in a nice note
+  const projectInfo = [
+    `📦 Project: ${project.name}`,
+    `🚀 Strapi Version: ${project.version || "unknown"}`,
+    `📋 Package Manager: ${project.packageManager.toUpperCase()}`,
+    `🔧 Language: ${
+      project.type === "typescript" ? "TypeScript" : "JavaScript"
+    }`,
+  ];
 
-  if (project.version) {
-    console.log(`📋 Strapi version: ${project.version}`);
-  }
+  note(projectInfo.join("\n"), "✅ Project detected");
 
   await runDockerizeWizard(project);
 
-  outro("🎉 Docker configuration complete! Happy coding!");
+  outro("🎉 Docker setup complete!");
+
+  note(
+    "💙 Thanks for using Strapi Dockerize!\n\n⭐ If this tool helped you, please star it on GitHub:\n   https://github.com/strapi-community/strapi-tool-dockerize\n\n🐛 Found an issue? Report it:\n   https://github.com/strapi-community/strapi-tool-dockerize/issues",
+    "Support the project"
+  );
 }
 
 async function testPluginsCommand() {
