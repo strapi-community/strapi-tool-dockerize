@@ -276,7 +276,7 @@ export async function runWizard(): Promise<void> {
 
   // Ask database-specific questions with auto-filled defaults
   if (databasePlugin && databasePlugin.questions) {
-    config.config = await databasePlugin.questions(autoFillConfig);
+    config.config = await databasePlugin.questions();
   }
 
   // Step 4: Generate Files
