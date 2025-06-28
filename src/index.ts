@@ -11,7 +11,7 @@ import {
   cancel,
 } from "@clack/prompts";
 import { detectStrapiProject } from "./utils/detection";
-import { runDockerizeWizard } from "./wizard";
+import { runWizard } from "./wizard";
 import { generatePluginCommand } from "./utils/plugin-generator";
 import { runPluginTests } from "./utils/plugin-tester";
 import { discoverPlugins, listDatabasePlugins } from "./plugins";
@@ -50,36 +50,8 @@ async function main() {
     }
   }
 
-  // Main dockerize flow
-  intro("🐳 Strapi Dockerize v2");
-
-  const project = await detectStrapiProject();
-
-  if (!project.isStrapi) {
-    outro("❌ This doesn't appear to be a Strapi project.");
-    process.exit(1);
-  }
-
-  // Show project details in a nice note
-  const projectInfo = [
-    `📦 Project: ${project.name}`,
-    `🚀 Strapi Version: ${project.version || "unknown"}`,
-    `📋 Package Manager: ${project.packageManager.toUpperCase()}`,
-    `🔧 Language: ${
-      project.type === "typescript" ? "TypeScript" : "JavaScript"
-    }`,
-  ];
-
-  note(projectInfo.join("\n"), "✅ Project detected");
-
-  await runDockerizeWizard(project);
-
-  outro("🎉 Docker setup complete!");
-
-  note(
-    "💙 Thanks for using Strapi Dockerize!\n\n⭐ If this tool helped you, please star it on GitHub:\n   https://github.com/strapi-community/strapi-tool-dockerize\n\n🐛 Found an issue? Report it:\n   https://github.com/strapi-community/strapi-tool-dockerize/issues",
-    "Support the project"
-  );
+  // Main dockerize flow - now simplified since runWizard handles everything
+  await runWizard();
 }
 
 async function testPluginsCommand() {

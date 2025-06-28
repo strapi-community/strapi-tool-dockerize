@@ -106,7 +106,10 @@ export async function writeFilesWithEnv(
   if (envFile) {
     try {
       const fullPath = join(projectPath, envFile.path);
-      const dockerSections = createDockerEnvSections(envFile.templateVars);
+      const dockerSections = createDockerEnvSections(
+        envFile.templateVars,
+        fullPath
+      );
       const mergedContent = mergeEnvVariables(fullPath, dockerSections);
       writeFileSync(fullPath, mergedContent, "utf8");
     } catch (error) {
