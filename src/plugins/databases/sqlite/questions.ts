@@ -9,11 +9,11 @@ export async function questions(defaults?: {
 }) {
   const dbFile = await text({
     message: "SQLite database file path (press Enter for default):",
-    placeholder: defaults?.databaseName || "./tmp/data.db",
-    defaultValue: defaults?.databaseName || "./tmp/data.db",
+    placeholder: defaults?.databaseName || ".tmp/data.db",
+    defaultValue: defaults?.databaseName || ".tmp/data.db",
     validate: (value) => {
       // Use the provided value or fall back to default
-      const val = value || defaults?.databaseName || "./tmp/data.db";
+      const val = value || defaults?.databaseName || ".tmp/data.db";
 
       // Only validate if there's actually a value
       if (val && !val.includes(".db")) {
@@ -31,11 +31,11 @@ export async function questions(defaults?: {
   });
 
   return {
-    filename: dbFile || defaults?.databaseName || "./tmp/data.db",
+    filename: dbFile || defaults?.databaseName || ".tmp/data.db",
     createBackup,
     // SQLite doesn't need host/port/user/password but include for consistency
     host: defaults?.databaseHost || "localhost",
     port: defaults?.databasePort || 0,
-    name: dbFile || defaults?.databaseName || "./tmp/data.db", // Add name for consistency
+    name: dbFile || defaults?.databaseName || ".tmp/data.db", // Add name for consistency
   };
 }

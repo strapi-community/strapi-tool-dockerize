@@ -45,7 +45,7 @@ services:
     env_file: .env
     image: {{ database.image }}:{{ database.tag }}
     {% if database.client == 'mysql' %}
-    command: --default-authentication-plugin=mysql_native_password --character-set-server={{ database.charset }} --collation-server={{ database.collation }}
+    command: --character-set-server={{ database.charset }} --collation-server={{ database.collation }} --mysql-native-password=ON
     {% elsif database.client == 'postgres' %}
     # PostgreSQL doesn't need special commands
     {% endif %}
@@ -68,6 +68,7 @@ services:
     volumes:
       {% if database.client == 'postgres' %}
       - strapi-data:/var/lib/postgresql/data/
+      - ./init-scripts:/docker-entrypoint-initdb.d/
       {% else %}
       - strapi-data:/var/lib/mysql
       {% endif %}

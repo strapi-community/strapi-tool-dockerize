@@ -1,6 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { detectStrapiProject } from "./detection";
-import type { StrapiProject } from "../types";
 
 // Mock fs
 vi.mock("fs", () => ({
@@ -14,8 +13,8 @@ vi.mock("child_process", () => ({
 }));
 
 // Import the mocked modules
-import { existsSync, readFileSync } from "fs";
 import { execSync } from "child_process";
+import { existsSync, readFileSync } from "fs";
 
 const mockFS = {
   existsSync: vi.mocked(existsSync),

@@ -119,6 +119,26 @@ export async function generateDockerFiles(
       content: compose,
       description,
     });
+
+    // Generate PostgreSQL initialization script if PostgreSQL is selected
+    if (config.database.type === "postgresql") {
+      const initScriptPath = join(
+        __dirname,
+        "templates/init-scripts/postgresql-init.sql.liquid"
+      );
+      const initScriptTemplate = readFileSync(initScriptPath, "utf8");
+      const initScript = await liquid.parseAndRender(
+        initScriptTemplate,
+        templateVars
+      );
+
+      files.push({
+        path: "init-scripts/01-init-strapi-user.sql",
+        content: initScript,
+        description:
+          "PostgreSQL initialization script for Strapi user permissions",
+      });
+    }
   }
 
   // Prepare .env file for smart merging

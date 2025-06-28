@@ -5,193 +5,203 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0-beta.1] - 2024-12-16
+## [2.0.0] - 2024-12-16
 
-### 🎯 Major Changes
+### 🎯 Major Rewrite
 
-#### Complete Codebase Modernization
+Version 2.0 represents a **complete rewrite** of the strapi-tool-dockerize from JavaScript to TypeScript with modern architecture and enhanced user experience.
 
-- **TypeScript Migration**: Fully migrated from JavaScript to TypeScript with comprehensive type safety
-- **Modern Architecture**: Restructured with plugin-based system for extensibility
-- **Enhanced User Experience**: Complete UI/UX overhaul with improved wizard flow
+#### Complete TypeScript Migration
 
-#### Plugin System Architecture
+- **Full TypeScript Rewrite**: Migrated entire codebase from JavaScript to TypeScript
+- **Type Safety**: Comprehensive type definitions and interfaces
+- **Modern Architecture**: Plugin-based system for database support
+- **Developer Experience**: Better IDE support, autocomplete, and error detection
 
-- **Database Plugin System**: Modular plugin architecture for database support
-- **Plugin Discovery**: Automatic discovery and loading of built-in and custom plugins
-- **Extensible Framework**: Support for custom plugins and future extensions
+#### Enhanced User Experience
+
+- **Interactive CLI**: Modern wizard-style interface with beautiful prompts
+- **Environment Selection**: Choose development, production, or both configurations
+- **Project Detection**: Auto-detects Strapi version, language, Node version, and package manager
+- **Streamlined Output**: Consolidated project information display
+
+### 🐛 Issues Resolved
+
+This release addresses real community-reported issues:
+
+#### MySQL 8.4 Compatibility - **Thanks to [@koeppel](https://github.com/koeppel)**
+
+- **Fixed MySQL 8.4 Compatibility** - Resolves deprecated `--default-authentication-plugin` parameter
+- Addresses [PR #119](https://github.com/strapi-community/strapi-tool-dockerize/pull/119) and related MySQL 8.4+ compatibility issues
+- Replaces deprecated `--default-authentication-plugin=mysql_native_password` with `--mysql-native-password=ON`
+- Maintains character set, collation, and native password authentication functionality
+
+#### Package Manager & Installation Issues
+
+- **Better Package Manager Detection** - Addresses [#137](https://github.com/strapi-community/strapi-tool-dockerize/issues/137)
+  - Improved detection of npm, yarn, pnpm
+  - Better error handling during installation
+  - Enhanced validation of project state
+
+#### Database Configuration Problems
+
+- **MySQL Installation Improvements** - Helps with [#123](https://github.com/strapi-community/strapi-tool-dockerize/issues/123)
+  - Better database client configuration
+  - Improved connection string generation
+  - Modern MySQL image usage
+
+#### Environment & Configuration
+
+- **Environment Selection** - Addresses [#132](https://github.com/strapi-community/strapi-tool-dockerize/issues/132)
+  - Clear development vs production environment selection
+  - Better documentation of environment-specific configurations
+  - Separate Dockerfile and docker-compose configurations
+
+#### Project Creation & Validation
+
+- **Enhanced Project Validation** - Helps with [#131](https://github.com/strapi-community/strapi-tool-dockerize/issues/131)
+  - Better Strapi project detection and validation
+  - Improved error messages for invalid projects
+  - Better handling of edge cases
 
 ### ✨ New Features
 
-#### Enhanced Database Support
+#### Database Support Expansion
 
-- **SQLite Support**: Added full support for SQLite databases
-- **Improved PostgreSQL**: Enhanced PostgreSQL configuration with better defaults
-- **Enhanced MySQL/MariaDB**: Improved MySQL and MariaDB integration
-- **Database Detection**: Automatic detection of existing database configurations
+- **SQLite Support**: New database option for local development (file-based)
+  - Proper directory bind mounting for data persistence (`.tmp` directory)
+  - No separate database service needed (simplified docker-compose)
+  - Correct filename handling matching Strapi defaults (`.tmp/data.db`)
+  - Fixed path configuration to align with official Strapi documentation
+- **Enhanced PostgreSQL**: Improved configuration with alpine images
+  - **Schema Permissions Fix**: Automatically grants required SCHEMA permissions to prevent Strapi admin 500 errors
+  - Includes initialization script (`init-scripts/01-init-strapi-user.sql`) that runs on first container startup
+  - Addresses PostgreSQL user permissions as documented in [Strapi's PostgreSQL guide](https://docs.strapi.io/cms/configurations/database#postgresql)
+- **MariaDB Support**: Alternative to MySQL with better defaults
+- **Database Plugins**: Modular plugin system for database configurations
 
-#### Environment Management
+#### Smart Configuration Management
 
-- **Environment Selection**: Choose between development, production, or both environments
-- **Smart .env Handling**: Intelligent .env file management that preserves existing variables
-- **Docker Section Management**: Automatic detection and replacement of Docker configuration sections
-- **Security Enhancements**: Secure random password and secret generation
+- **Intelligent .env Management**:
+  - Preserves existing environment variables
+  - Updates only Docker-related sections with clear headers
+  - Prevents duplication of configuration blocks
+  - Organized section management
 
-#### Project Detection & Validation
+#### Environment Flexibility
 
-- **Advanced Project Detection**: Comprehensive Strapi project validation
-- **Node Version Checking**: Automatic Node.js version compatibility checking
-- **TypeScript/JavaScript Detection**: Automatic project type detection
-- **Package Manager Detection**: Smart detection of npm, yarn, or pnpm
+- **Multi-Environment Support**:
+  - **Development only**: docker-compose + Dockerfile for local development
+  - **Production only**: optimized Dockerfile.prod for deployment
+  - **Both**: complete development + production setup (default)
 
-#### User Experience Improvements
+#### Security Enhancements
 
-- **Modern CLI Interface**: Beautiful, interactive CLI using @clack/prompts
-- **Progress Indicators**: Real-time feedback during file generation
-- **Colored Output**: Enhanced readability with syntax highlighting
-- **Streamlined Workflow**: Simplified wizard with better question flow
+- **Auto-generated Secrets**: Secure random generation of:
+  - Database passwords
+  - APP_KEYS (4 random keys)
+  - JWT secrets
+  - API tokens
+  - Transfer tokens
 
 ### 🔧 Technical Improvements
 
-#### Code Quality & Testing
+#### Modern Architecture
 
-- **Comprehensive Test Suite**: 26 unit tests covering all major functionality
-- **Fast Test Execution**: Tests run in ~250ms (99% performance improvement)
-- **TypeScript Type Safety**: Full type coverage with strict TypeScript configuration
+- **Plugin System**: Extensible architecture for database plugins
+- **Template Engine**: LiquidJS-powered templating system
+- **Modular Design**: Separation of concerns with utility modules
+- **Comprehensive Error Handling**: User-friendly error messages
+
+#### Developer Experience
+
+- **Comprehensive Testing**: 26 unit tests covering core functionality (v1.x had no tests)
+- **Fast Test Execution**: Complete test suite runs in ~250ms
+- **TypeScript Support**: Full type coverage for better maintainability
 - **Modern Build System**: Using tsup for optimized builds
 
-#### File Generation & Templates
+#### Code Quality
 
-- **Liquid Templating**: Advanced templating system using LiquidJS
-- **Template Organization**: Better organized template structure
-- **File Writing System**: Enhanced file writing with conflict detection
-- **Debug Mode**: Comprehensive debugging capabilities
-
-#### Error Handling & Reliability
-
-- **Robust Error Handling**: Comprehensive error catching and user-friendly messages
-- **Validation System**: Input validation with clear error feedback
-- **Graceful Degradation**: Better handling of edge cases and missing dependencies
-- **Async/Await**: Proper async handling throughout the application
-
-### 🐛 Bug Fixes
-
-#### Core Functionality
-
-- **Fixed Plugin Loading**: Resolved async/await issues in plugin loading system
-- **Fixed .env Duplication**: Eliminated duplicate Docker configuration sections
-- **Fixed Node Version Detection**: Proper handling of Node version checking failures
-- **Fixed Package Manager Detection**: Accurate detection across different lock file types
-
-#### CLI & User Interface
-
-- **Fixed Command Parsing**: Improved CLI argument parsing and validation
-- **Fixed Progress Display**: Proper progress indication during operations
-- **Fixed Error Messages**: More descriptive and actionable error messages
-- **Fixed Path Resolution**: Better handling of project path detection
+- **Modern JavaScript**: ES2022+ features with proper async/await usage
+- **Organized Code Structure**: Clear separation of utilities, plugins, and core logic
+- **Documentation**: Comprehensive inline documentation
+- **Linting**: ESLint and Prettier configuration for consistent code style
 
 ### 🔄 Breaking Changes
 
-#### API Changes
+**⚠️ Important**: Version 2.0 is essentially a new tool. The usage pattern is different from v1.x.
 
-- **CLI Arguments**: Updated CLI argument names for consistency
-  - `--dbtype` → `--database-type`
-  - `--useCompose` → `--use-compose`
-  - Added new `--environment` option
+#### New Usage Pattern
 
-#### Configuration Changes
+- **Interactive Mode**: `npx @strapi-community/dockerize` (default)
+- **CLI Mode**: `npx @strapi-community/dockerize new [options]`
+- **Reset Command**: `npx @strapi-community/dockerize reset`
 
-- **Database Configuration**: Updated database configuration format
-- **Template Structure**: Reorganized template directory structure
-- **Environment Variables**: Updated environment variable naming conventions
+#### What Changed
 
-#### System Requirements
+- **Command Structure**: New interactive wizard instead of single command
+- **File Templates**: Completely new template system
+- **Environment Variables**: Updated .env variable organization
+- **Docker Configuration**: Enhanced Dockerfile and docker-compose.yml templates
 
-- **Node.js**: Minimum version updated to Node.js 18+
-- **Dependencies**: Updated to latest versions of all dependencies
-- **TypeScript**: Full TypeScript support required for development
+#### For Users Upgrading from v1.x
 
-### 📦 Dependencies
+Since this is essentially a new tool with a different approach:
 
-#### Added
+1. **No migration needed** - v2.0 generates fresh Docker configurations
+2. **Remove old files** first (or use the `reset` command)
+3. **Run the new interactive wizard**: `npx @strapi-community/dockerize`
+4. **Review generated files** and customize as needed
 
-- `@clack/prompts` - Modern CLI prompts
-- `liquidjs` - Advanced templating engine
-- `chalk` - Terminal string styling
-- `zod` - Runtime type validation
-- `vitest` - Fast unit testing framework
+### 📋 Development Improvements
 
-#### Updated
+#### Testing Infrastructure (New!)
 
-- `typescript` - Updated to v5.3.3
-- `commander` - Updated to v11.1.0
-- `fs-extra` - Updated to v11.2.0
+- **Vitest Framework**: Modern testing framework with fast execution
+- **Comprehensive Test Coverage**: 26 tests covering core functionality
+- **Mocking Strategy**: File system and process mocking for reliable tests
+- **CI Integration**: Automated testing on pull requests
 
-#### Removed
+#### Development Workflow
 
-- Legacy JavaScript files
-- Outdated dependencies
-- Unused utility functions
-
-### 🔒 Security
-
-#### Enhanced Security
-
-- **Secure Defaults**: Generated passwords use cryptographically secure random values
-- **Input Validation**: All user inputs are validated and sanitized
-- **Path Traversal Protection**: Safe file path handling
-- **Dependency Updates**: All dependencies updated to latest secure versions
-
-### 📚 Documentation
-
-#### Improved Documentation
-
-- **Updated README**: Comprehensive documentation for v2 features
-- **API Documentation**: Complete TypeScript interfaces and types
-- **Changelog**: Detailed changelog with migration guide
-- **Contributing Guide**: Updated contribution guidelines
-
-### 🚀 Performance
-
-#### Performance Improvements
-
-- **Faster Startup**: 50% faster CLI initialization
-- **Optimized File Operations**: Efficient file reading and writing
-- **Reduced Bundle Size**: Optimized build output
-- **Test Performance**: 99% faster test execution
+- **TypeScript Build**: Modern build process with tsup
+- **Development Mode**: Hot reload during development
+- **Package Management**: Support for npm, yarn, and pnpm
+- **Linting & Formatting**: ESLint and Prettier integration
 
 ---
 
-## [1.x.x] - Previous Versions
+## [1.x.x] - Legacy JavaScript Versions
 
-Previous versions were JavaScript-based with basic Docker support. See git history for detailed changes.
+### Historical Context
 
-### Migration Guide from v1.x to v2.0
+The v1.x series was built in JavaScript and served the community well, but several foundational issues emerged:
 
-#### For End Users
+- No automated testing (making maintenance and contributions difficult)
+- Limited error handling and validation
+- Package manager compatibility issues
+- Environment configuration confusion
+- Database setup problems (like the MySQL 8.4 compatibility issue)
 
-1. **Node.js**: Ensure you're running Node.js 18+
-2. **CLI Usage**: Update any scripts using the new CLI argument names
-3. **Environment Files**: Review generated .env files for new structure
-
-#### For Contributors
-
-1. **TypeScript**: All development now requires TypeScript knowledge
-2. **Testing**: Use `npm test` for the new Vitest-based test suite
-3. **Build System**: Use `npm run build` with the new tsup build system
-
-#### Breaking Changes
-
-- CLI argument names have changed (see breaking changes section)
-- Template structure has been reorganized
-- Minimum Node.js version is now 18+
-
-For detailed migration help, please see the README or open an issue on GitHub.
+Version 2.0 represents a complete ground-up rewrite addressing these foundational issues with modern tooling and architecture.
 
 ---
 
-### Links
+## Community Contributors
 
-- [GitHub Repository](https://github.com/strapi-community/strapi-tool-dockerize)
-- [NPM Package](https://www.npmjs.com/package/@strapi-community/dockerize)
-- [Issues & Bug Reports](https://github.com/strapi-community/strapi-tool-dockerize/issues)
+### Special Thanks
+
+- **[@koeppel](https://github.com/koeppel)** - Identified and provided solution for MySQL 8.4 compatibility issue in [PR #119](https://github.com/strapi-community/strapi-tool-dockerize/pull/119)
+- **[@Simon-Dirks](https://github.com/Simon-Dirks)** - Grammar and documentation improvements in [PR #139](https://github.com/strapi-community/strapi-tool-dockerize/pull/139)
+- **[@Eventyret](https://github.com/Eventyret)** - Lead maintainer and v2.0 architect
+- All community members who reported issues and provided feedback
+
+---
+
+## Links
+
+- **GitHub Repository**: https://github.com/strapi-community/strapi-tool-dockerize
+- **NPM Package**: https://www.npmjs.com/package/@strapi-community/dockerize
+- **Issue Tracker**: https://github.com/strapi-community/strapi-tool-dockerize/issues
+- **Discord**: https://discord.strapi.io/ (join the #tools channel)
+- **Support**: [Open Collective](https://opencollective.com/strapi/projects/strapi-tool-dockerize)

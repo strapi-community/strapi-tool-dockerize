@@ -1,0 +1,21 @@
+-- PostgreSQL initialization script for Strapi
+-- This script grants the necessary SCHEMA permissions to prevent 500 errors
+-- See: https://docs.strapi.io/cms/configurations/database#postgresql
+
+-- Grant all privileges on schema public to the Strapi user
+-- This is required for Strapi to work correctly with PostgreSQL
+GRANT ALL ON SCHEMA public TO {{ database.user }};
+
+-- Grant usage on schema public (allows access to schema)
+GRANT USAGE ON SCHEMA public TO {{ database.user }};
+
+-- Grant create privileges (allows creating tables, etc.)
+GRANT CREATE ON SCHEMA public TO {{ database.user }};
+
+-- Ensure the user can create and manage tables in the future
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO {{ database.user }};
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO {{ database.user }};
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO {{ database.user }};
+
+-- Log the completion
+SELECT 'PostgreSQL initialization completed for Strapi user: {{ database.user }}' AS status; 

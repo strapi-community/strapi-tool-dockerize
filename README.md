@@ -22,7 +22,7 @@ _Feel free to buy [@Eventyret](https://www.github.com/Eventyret) a ☕️ if thi
 </p>
 
 <p>
-  <strong>Version 2.0</strong> - Complete TypeScript rewrite with modern architecture ✨
+  <strong>Version 2.0</strong> - Complete TypeScript rewrite solving real user issues ✨
 </p>
 
 _Feel free to buy [@Eventyret](https://www.github.com/Eventyret) a ☕️ if this tool was helpful_
@@ -30,6 +30,14 @@ _Feel free to buy [@Eventyret](https://www.github.com/Eventyret) a ☕️ if thi
 [![Open Collective](https://img.shields.io/opencollective/all/strapi-tool-dockerize?color=blue&label=financial%20contributors)](https://opencollective.com/strapi/projects/strapi-tool-dockerize)
 
 </div>
+
+---
+
+## 🚧 Development Status
+
+This package is **stable** and actively maintained. Version 2.0 represents a complete rewrite with modern architecture, comprehensive testing, and enhanced user experience.
+
+We are actively accepting contributions and dedicated contributors to help develop and maintain this package. See our [Contributing Guide](#-contributing) below.
 
 ---
 
@@ -56,22 +64,22 @@ _Feel free to buy [@Eventyret](https://www.github.com/Eventyret) a ☕️ if thi
 <tr>
 <td>
 
-### 🔥 **Complete Rewrite**
+### 🔥 **Major Rewrite**
 
-- **TypeScript** - Full type safety
+- **TypeScript** - Complete migration for type safety
 - **Modern CLI** - Beautiful interactive prompts
-- **Plugin Architecture** - Extensible and modular
-- **99% Faster Tests** - 250ms vs 20+ seconds!
+- **Plugin Architecture** - Extensible database system
+- **Comprehensive Testing** - 26 unit tests (previously none!)
 
 </td>
 <td>
 
-### ⚡ **Enhanced Features**
+### 🐛 **Issues Resolved**
 
-- **SQLite Support** - Local development made easy
-- **Smart .env Management** - No more duplicates
-- **Environment Selection** - Dev, prod, or both
-- **Auto-detection** - Project type, Node version, package manager
+- **Fixed Yarn/npm Errors** - [#137](https://github.com/strapi-community/strapi-tool-dockerize/issues/137) Better package manager detection
+- **MySQL Installation** - [#123](https://github.com/strapi-community/strapi-tool-dockerize/issues/123) Improved database setup
+- **Environment Confusion** - [#132](https://github.com/strapi-community/strapi-tool-dockerize/issues/132) Clear environment selection
+- **Project Creation** - [#131](https://github.com/strapi-community/strapi-tool-dockerize/issues/131) Enhanced project validation
 
 </td>
 </tr>
@@ -127,10 +135,10 @@ npx @strapi-community/dockerize new \
 
 ### 🛡️ **Reliability Features**
 
-- ✅ **Comprehensive Testing** - 26 unit tests with 99% speed improvement
+- ✅ **Comprehensive Testing** - 26 unit tests covering core functionality
 - ✅ **TypeScript Safety** - Full type coverage
 - ✅ **Error Handling** - Graceful error handling with helpful messages
-- ✅ **Validation** - Input validation and sanitization
+- ✅ **Input Validation** - Comprehensive input validation and sanitization
 
 ---
 
@@ -143,6 +151,7 @@ npx @strapi-community/dockerize new \
 <th>Development</th>
 <th>Production</th>
 <th>Docker Compose</th>
+<th>Issues Resolved</th>
 </tr>
 <tr>
 <td>🐘 PostgreSQL</td>
@@ -150,6 +159,7 @@ npx @strapi-community/dockerize new \
 <td>✅</td>
 <td>✅</td>
 <td>✅</td>
+<td>Schema permissions fix for admin panel</td>
 </tr>
 <tr>
 <td>🐬 MySQL</td>
@@ -157,6 +167,7 @@ npx @strapi-community/dockerize new \
 <td>✅</td>
 <td>✅</td>
 <td>✅</td>
+<td><a href="https://github.com/strapi-community/strapi-tool-dockerize/issues/123">#123</a> Installation fixes</td>
 </tr>
 <tr>
 <td>🦭 MariaDB</td>
@@ -164,6 +175,7 @@ npx @strapi-community/dockerize new \
 <td>✅</td>
 <td>✅</td>
 <td>✅</td>
+<td>Better defaults</td>
 </tr>
 <tr>
 <td>🗃️ SQLite</td>
@@ -171,6 +183,7 @@ npx @strapi-community/dockerize new \
 <td>✅</td>
 <td>✅</td>
 <td>N/A</td>
+<td><strong>New!</strong> Local development</td>
 </tr>
 </table>
 
@@ -295,7 +308,10 @@ services:
       - "${DATABASE_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d/
 ```
+
+> 🛡️ **Schema Permissions**: Automatically includes initialization script to grant required SCHEMA permissions, preventing Strapi admin 500 errors as documented in [Strapi's PostgreSQL guide](https://docs.strapi.io/cms/configurations/database#postgresql).
 
 </details>
 
@@ -376,7 +392,7 @@ npm run test:ui
 
 ### 📊 **Test Coverage**
 
-- **26 comprehensive unit tests**
+- **26 comprehensive unit tests** (v1.x had no tests)
 - **Fast execution** (~250ms total)
 - **Core functionality coverage**:
   - Plugin loading and database support
@@ -391,16 +407,19 @@ npm run test:ui
 
 We actively welcome contributions! Here's how you can help:
 
-### 🐛 **Bug Reports**
+### 🐛 **Current Open Issues**
 
-- Use the [issue tracker](https://github.com/strapi-community/strapi-tool-dockerize/issues)
-- Include your OS, Node version, and Strapi version
-- Provide steps to reproduce
+Help us resolve these community-reported issues:
+
+- [#138](https://github.com/strapi-community/strapi-tool-dockerize/issues/138) - Strapi Upgrade Fails After Changing package.json
+- [#137](https://github.com/strapi-community/strapi-tool-dockerize/issues/137) - Yarn error after running dockerize command
+- [#135](https://github.com/strapi-community/strapi-tool-dockerize/issues/135) - Please publish latest NPM version
+- [#131](https://github.com/strapi-community/strapi-tool-dockerize/issues/131) - Bug - Issues when creating a Strapi project
 
 ### 💡 **Feature Requests**
 
 - Check existing [feature requests](https://github.com/strapi-community/strapi-tool-dockerize/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)
-- Explain the use case and expected behavior
+- Review [open pull requests](https://github.com/strapi-community/strapi-tool-dockerize/pulls?q=sort:updated-desc+is:pr+is:open)
 
 ### 🔧 **Development Setup**
 
@@ -461,7 +480,7 @@ Support development through [Open Collective](https://opencollective.com/strapi/
 
 - [Strapi Discord](https://discord.strapi.io/) - Join the `#tools` channel
 - [GitHub Discussions](https://github.com/strapi-community/strapi-tool-dockerize/discussions)
-- [Twitter](https://twitter.com/strapijs) - Follow for updates
+- [Issues](https://github.com/strapi-community/strapi-tool-dockerize/issues) - Report bugs or request features
 
 ### 📚 **Resources**
 
@@ -487,6 +506,7 @@ Thanks to all our amazing contributors!
 
 **Special Thanks**
 
+- [@koeppel](https://github.com/koeppel) - MySQL 8.4 compatibility fix
 - [@DimitriGilbert](https://github.com/DimitriGilbert)
 - [@YEK-PLUS](https://github.com/YEK-PLUS)
 - [@RobbieClarken](https://github.com/RobbieClarken)

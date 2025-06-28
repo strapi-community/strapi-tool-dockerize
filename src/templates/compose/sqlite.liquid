@@ -7,7 +7,7 @@ services:
     env_file: .env
     environment:
       DATABASE_CLIENT: sqlite
-      DATABASE_FILENAME: ./data/{{ database.name }}
+      DATABASE_FILENAME: {{ database.filename }}
       JWT_SECRET: ${JWT_SECRET}
       ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
       APP_KEYS: ${APP_KEYS}
@@ -27,9 +27,8 @@ services:
       {% endif %}
       - ./.env:/opt/app/.env
       - ./public/uploads:/opt/app/public/uploads
-      # SQLite database file storage
-      - ./data/{{ database.name }}:/opt/app/data/{{ database.name }}
-      - strapi-sqlite-data:/opt/app/data
+      # SQLite database directory bind mount for data persistence (matches Strapi defaults)
+      - ./.tmp:/opt/app/.tmp
     ports:
       - "1337:1337"
     networks:
