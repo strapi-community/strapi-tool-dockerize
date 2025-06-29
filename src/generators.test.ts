@@ -289,11 +289,10 @@ describe("generators", () => {
         expect.objectContaining({
           templateVars: expect.objectContaining({
             secrets: expect.objectContaining({
-              appKeys: "test-app-keys",
-              apiTokenSalt: "test-api-token-salt",
-              adminJwtSecret: "test-admin-jwt-secret",
-              transferTokenSalt: "test-transfer-token-salt",
-              jwtSecret: "test-jwt-secret",
+              // Updated to match the new format from security-utils.ts
+              jwt: expect.any(String),
+              adminJwt: expect.any(String),
+              appKeys: expect.any(String), // Now a comma-separated string
             }),
           }),
         }),

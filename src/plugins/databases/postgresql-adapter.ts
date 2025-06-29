@@ -3,18 +3,9 @@ import { readFileSync } from "fs";
 import { Liquid } from "liquidjs";
 import { join } from "path";
 import type { DatabasePlugin } from "../../types";
+import { generateSecurePassword } from "../../utils/security-utils";
 
-// Simple password generator (we'll enhance this later)
-function generateSecurePassword(): string {
-  const length = 16;
-  const charset =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
-  let password = "";
-  for (let i = 0; i < length; i++) {
-    password += charset.charAt(Math.floor(Math.random() * charset.length));
-  }
-  return password;
-}
+// generateSecurePassword function moved to utils/security-utils.ts
 
 export const postgresqlPlugin: DatabasePlugin = {
   name: "PostgreSQL",

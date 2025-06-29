@@ -66,26 +66,9 @@ export async function writeFiles(
   console.log("\n🎉 All files created successfully!");
 }
 
-// Generate secure secrets for Strapi
-export function generateSecrets() {
-  const generateSecret = (length: number = 64): string => {
-    const charset =
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=";
-    let result = "";
-    for (let i = 0; i < length; i++) {
-      result += charset.charAt(Math.floor(Math.random() * charset.length));
-    }
-    return result;
-  };
-
-  return {
-    jwt: generateSecret(64),
-    adminJwt: generateSecret(64),
-    appKeys: `${generateSecret(32)},${generateSecret(32)},${generateSecret(
-      32
-    )},${generateSecret(32)}`,
-  };
-}
+// generateSecrets function moved to utils/security-utils.ts
+// Re-export it for backward compatibility
+export { generateSecrets } from "./security-utils";
 
 export async function writeFilesWithEnv(
   files: FileToWrite[],

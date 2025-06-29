@@ -4,10 +4,16 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import {
   writeFilesWithEnv,
-  generateSecrets,
   type FileToWrite,
   type EnvFileToWrite,
 } from "./utils/file-writer";
+import {
+  getDatabaseClient,
+  getDatabaseImage,
+  getDatabaseServiceName,
+  DATABASE_TYPES,
+} from "./utils/database-utils";
+import { generateSecrets } from "./utils/security-utils";
 
 export async function generateDockerFiles(
   project: StrapiProject,
@@ -16,13 +22,10 @@ export async function generateDockerFiles(
   const liquid = new Liquid();
   const secrets = generateSecrets();
 
-  // Map database types to Strapi database clients
-  const databaseClientMap = {
-    postgresql: "postgres",
-    mysql: "mysql",
-    mariadb: "mysql", // MariaDB uses mysql client in Strapi
-    sqlite: "sqlite",
-  };
+  // Get database configuration using consolidated utilities
+  const databaseImage = getDatabaseImage(config.database.type);
+  const databaseClient = getDatabaseClient(config.database.type);
+  const serviceName = getDatabaseServiceName(config.database.type);
 
   // Prepare template variables
   const templateVars = {
@@ -30,29 +33,16 @@ export async function generateDockerFiles(
     environment:
       config.environment === "both" ? "development" : config.environment,
     database: {
-      client: databaseClientMap[config.database.type],
+      client: databaseClient,
       type: config.database.type,
-      serviceName:
-        config.database.type === "postgresql"
-          ? "strapiDB"
-          : config.database.type,
+      serviceName,
       name: config.database.name,
       user: config.database.user,
       password: config.database.password,
       port: config.database.port,
       host: config.database.host,
-      image:
-        config.database.type === "postgresql"
-          ? "postgres"
-          : config.database.type === "mariadb"
-          ? "mariadb"
-          : "mysql",
-      tag:
-        config.database.type === "postgresql"
-          ? "16.0-alpine"
-          : config.database.type === "mariadb"
-          ? "10.11"
-          : "8.0",
+      image: databaseImage.image,
+      tag: databaseImage.tag,
       charset: "utf8mb4",
       collation: "utf8mb4_unicode_ci",
     },
@@ -101,7 +91,7 @@ export async function generateDockerFiles(
   if (config.useCompose) {
     // SQLite uses a different template (no separate database service)
     const templateName =
-      config.database.type === "sqlite" ? "sqlite" : "complete";
+      config.database.type === DATABASE_TYPES.SQLITE ? "sqlite" : "complete";
     const composePath = join(
       __dirname,
       `templates/compose/${templateName}.liquid`
@@ -110,7 +100,7 @@ export async function generateDockerFiles(
     const compose = await liquid.parseAndRender(composeTemplate, templateVars);
 
     const description =
-      config.database.type === "sqlite"
+      config.database.type === DATABASE_TYPES.SQLITE
         ? "Docker Compose for Strapi with SQLite"
         : "Docker Compose with Strapi + Database";
 
@@ -121,7 +111,7 @@ export async function generateDockerFiles(
     });
 
     // Generate PostgreSQL initialization script if PostgreSQL is selected
-    if (config.database.type === "postgresql") {
+    if (config.database.type === DATABASE_TYPES.POSTGRESQL) {
       const initScriptPath = join(
         __dirname,
         "templates/init-scripts/postgresql-init.sql.liquid"

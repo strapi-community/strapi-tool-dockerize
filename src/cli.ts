@@ -9,6 +9,13 @@ import { detectStrapiProject } from "./utils/detection";
 import { generatePluginCommand } from "./utils/plugin-generator";
 import { runPluginTests } from "./utils/plugin-tester";
 import { runWizard } from "./wizard";
+import {
+  VALID_DATABASE_TYPES,
+  getDefaultPort,
+  isValidDatabaseType,
+  getValidDatabaseTypesString,
+} from "./utils/database-utils";
+import { generateSecurePassword } from "./utils/security-utils";
 
 export const main = defineCommand({
   meta: {
@@ -23,9 +30,22 @@ export const main = defineCommand({
       default: true,
     },
   },
-  async run({ args }) {
-    // If no subcommand specified, run the interactive wizard
-    if (args.interactive !== false) {
+  async run({ args, cmd }) {
+    // Only run interactive wizard if no subcommand was specified
+    // (citty provides the cmd object which contains subcommand info)
+    const subcommandUsed = process.argv
+      .slice(2)
+      .some((arg) =>
+        [
+          "new",
+          "reset",
+          "generate-plugin",
+          "test-plugins",
+          "list-plugins",
+        ].includes(arg)
+      );
+
+    if (!subcommandUsed && args.interactive !== false) {
       await runWizard();
     }
   },
@@ -39,7 +59,7 @@ export const main = defineCommand({
           type: "string",
           description: "Database type",
           default: "postgresql",
-          valueHint: "postgresql|mysql|mariadb|sqlite",
+          valueHint: getValidDatabaseTypesString(),
         },
         environment: {
           type: "string",
@@ -104,15 +124,9 @@ export const main = defineCommand({
             : null;
 
           // Validate database type
-          const validDatabaseTypes = [
-            "postgresql",
-            "mysql",
-            "mariadb",
-            "sqlite",
-          ];
-          if (!validDatabaseTypes.includes(databaseType)) {
+          if (!isValidDatabaseType(databaseType)) {
             console.error(`❌ Invalid database type: ${databaseType}`);
-            console.error(`Valid options: ${validDatabaseTypes.join(", ")}`);
+            console.error(`Valid options: ${VALID_DATABASE_TYPES.join(", ")}`);
             process.exit(1);
           }
 
@@ -127,13 +141,7 @@ export const main = defineCommand({
           // Set default ports if not provided
           let port = args.port ? String(args.port) : null;
           if (!port) {
-            const portMap = {
-              postgresql: "5432",
-              mysql: "3306",
-              mariadb: "3306",
-              sqlite: "0", // Not used for SQLite
-            };
-            port = portMap[databaseType as keyof typeof portMap];
+            port = getDefaultPort(databaseType).toString();
           }
 
           // Generate password if not provided
@@ -392,14 +400,3 @@ export const main = defineCommand({
     }),
   },
 });
-
-// Helper function to generate secure password
-function generateSecurePassword(): string {
-  const chars =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
-  let password = "";
-  for (let i = 0; i < 16; i++) {
-    password += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return password;
-}

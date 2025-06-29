@@ -12,9 +12,10 @@ import { generateDockerFiles } from "./generators";
 import { getDatabasePlugin } from "./plugins";
 import {
   detectStrapiProject,
-  generateSecureDefaults,
   type ExistingDockerConfig,
 } from "./utils/detection";
+import { getDefaultPort, DATABASE_TYPES } from "./utils/database-utils";
+import { generateSecureDefaults } from "./utils/security-utils";
 
 interface WizardConfig {
   database: string;
@@ -104,41 +105,57 @@ export async function runWizard(): Promise<void> {
   };
 
   // Smart pre-selection based on detected database
-  let initialDatabase = "postgresql"; // Default fallback
+  let initialDatabase: string = DATABASE_TYPES.POSTGRESQL; // Default fallback
   let detectedDatabase = false;
 
   if (project.dockerConfig?.existingDatabase?.type) {
     const detectedType = project.dockerConfig.existingDatabase.type;
-    initialDatabase = detectedType;
+    // Normalize the detected type to match our constants
+    switch (detectedType) {
+      case "postgresql":
+        initialDatabase = DATABASE_TYPES.POSTGRESQL;
+        break;
+      case "mysql":
+        initialDatabase = DATABASE_TYPES.MYSQL;
+        break;
+      case "mariadb":
+        initialDatabase = DATABASE_TYPES.MARIADB;
+        break;
+      case "sqlite":
+        initialDatabase = DATABASE_TYPES.SQLITE;
+        break;
+      default:
+        initialDatabase = DATABASE_TYPES.POSTGRESQL;
+    }
     detectedDatabase = true;
   }
 
   const databaseOptions = [
     {
-      value: "postgresql",
+      value: DATABASE_TYPES.POSTGRESQL,
       label:
-        detectedDatabase && initialDatabase === "postgresql"
+        detectedDatabase && initialDatabase === DATABASE_TYPES.POSTGRESQL
           ? "PostgreSQL (currently configured)"
           : "PostgreSQL",
     },
     {
-      value: "mysql",
+      value: DATABASE_TYPES.MYSQL,
       label:
-        detectedDatabase && initialDatabase === "mysql"
+        detectedDatabase && initialDatabase === DATABASE_TYPES.MYSQL
           ? "MySQL (currently configured)"
           : "MySQL",
     },
     {
-      value: "mariadb",
+      value: DATABASE_TYPES.MARIADB,
       label:
-        detectedDatabase && initialDatabase === "mariadb"
+        detectedDatabase && initialDatabase === DATABASE_TYPES.MARIADB
           ? "MariaDB (currently configured)"
           : "MariaDB",
     },
     {
-      value: "sqlite",
+      value: DATABASE_TYPES.SQLITE,
       label:
-        detectedDatabase && initialDatabase === "sqlite"
+        detectedDatabase && initialDatabase === DATABASE_TYPES.SQLITE
           ? "SQLite (currently configured)"
           : "SQLite",
     },
@@ -200,28 +217,28 @@ export async function runWizard(): Promise<void> {
   const existingDb = project.dockerConfig?.existingDatabase;
   const autoFillConfig = {
     databaseName:
-      config.database === "sqlite"
-        ? existingDb?.type === "sqlite"
+      config.database === DATABASE_TYPES.SQLITE
+        ? existingDb?.type === DATABASE_TYPES.SQLITE
           ? existingDb.name || ".tmp/data.db"
           : ".tmp/data.db"
         : existingDb?.type === config.database
         ? existingDb.name || secureDefaults.databaseName
         : secureDefaults.databaseName,
     databaseUser:
-      config.database === "sqlite"
+      config.database === DATABASE_TYPES.SQLITE
         ? undefined
         : existingDb?.type === config.database
         ? existingDb.user || secureDefaults.databaseUser
         : secureDefaults.databaseUser,
     databasePassword: secureDefaults.databasePassword, // Always generate new password for security
     databaseHost:
-      config.database === "sqlite"
+      config.database === DATABASE_TYPES.SQLITE
         ? undefined
         : existingDb?.type === config.database
         ? existingDb.host || "localhost"
         : "localhost",
     databasePort:
-      config.database === "sqlite"
+      config.database === DATABASE_TYPES.SQLITE
         ? undefined
         : existingDb?.type === config.database
         ? existingDb.port || getDefaultPort(config.database)
@@ -237,7 +254,7 @@ export async function runWizard(): Promise<void> {
         ? ".env"
         : "configuration";
 
-    if (config.database === "sqlite") {
+    if (config.database === DATABASE_TYPES.SQLITE) {
       note(
         `Auto-filling from detected ${detectionSource}:\n` +
           `• Database file: ${autoFillConfig.databaseName}`,
@@ -255,7 +272,7 @@ export async function runWizard(): Promise<void> {
       );
     }
   } else {
-    if (config.database === "sqlite") {
+    if (config.database === DATABASE_TYPES.SQLITE) {
       note(
         `Using default SQLite configuration:\n` +
           `• Database file: ${autoFillConfig.databaseName}`,
@@ -290,7 +307,7 @@ export async function runWizard(): Promise<void> {
       database: {
         type: config.database as any,
         name:
-          config.database === "sqlite"
+          config.database === DATABASE_TYPES.SQLITE
             ? config.config.filename || autoFillConfig.databaseName
             : config.config.name || autoFillConfig.databaseName,
         user: config.config.user || autoFillConfig.databaseUser,
@@ -380,17 +397,4 @@ export async function runWizard(): Promise<void> {
   }
 }
 
-function getDefaultPort(database: string): number {
-  switch (database) {
-    case "postgresql":
-      return 5432;
-    case "mysql":
-      return 3306;
-    case "mariadb":
-      return 3306;
-    case "sqlite":
-      return 0; // SQLite doesn't use ports
-    default:
-      return 3306;
-  }
-}
+// getDefaultPort function moved to utils/database-utils.ts
