@@ -87,7 +87,7 @@ describe("CLI Commands", () => {
         type: "typescript",
         packageManager: "npm",
         path: "/test/path",
-      } as StrapiProject);
+      });
 
       const args = {
         "database-type": "invalid-db",

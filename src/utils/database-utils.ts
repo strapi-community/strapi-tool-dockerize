@@ -118,7 +118,17 @@ export function normalizeDatabaseType(dbType: string): DatabaseType {
  * Validate if a database type is supported
  */
 export function isValidDatabaseType(databaseType: string): boolean {
-  return VALID_DATABASE_TYPES.includes(normalizeDatabaseType(databaseType));
+  const normalized = databaseType.toLowerCase();
+  const validInputs = [
+    "postgres",
+    "postgresql",
+    "pg",
+    "mysql",
+    "mariadb",
+    "sqlite",
+    "sqlite3",
+  ];
+  return validInputs.includes(normalized);
 }
 
 /**
