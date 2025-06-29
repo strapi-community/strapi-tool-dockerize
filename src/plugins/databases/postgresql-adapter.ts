@@ -1,8 +1,8 @@
-import { text, select, password } from "@clack/prompts";
-import type { DatabasePlugin, ValidationResult, PluginTest } from "../../types";
-import { Liquid } from "liquidjs";
+import { select, text } from "@clack/prompts";
 import { readFileSync } from "fs";
+import { Liquid } from "liquidjs";
 import { join } from "path";
+import type { DatabasePlugin } from "../../types";
 
 // Simple password generator (we'll enhance this later)
 function generateSecurePassword(): string {

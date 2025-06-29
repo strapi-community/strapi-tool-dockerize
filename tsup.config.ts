@@ -26,6 +26,7 @@ export default defineConfig({
     const templateDirs = [
       "dist/templates/dockerfile",
       "dist/templates/compose",
+      "dist/templates/init-scripts",
       "dist/plugins/databases/postgresql/templates",
       "dist/plugins/databases/mysql/templates",
       "dist/plugins/databases/mariadb/templates",
@@ -45,6 +46,7 @@ export default defineConfig({
       "src/templates/compose/complete.liquid",
       "src/templates/compose/sqlite.liquid",
       "src/templates/env.liquid",
+      "src/templates/init-scripts/postgresql-init.sql.liquid",
     ];
 
     templateFiles.forEach((file) => {

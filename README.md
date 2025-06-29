@@ -104,13 +104,17 @@ The interactive wizard will guide you through:
 - 🌍 **Environment choice** - Development, production, or both
 - ⚙️ **Configuration** - Customizable settings with smart defaults
 
-### 🤖 CLI Mode
+### 🤖 CLI Commands
 
 ```bash
-npx @strapi-community/dockerize new \
-  --database-type=postgresql \
-  --environment=both \
-  --use-compose=true
+# Interactive mode (default)
+npx @strapi-community/dockerize
+
+# Plugin development commands
+npx @strapi-community/dockerize generate-plugin  # Create new plugin
+npx @strapi-community/dockerize test-plugins     # Test all plugins
+npx @strapi-community/dockerize list-plugins     # List available plugins
+npx @strapi-community/dockerize help             # Show help
 ```
 
 ---
@@ -191,30 +195,17 @@ npx @strapi-community/dockerize new \
 
 ## 🔧 Advanced Usage
 
-### 📋 **CLI Arguments**
+### 🔧 **Available Commands**
 
-```bash
-npx @strapi-community/dockerize new [options]
-```
+The tool provides an interactive wizard that guides you through all configuration options. No complex CLI arguments needed!
 
-| Option                | Values                                     | Default          | Description                 |
-| --------------------- | ------------------------------------------ | ---------------- | --------------------------- |
-| `--database-type`     | `postgresql`, `mysql`, `mariadb`, `sqlite` | `postgresql`     | Database type               |
-| `--environment`       | `development`, `production`, `both`        | `both`           | Target environment          |
-| `--use-compose`       | `true`, `false`                            | `true`           | Generate docker-compose.yml |
-| `--database-name`     | string                                     | `strapi`         | Database name               |
-| `--database-user`     | string                                     | `strapi`         | Database username           |
-| `--database-password` | string                                     | _auto-generated_ | Database password           |
-| `--host`              | string                                     | `localhost`      | Database host               |
-| `--port`              | number                                     | _varies by DB_   | Database port               |
-
-### 🔄 **Reset Command**
-
-```bash
-npx @strapi-community/dockerize reset
-```
-
-> ⚠️ **Warning**: This will remove all Docker-related files and configurations.
+| Command           | Description                                 |
+| ----------------- | ------------------------------------------- |
+| _(no command)_    | Run interactive Docker configuration wizard |
+| `generate-plugin` | Create a new database plugin template       |
+| `test-plugins`    | Test all discovered plugins                 |
+| `list-plugins`    | List all available plugins                  |
+| `help`            | Show help message                           |
 
 ### 🏗️ **Project Types**
 

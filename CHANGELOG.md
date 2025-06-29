@@ -133,9 +133,10 @@ This release addresses real community-reported issues:
 
 #### New Usage Pattern
 
-- **Interactive Mode**: `npx @strapi-community/dockerize` (default)
-- **CLI Mode**: `npx @strapi-community/dockerize new [options]`
-- **Reset Command**: `npx @strapi-community/dockerize reset`
+- **Interactive Mode**: `npx @strapi-community/dockerize` (default and primary method)
+- **Plugin Development**: `npx @strapi-community/dockerize generate-plugin`
+- **Plugin Testing**: `npx @strapi-community/dockerize test-plugins`
+- **Plugin Listing**: `npx @strapi-community/dockerize list-plugins`
 
 #### What Changed
 
@@ -149,7 +150,7 @@ This release addresses real community-reported issues:
 Since this is essentially a new tool with a different approach:
 
 1. **No migration needed** - v2.0 generates fresh Docker configurations
-2. **Remove old files** first (or use the `reset` command)
+2. **Remove old Docker files manually** if you want a fresh start (Dockerfile, docker-compose.yml, etc.)
 3. **Run the new interactive wizard**: `npx @strapi-community/dockerize`
 4. **Review generated files** and customize as needed
 

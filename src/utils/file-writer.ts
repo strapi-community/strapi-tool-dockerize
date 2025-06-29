@@ -1,5 +1,5 @@
-import { writeFileSync, existsSync, readFileSync } from "fs";
-import { join } from "path";
+import { writeFileSync, existsSync, readFileSync, mkdirSync } from "fs";
+import { join, dirname } from "path";
 import { confirm } from "@clack/prompts";
 import {
   mergeEnvVariables,
@@ -51,6 +51,10 @@ export async function writeFiles(
   for (const file of files) {
     try {
       const fullPath = join(projectPath, file.path);
+      const dir = dirname(fullPath);
+      if (!existsSync(dir)) {
+        mkdirSync(dir, { recursive: true });
+      }
       writeFileSync(fullPath, file.content, "utf8");
       console.log(`✅ Created ${file.path}`);
     } catch (error) {
@@ -95,6 +99,10 @@ export async function writeFilesWithEnv(
   for (const file of files) {
     try {
       const fullPath = join(projectPath, file.path);
+      const dir = dirname(fullPath);
+      if (!existsSync(dir)) {
+        mkdirSync(dir, { recursive: true });
+      }
       writeFileSync(fullPath, file.content, "utf8");
     } catch (error) {
       console.error(`❌ Failed to create ${file.path}:`, error);
