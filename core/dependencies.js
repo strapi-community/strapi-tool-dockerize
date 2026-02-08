@@ -20,7 +20,7 @@ const installDependecies = async () => {
 		);
 		await execa(config.packageManager, [
 			`${config.packageManager === `yarn` ? `add` : `install`}`,
-			`${config.dbtype.toLowerCase() === `postgresql` ? `pg` : `mysql`}`
+			`${config.dbtype.toLowerCase() === `postgresql` ? `pg` : `mysql2`}`
 		]);
 		spinner.stopAndPersist({
 			symbol: `📦`,
@@ -43,7 +43,7 @@ const checkForOldDependecies = async command => {
 
 		await execa(`${config.packageManager}`, [
 			`${command}`,
-			`${config.dbtype.toLowerCase() === `postgresql` ? `mysql` : `pg`}`
+			...(config.dbtype.toLowerCase() === `postgresql` ? [`mysql`, `mysql2`] : [`pg`, `mysql`])
 		]);
 
 		spinner.stopAndPersist({

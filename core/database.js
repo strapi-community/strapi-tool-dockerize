@@ -12,7 +12,7 @@ const generateDatabase = async () => {
 		config.projectType === `ts` ? `export default` : `module.exports = `
 	} ({ env }) => ({
 	connection: {
-		client: '${config.dbtype === `postgresql` ? `postgres` : `mysql`}',
+		client: '${config.dbtype === `postgresql` ? `postgres` : `mysql2`}',
 		connection: {
 		host: env('DATABASE_HOST', '${config.dbhost}'),
 			port: env.int('DATABASE_PORT', ${config.dbport}),
