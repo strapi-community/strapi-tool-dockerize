@@ -1,4 +1,3 @@
-version: '3'
 services:
   {{name}}:
     container_name: {{name}}
@@ -16,6 +15,9 @@ services:
       ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
       NODE_ENV: ${NODE_ENV}
+      APP_KEYS: ${APP_KEYS}
+      API_TOKEN_SALT: ${API_TOKEN_SALT}
+      TRANSFER_TOKEN_SALT: ${TRANSFER_TOKEN_SALT}
     volumes:
       - ./config:/opt/app/config
       - ./src:/opt/app/src
@@ -40,7 +42,7 @@ services:
     restart: unless-stopped
     env_file: .env
 {%- if dbtype == "postgresql" %}
-    image: postgres:14.5-alpine
+    image: postgres:alpine
     environment:
       POSTGRES_USER: ${DATABASE_USERNAME}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
@@ -51,7 +53,7 @@ services:
 {% else %}
 {%- if dbtype == "mysql" %}
     image: mysql:latest
-    command: "--character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci  --default-authentication-plugin=mysql_native_password"
+    command: "--character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci"
     {%- else%}
     image: mariadb:latest
     {%- endif %}

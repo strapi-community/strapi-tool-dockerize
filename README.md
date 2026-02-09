@@ -102,9 +102,11 @@ _Note_ that **RESET** will delete the `config/env` folder with all of it's conte
 
 ## 🐳 Docker-compose support
 
-- Postgres 14.5
+- Postgres 16
 - MySQL 8
-- MariaDB 10
+- MariaDB (latest)
+
+> **Note:** This version targets **Strapi v5**. For Strapi v4 support, use an earlier release.
 
 ## 🎗 Contributing
 

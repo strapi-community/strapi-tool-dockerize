@@ -35,7 +35,7 @@ const appendEnv = async () => {
 			}`
 		);
 		writeLine(
-			`DATABASE_CLIENT=${config.dbtype === `postgresql` ? `postgres` : `mysql`}`
+			`DATABASE_CLIENT=${config.dbtype === `postgresql` ? `postgres` : `mysql2`}`
 		);
 		writeLine(`# @strapi-community/dockerize end variables \n`);
 		spinner.stopAndPersist({
@@ -64,7 +64,7 @@ const envUpdate = async env => {
 			`${env.toLowerCase()}`,
 			`development`,
 			`DATABASE_CLIENT=${
-				config.dbtype.toLowerCase() === `postgresql` ? `postgres` : `mysql`
+				config.dbtype.toLowerCase() === `postgresql` ? `postgres` : `mysql2`
 			}`,
 			`DATABASE_HOST=${config.dbhost}`,
 			`DATABASE_NAME=${config.dbname}`,
