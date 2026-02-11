@@ -39,7 +39,12 @@ export const pluginRegistry: PluginRegistry = {
 	},
 }
 
-export type { DatabasePlugin, PackageManagerPlugin, PluginRegistry, SecretManagerPlugin } from "./types"
+export type {
+	DatabasePlugin,
+	PackageManagerPlugin,
+	PluginRegistry,
+	SecretManagerPlugin,
+} from "./types"
 export type { ComposeSecret, ComposeService, HealthCheck } from "./types"
 export { databasePlugins } from "./databases"
 export { packageManagerPlugins } from "./package-managers"
