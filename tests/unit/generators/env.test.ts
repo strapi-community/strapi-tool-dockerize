@@ -23,6 +23,7 @@ const baseConfig: ResolvedConfig = {
 	databasePassword: "strapi",
 	useCompose: false,
 	useAdminer: false,
+	secretBackend: "none",
 	isESM: false,
 	envVars: {},
 }

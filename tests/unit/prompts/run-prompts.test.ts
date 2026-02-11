@@ -241,7 +241,7 @@ describe("runPrompts", () => {
 	})
 
 	it("handles environment=both correctly", async () => {
-		setupSelectResponses(["v5", "ts", "npm", "postgres", "both"])
+		setupSelectResponses(["v5", "ts", "npm", "postgres", "both", "none"])
 		setupConfirmResponses([false, true, true])
 
 		const detected: DetectedConfig = {}
@@ -384,7 +384,7 @@ describe("runPrompts", () => {
 	})
 
 	it("warns about default credentials for production environment", async () => {
-		setupSelectResponses(["v5", "ts", "npm", "postgres", "production"])
+		setupSelectResponses(["v5", "ts", "npm", "postgres", "production", "none"])
 		setupConfirmResponses([false, true, true])
 
 		await runPrompts({})
@@ -397,7 +397,7 @@ describe("runPrompts", () => {
 	})
 
 	it("warns about default credentials for both environment", async () => {
-		setupSelectResponses(["v5", "ts", "npm", "postgres", "both"])
+		setupSelectResponses(["v5", "ts", "npm", "postgres", "both", "none"])
 		setupConfirmResponses([false, true, true])
 
 		await runPrompts({})

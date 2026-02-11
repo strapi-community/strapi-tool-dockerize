@@ -344,7 +344,7 @@ describe("prompt flow: production credentials warning", () => {
 	})
 
 	it("shows warning when production env uses default password", async () => {
-		setupSelectResponses(["v5", "ts", "npm", "postgres", "production"])
+		setupSelectResponses(["v5", "ts", "npm", "postgres", "production", "none"])
 		setupConfirmResponses([false, true, true])
 
 		await runPrompts({})
@@ -357,7 +357,7 @@ describe("prompt flow: production credentials warning", () => {
 	})
 
 	it("does not warn when password is not default", async () => {
-		setupSelectResponses(["v5", "ts", "npm", "postgres", "production"])
+		setupSelectResponses(["v5", "ts", "npm", "postgres", "production", "none"])
 		setupConfirmResponses([false, true, true])
 
 		await runPrompts({
