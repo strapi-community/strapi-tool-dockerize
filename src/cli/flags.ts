@@ -37,4 +37,30 @@ export const sharedFlags = {
 		default: false,
 		alias: "y",
 	},
+	secrets: {
+		type: "string",
+		description: "Secret backend (none, docker-secrets)",
+		alias: "s",
+	},
+	"dry-run": {
+		type: "boolean",
+		description: "Preview generated files without writing to disk",
+		default: false,
+	},
+	"health-interval": {
+		type: "string",
+		description: "Strapi health check interval (e.g. 30s, 1m)",
+	},
+	"health-timeout": {
+		type: "string",
+		description: "Strapi health check timeout (e.g. 10s, 30s)",
+	},
+	"health-start-period": {
+		type: "string",
+		description: "Strapi health check start period (e.g. 40s, 2m)",
+	},
+	"health-retries": {
+		type: "string",
+		description: "Strapi health check retry count",
+	},
 } satisfies ArgsDef

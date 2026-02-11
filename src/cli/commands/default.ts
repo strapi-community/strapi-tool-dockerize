@@ -4,7 +4,13 @@ import { defineCommand } from "citty"
 import pc from "picocolors"
 import { ZodError } from "zod"
 import { installDatabaseDriver } from "../../actions"
-import type { DetectedConfig, Environment, ResolvedConfig } from "../../config"
+import type {
+	DetectedConfig,
+	Environment,
+	ResolvedConfig,
+	SecretBackend,
+	StrapiHealthCheckOverrides,
+} from "../../config"
 import { DEFAULT_PORTS, resolvedConfigSchema } from "../../config"
 import { detectAll } from "../../detection"
 import {
@@ -17,7 +23,7 @@ import {
 import { pluginRegistry } from "../../plugins"
 import { runPrompts } from "../../prompts"
 import { createSpinner, log, showBanner } from "../../ui"
-import { backupDockerFiles } from "../../utils"
+import { backupDockerFiles, formatPreviewOutput, previewGeneration } from "../../utils"
 import { sharedFlags } from "../flags"
 
 export function formatZodErrors(error: ZodError): string[] {
@@ -29,6 +35,17 @@ export function formatZodErrors(error: ZodError): string[] {
 
 export function shouldWarnDatabaseDefault(detected: DetectedConfig): boolean {
 	return !detected.databaseClient
+}
+
+export function buildHealthCheckOverrides(
+	args: Record<string, unknown>,
+): StrapiHealthCheckOverrides | undefined {
+	const overrides: StrapiHealthCheckOverrides = {}
+	if (args["health-interval"]) overrides.interval = String(args["health-interval"])
+	if (args["health-timeout"]) overrides.timeout = String(args["health-timeout"])
+	if (args["health-start-period"]) overrides.startPeriod = String(args["health-start-period"])
+	if (args["health-retries"]) overrides.retries = Number(args["health-retries"])
+	return Object.keys(overrides).length > 0 ? overrides : undefined
 }
 
 export function buildDetectionSummary(detected: DetectedConfig): string {
@@ -87,6 +104,9 @@ export const defaultCommand = defineCommand({
 		if (args.compose !== undefined) {
 			detected.useCompose = args.compose
 		}
+		if (args.secrets) {
+			detected.secretBackend = args.secrets as SecretBackend
+		}
 
 		if (args.yes) {
 			log.info(`Detected: ${buildDetectionSummary(detected)}`)
@@ -113,6 +133,7 @@ export const defaultCommand = defineCommand({
 					databasePassword: detected.databasePassword ?? "strapi",
 					useCompose: detected.useCompose ?? true,
 					useAdminer: detected.useAdminer ?? false,
+					secretBackend: detected.secretBackend ?? "none",
 					isESM: detected.isESM ?? false,
 					envVars: detected.envVars ?? {},
 				})
@@ -130,6 +151,19 @@ export const defaultCommand = defineCommand({
 			config = await runPrompts(detected)
 		}
 
+		const healthCheckOverrides = buildHealthCheckOverrides(args)
+
+		if (args["dry-run"]) {
+			try {
+				const files = await previewGeneration(config, pluginRegistry)
+				console.log(formatPreviewOutput(files))
+			} catch (err) {
+				log.error(err instanceof Error ? err.message : String(err))
+				process.exit(1)
+			}
+			return
+		}
+
 		const backedUp = await backupDockerFiles(cwd)
 		if (backedUp.length > 0) {
 			log.warn(`Backed up existing files: ${backedUp.join(", ")}`)
@@ -138,7 +172,7 @@ export const defaultCommand = defineCommand({
 		const genSpinner = createSpinner("Generating Docker configuration...")
 
 		try {
-			await generateDockerfiles(config, pluginRegistry, cwd)
+			await generateDockerfiles(config, pluginRegistry, cwd, healthCheckOverrides)
 			genSpinner.update("Generating .dockerignore...")
 			await generateDockerignore(cwd)
 
