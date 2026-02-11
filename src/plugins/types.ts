@@ -1,4 +1,4 @@
-import type { DatabaseClient, PackageManager, ResolvedConfig } from "../config"
+import type { DatabaseClient, PackageManager, ResolvedConfig, SecretBackend } from "../config"
 
 export interface HealthCheck {
 	test: string[]
@@ -48,9 +48,25 @@ export interface PackageManagerPlugin {
 	dockerStartStep(dev: boolean): string
 }
 
+export interface ComposeSecret {
+	name: string
+	file: string
+}
+
+export interface SecretManagerPlugin {
+	id: SecretBackend
+	displayName: string
+	composeSecrets(config: ResolvedConfig): ComposeSecret[]
+	serviceSecrets(config: ResolvedConfig): string[]
+	envOverrides(config: ResolvedConfig): Record<string, string>
+	generateFiles(config: ResolvedConfig, cwd: string): Promise<string[]>
+}
+
 export interface PluginRegistry {
 	databases: Map<DatabaseClient, DatabasePlugin>
 	packageManagers: Map<PackageManager, PackageManagerPlugin>
+	secretManagers: Map<SecretBackend, SecretManagerPlugin>
 	getDatabase(id: DatabaseClient): DatabasePlugin
 	getPackageManager(id: PackageManager): PackageManagerPlugin
+	getSecretManager(id: SecretBackend): SecretManagerPlugin
 }
