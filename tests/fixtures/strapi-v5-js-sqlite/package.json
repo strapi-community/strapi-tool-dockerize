@@ -1,0 +1,8 @@
+{
+	"name": "my-strapi-v5-js-sqlite",
+	"version": "1.0.0",
+	"dependencies": {
+		"@strapi/strapi": "^5.0.0",
+		"better-sqlite3": "^9.4.0"
+	}
+}

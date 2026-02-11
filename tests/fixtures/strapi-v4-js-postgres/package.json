@@ -1,0 +1,8 @@
+{
+	"name": "my-strapi-v4-js-postgres",
+	"version": "1.0.0",
+	"dependencies": {
+		"@strapi/strapi": "^4.15.0",
+		"pg": "^8.11.0"
+	}
+}

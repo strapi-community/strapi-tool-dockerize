@@ -1,0 +1,7 @@
+{
+	"name": "my-strapi-v5-bun",
+	"version": "1.0.0",
+	"dependencies": {
+		"@strapi/strapi": "^5.0.0"
+	}
+}

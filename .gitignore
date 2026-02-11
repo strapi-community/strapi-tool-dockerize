@@ -23,6 +23,7 @@ node_modules/
 *.log
 *.sql
 *.env
+!tests/fixtures/**/.env
 
 # OS generated files #
 ######################
