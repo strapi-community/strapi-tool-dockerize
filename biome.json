@@ -22,6 +22,9 @@
 			"recommended": true,
 			"style": {
 				"noNonNullAssertion": "warn"
+			},
+			"suspicious": {
+				"noExplicitAny": "warn"
 			}
 		}
 	},
