@@ -30,8 +30,10 @@ export async function generateDockerfiles(config: ResolvedConfig, registry: Plug
 		strapiPort: STRAPI_DEFAULT_PORT,
 	}
 
-	const dockerfile = await renderTemplate("Dockerfile", context)
-	await writeFile(join(cwd, "Dockerfile"), dockerfile)
+	if (config.environment === "development" || config.environment === "both") {
+		const dockerfile = await renderTemplate("Dockerfile", context)
+		await writeFile(join(cwd, "Dockerfile"), dockerfile)
+	}
 
 	if (config.environment === "production" || config.environment === "both") {
 		const dockerfileProd = await renderTemplate("Dockerfile.prod", context)
