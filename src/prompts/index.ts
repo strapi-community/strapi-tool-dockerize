@@ -77,7 +77,7 @@ function fillDefaults(detected: DetectedConfig, dbClient: DatabaseClient): Parti
 }
 
 export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConfig> {
-	p.intro("Let's configure your Docker setup")
+	p.intro("Configuring Docker for your Strapi project")
 
 	const hasDetections = detected.strapiVersion || detected.projectType || detected.databaseClient || detected.packageManager
 
@@ -113,7 +113,7 @@ export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConf
 			databasePassword: detected.databasePassword ?? defaults.databasePassword!,
 		}
 	} else {
-		dbConnection = await promptDatabaseConnection(databaseClient)
+		dbConnection = await promptDatabaseConnection(databaseClient, detected)
 	}
 
 	const environment = useDetected && detected.environment ? detected.environment : await promptEnvironment()

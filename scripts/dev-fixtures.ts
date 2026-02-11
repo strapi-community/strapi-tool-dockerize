@@ -11,6 +11,7 @@ interface Fixture {
 	packageManager: string
 	lockfile?: string
 	env?: Record<string, string>
+	isESM?: boolean
 }
 
 const fixtures: Fixture[] = [
@@ -76,6 +77,37 @@ const fixtures: Fixture[] = [
 		packageManager: "npm",
 		lockfile: "package-lock.json",
 	},
+	{
+		name: "v5-esm-postgres",
+		strapiVersion: "^5.0.0",
+		database: "postgres",
+		databaseDep: "pg",
+		packageManager: "npm",
+		lockfile: "package-lock.json",
+		isESM: true,
+		env: {
+			DATABASE_CLIENT: "postgres",
+			DATABASE_HOST: "localhost",
+			DATABASE_PORT: "5432",
+			DATABASE_NAME: "strapi",
+			DATABASE_USERNAME: "strapi",
+			DATABASE_PASSWORD: "strapi",
+		},
+	},
+	{
+		name: "v5-npm-mariadb",
+		strapiVersion: "^5.0.0",
+		packageManager: "npm",
+		lockfile: "package-lock.json",
+		env: {
+			DATABASE_CLIENT: "mariadb",
+			DATABASE_HOST: "localhost",
+			DATABASE_PORT: "3306",
+			DATABASE_NAME: "strapi",
+			DATABASE_USERNAME: "strapi",
+			DATABASE_PASSWORD: "strapi",
+		},
+	},
 ]
 
 async function createFixture(fixture: Fixture) {
@@ -84,7 +116,8 @@ async function createFixture(fixture: Fixture) {
 
 	const pkg: Record<string, unknown> = {
 		name: `fixture-${fixture.name}`,
-		version: "1.0.0",
+		version: "0.0.0",
+		...(fixture.isESM ? { type: "module" } : {}),
 		dependencies: {
 			"@strapi/strapi": fixture.strapiVersion,
 			...(fixture.databaseDep ? { [fixture.databaseDep]: "^8.0.0" } : {}),

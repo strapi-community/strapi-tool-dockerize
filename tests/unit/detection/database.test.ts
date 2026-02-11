@@ -102,6 +102,29 @@ describe("detectDatabase", () => {
 		})
 	})
 
+	describe("mariadb detection", () => {
+		let tempDir: string
+
+		beforeEach(async () => {
+			tempDir = await createTempDir()
+		})
+
+		afterEach(async () => {
+			await cleanupTempDir(tempDir)
+		})
+
+		it("detects mariadb from .env DATABASE_CLIENT", async () => {
+			await createFixtureFiles(tempDir, {
+				"package.json": JSON.stringify({ name: "test" }),
+				".env": "DATABASE_CLIENT=mariadb\nDATABASE_HOST=localhost\nDATABASE_PORT=3306\nDATABASE_NAME=strapi\nDATABASE_USERNAME=strapi\nDATABASE_PASSWORD=strapi",
+			})
+
+			const result = await detectDatabase(tempDir)
+			expect(result.databaseClient).toBe("mariadb")
+			expect(result.databasePort).toBe(3306)
+		})
+	})
+
 	describe("priority order", () => {
 		let tempDir: string
 

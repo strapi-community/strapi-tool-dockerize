@@ -11,7 +11,7 @@ export async function parseEnvFile(filePath: string): Promise<Record<string, str
 
 export function parseEnvContent(content: string): Record<string, string> {
 	const result: Record<string, string> = {}
-	const lines = content.split("\n")
+	const lines = content.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n")
 	let i = 0
 
 	while (i < lines.length) {

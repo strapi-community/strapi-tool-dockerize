@@ -1,6 +1,6 @@
-import { describe, it, expect } from "bun:test"
+import { describe, it, expect, beforeEach, afterEach } from "bun:test"
 import { detectStrapi } from "../../../src/detection/strapi"
-import { fixturePath } from "../../setup"
+import { fixturePath, createTempDir, cleanupTempDir, createFixtureFiles } from "../../setup"
 
 describe("detectStrapi", () => {
 	it("detects strapi v5 with typescript", async () => {
@@ -31,5 +31,42 @@ describe("detectStrapi", () => {
 	it("returns empty for nonexistent directory", async () => {
 		const result = await detectStrapi("/nonexistent/path")
 		expect(result).toEqual({})
+	})
+
+	describe("ESM detection", () => {
+		let tempDir: string
+
+		beforeEach(async () => {
+			tempDir = await createTempDir()
+		})
+
+		afterEach(async () => {
+			await cleanupTempDir(tempDir)
+		})
+
+		it("detects isESM true when package.json has type module", async () => {
+			await createFixtureFiles(tempDir, {
+				"package.json": JSON.stringify({
+					name: "test-esm",
+					type: "module",
+					dependencies: { "@strapi/strapi": "^5.0.0" },
+				}),
+			})
+
+			const result = await detectStrapi(tempDir)
+			expect(result.isESM).toBe(true)
+		})
+
+		it("detects isESM false when package.json has no type field", async () => {
+			await createFixtureFiles(tempDir, {
+				"package.json": JSON.stringify({
+					name: "test-cjs",
+					dependencies: { "@strapi/strapi": "^5.0.0" },
+				}),
+			})
+
+			const result = await detectStrapi(tempDir)
+			expect(result.isESM).toBe(false)
+		})
 	})
 })

@@ -72,6 +72,29 @@ describe("parseEnvContent", () => {
 		expect(result).toEqual({ FOO: "" })
 	})
 
+	it("parses Windows \\r\\n line endings correctly", () => {
+		const result = parseEnvContent("FOO=bar\r\nBAZ=qux")
+		expect(result).toEqual({ FOO: "bar", BAZ: "qux" })
+	})
+
+	it("parses old Mac \\r line endings correctly", () => {
+		const result = parseEnvContent("FOO=bar\rBAZ=qux")
+		expect(result).toEqual({ FOO: "bar", BAZ: "qux" })
+	})
+
+	it("parses mixed line endings correctly", () => {
+		const result = parseEnvContent("FOO=bar\r\nBAZ=qux\rQUX=hello\nEND=done")
+		expect(result).toEqual({ FOO: "bar", BAZ: "qux", QUX: "hello", END: "done" })
+	})
+
+	it("DATABASE_CLIENT detection works with Windows line endings", () => {
+		const content = "DATABASE_CLIENT=postgres\r\nDATABASE_HOST=localhost\r\nDATABASE_PORT=5432"
+		const result = parseEnvContent(content)
+		expect(result.DATABASE_CLIENT).toBe("postgres")
+		expect(result.DATABASE_HOST).toBe("localhost")
+		expect(result.DATABASE_PORT).toBe("5432")
+	})
+
 	it("parses database connection vars", () => {
 		const content = [
 			"DATABASE_CLIENT=postgres",

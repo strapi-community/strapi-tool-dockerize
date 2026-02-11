@@ -1,4 +1,5 @@
 import { defineCommand } from "citty"
+import pc from "picocolors"
 import { access } from "node:fs/promises"
 import { join, resolve } from "node:path"
 import { ZodError } from "zod"
@@ -146,7 +147,7 @@ export const defaultCommand = defineCommand({
 			genSpinner.update("Generating database config...")
 			await generateDatabaseConfig(config, cwd)
 
-			genSpinner.success("Files generated")
+			genSpinner.success("Docker configuration ready!")
 		} catch (err) {
 			genSpinner.error("Generation failed")
 			log.error(err instanceof Error ? err.message : String(err))
@@ -189,22 +190,29 @@ export const defaultCommand = defineCommand({
 			generated.push(`config/env/${envDir}/database.${dbExt}`)
 		}
 
-		log.success("Docker configuration complete!")
-		log.info("Generated files:")
-		for (const file of generated) {
-			log.info(`  ${file}`)
-		}
+		const fileList = generated.map(f => `  ${pc.dim(">")} ${f}`).join("\n")
+		console.log()
+		console.log(pc.bold("  Generated files:"))
+		console.log(fileList)
+		console.log()
 
+		console.log(pc.bold("  Next steps:"))
 		if (config.useCompose) {
 			if (config.environment === "both") {
-				log.info("Dev:  docker compose up -d")
-				log.info("Prod: docker compose -f docker-compose.prod.yml up -d")
+				console.log(`  ${pc.cyan("$")} ${pc.bold("docker compose up -d")}  ${pc.dim("(development)")}`)
+				console.log(`  ${pc.cyan("$")} ${pc.bold("docker compose -f docker-compose.prod.yml up -d")}  ${pc.dim("(production)")}`)
 			} else {
-				log.info("Next: docker compose up -d")
+				console.log(`  ${pc.cyan("$")} ${pc.bold("docker compose up -d")}`)
 			}
 		} else {
-			log.info(`Next: docker build -t ${config.projectName} .`)
+			console.log(`  ${pc.cyan("$")} ${pc.bold(`docker build -t ${config.projectName} .`)}`)
 		}
-		log.info("Docs: https://github.com/strapi-community/strapi-tool-dockerize")
+		console.log()
+		console.log(`  ${pc.dim("Your Strapi app will be available at")} ${pc.cyan("http://localhost:1337")}`)
+		console.log()
+		console.log(`  ${pc.dim("Docs & issues:")} ${pc.dim("https://github.com/strapi-community/strapi-tool-dockerize")}`)
+		console.log()
+
+		log.success("Your project is ready to containerize!")
 	},
 })

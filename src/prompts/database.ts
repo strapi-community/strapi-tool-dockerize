@@ -1,5 +1,5 @@
 import * as p from "@clack/prompts"
-import type { DatabaseClient } from "../config"
+import type { DatabaseClient, DetectedConfig } from "../config"
 import {
 	DEFAULT_DATABASE_HOST,
 	DEFAULT_DATABASE_NAME,
@@ -35,7 +35,10 @@ interface DatabaseConnection {
 	databasePassword: string
 }
 
-export async function promptDatabaseConnection(dbClient: DatabaseClient): Promise<DatabaseConnection> {
+export async function promptDatabaseConnection(
+	dbClient: DatabaseClient,
+	detected?: Partial<DetectedConfig>,
+): Promise<DatabaseConnection> {
 	if (dbClient === "sqlite") {
 		return {
 			databaseHost: DEFAULT_DATABASE_HOST,
@@ -46,15 +49,19 @@ export async function promptDatabaseConnection(dbClient: DatabaseClient): Promis
 		}
 	}
 
-	const defaultPort = DEFAULT_PORTS[dbClient]
+	const defaultHost = detected?.databaseHost ?? DEFAULT_DATABASE_HOST
+	const defaultPort = detected?.databasePort ?? DEFAULT_PORTS[dbClient]
+	const defaultName = detected?.databaseName ?? DEFAULT_DATABASE_NAME
+	const defaultUsername = detected?.databaseUsername ?? DEFAULT_DATABASE_USERNAME
+	const defaultPassword = detected?.databasePassword ?? DEFAULT_DATABASE_PASSWORD
 
 	const result = await p.group(
 		{
 			databaseHost: () =>
 				p.text({
 					message: "Database host",
-					placeholder: DEFAULT_DATABASE_HOST,
-					defaultValue: DEFAULT_DATABASE_HOST,
+					placeholder: defaultHost,
+					defaultValue: defaultHost,
 				}),
 			databasePort: () =>
 				p.text({
@@ -71,18 +78,18 @@ export async function promptDatabaseConnection(dbClient: DatabaseClient): Promis
 			databaseName: () =>
 				p.text({
 					message: "Database name",
-					placeholder: DEFAULT_DATABASE_NAME,
-					defaultValue: DEFAULT_DATABASE_NAME,
+					placeholder: defaultName,
+					defaultValue: defaultName,
 				}),
 			databaseUsername: () =>
 				p.text({
 					message: "Database username",
-					placeholder: DEFAULT_DATABASE_USERNAME,
-					defaultValue: DEFAULT_DATABASE_USERNAME,
+					placeholder: defaultUsername,
+					defaultValue: defaultUsername,
 				}),
 			databasePassword: () =>
 				p.password({
-					message: `Database password (press Enter for '${DEFAULT_DATABASE_PASSWORD}')`,
+					message: `Database password (press Enter for '${defaultPassword}')`,
 					mask: "*",
 				}),
 		},
@@ -99,6 +106,6 @@ export async function promptDatabaseConnection(dbClient: DatabaseClient): Promis
 		databasePort: Number.parseInt(result.databasePort, 10),
 		databaseName: result.databaseName,
 		databaseUsername: result.databaseUsername,
-		databasePassword: result.databasePassword || DEFAULT_DATABASE_PASSWORD,
+		databasePassword: result.databasePassword || defaultPassword,
 	}
 }

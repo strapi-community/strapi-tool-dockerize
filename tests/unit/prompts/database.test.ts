@@ -216,4 +216,85 @@ describe("promptDatabaseConnection", () => {
 		expect(groupOptions).toHaveProperty("onCancel")
 		expect(typeof groupOptions.onCancel).toBe("function")
 	})
+
+	it("uses detected host as default when provided", async () => {
+		mockGroup.mockResolvedValue({
+			databaseHost: "detected-host",
+			databasePort: "5432",
+			databaseName: "strapi",
+			databaseUsername: "strapi",
+			databasePassword: "strapi",
+		})
+
+		await promptDatabaseConnection("postgres", { databaseHost: "detected-host" })
+
+		const groupCall = mockGroup.mock.calls[0]
+		const promptDefs = groupCall[0] as Record<string, () => unknown>
+		promptDefs.databaseHost()
+
+		const textArgs = mockText.mock.calls[mockText.mock.calls.length - 1][0] as {
+			defaultValue: string
+			placeholder: string
+		}
+		expect(textArgs.defaultValue).toBe("detected-host")
+		expect(textArgs.placeholder).toBe("detected-host")
+	})
+
+	it("uses detected port as default when provided", async () => {
+		mockGroup.mockResolvedValue({
+			databaseHost: "localhost",
+			databasePort: "9999",
+			databaseName: "strapi",
+			databaseUsername: "strapi",
+			databasePassword: "strapi",
+		})
+
+		await promptDatabaseConnection("postgres", { databasePort: 9999 })
+
+		const groupCall = mockGroup.mock.calls[0]
+		const promptDefs = groupCall[0] as Record<string, () => unknown>
+		promptDefs.databasePort()
+
+		const textArgs = mockText.mock.calls[mockText.mock.calls.length - 1][0] as {
+			defaultValue: string
+			placeholder: string
+		}
+		expect(textArgs.defaultValue).toBe("9999")
+		expect(textArgs.placeholder).toBe("9999")
+	})
+
+	it("falls back to DEFAULT_* when no detected values", async () => {
+		mockGroup.mockResolvedValue({
+			databaseHost: "localhost",
+			databasePort: "5432",
+			databaseName: "strapi",
+			databaseUsername: "strapi",
+			databasePassword: "strapi",
+		})
+
+		await promptDatabaseConnection("postgres")
+
+		const groupCall = mockGroup.mock.calls[0]
+		const promptDefs = groupCall[0] as Record<string, () => unknown>
+
+		mockText.mockClear()
+		promptDefs.databaseHost()
+		const hostArgs = mockText.mock.calls[0][0] as { defaultValue: string }
+		expect(hostArgs.defaultValue).toBe(DEFAULT_DATABASE_HOST)
+
+		mockText.mockClear()
+		promptDefs.databasePort()
+		const portArgs = mockText.mock.calls[0][0] as { defaultValue: string }
+		expect(portArgs.defaultValue).toBe(String(DEFAULT_PORTS.postgres))
+
+		mockText.mockClear()
+		promptDefs.databaseName()
+		const nameArgs = mockText.mock.calls[0][0] as { defaultValue: string }
+		expect(nameArgs.defaultValue).toBe(DEFAULT_DATABASE_NAME)
+
+		mockText.mockClear()
+		promptDefs.databaseUsername()
+		const userArgs = mockText.mock.calls[0][0] as { defaultValue: string }
+		expect(userArgs.defaultValue).toBe(DEFAULT_DATABASE_USERNAME)
+	})
 })
