@@ -1,0 +1,26 @@
+FROM node:{{ nodeVersion }}-alpine AS base
+RUN apk update && apk add --no-cache build-base gcc autoconf automake zlib-dev libpng-dev vips-dev
+ARG NODE_ENV=development
+ENV NODE_ENV=${NODE_ENV}
+RUN addgroup -S strapi && adduser -S strapi -G strapi
+WORKDIR /opt/app
+
+FROM base AS deps
+{% for file in pmCopyFiles %}
+COPY {{ file }} ./
+{% endfor %}
+RUN {{ pmInstallStep }}
+
+FROM deps AS build
+COPY . .
+RUN {{ pmBuildStep }}
+
+FROM base AS runtime
+WORKDIR /opt/app
+COPY --from=build /opt/app .
+RUN chown -R strapi:strapi /opt/app
+USER strapi
+EXPOSE {{ strapiPort }}
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:{{ strapiPort }}/_health || exit 1
+CMD {{ pmDevStep }}
