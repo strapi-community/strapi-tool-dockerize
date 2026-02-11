@@ -42,6 +42,10 @@ export const sharedFlags = {
 		description: "Secret backend (none, docker-secrets)",
 		alias: "s",
 	},
+	preset: {
+		type: "string",
+		description: "Named preset (local-dev, production, ci)",
+	},
 	"dry-run": {
 		type: "boolean",
 		description: "Preview generated files without writing to disk",
@@ -62,5 +66,13 @@ export const sharedFlags = {
 	"health-retries": {
 		type: "string",
 		description: "Strapi health check retry count",
+	},
+	memory: {
+		type: "string",
+		description: "Container memory limit (e.g. 2g, 512m)",
+	},
+	cpus: {
+		type: "string",
+		description: "Container CPU limit (e.g. 2, 0.5)",
 	},
 } satisfies ArgsDef

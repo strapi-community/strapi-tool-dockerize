@@ -7,11 +7,12 @@ import { installDatabaseDriver } from "../../actions"
 import type {
 	DetectedConfig,
 	Environment,
+	PresetName,
 	ResolvedConfig,
 	SecretBackend,
 	StrapiHealthCheckOverrides,
 } from "../../config"
-import { DEFAULT_PORTS, resolvedConfigSchema } from "../../config"
+import { DEFAULT_PORTS, PRESET_NAMES, getPreset, resolvedConfigSchema } from "../../config"
 import { detectAll } from "../../detection"
 import {
 	generateCompose,
@@ -46,6 +47,11 @@ export function buildHealthCheckOverrides(
 	if (args["health-start-period"]) overrides.startPeriod = String(args["health-start-period"])
 	if (args["health-retries"]) overrides.retries = Number(args["health-retries"])
 	return Object.keys(overrides).length > 0 ? overrides : undefined
+}
+
+export function applyPreset(detected: DetectedConfig, presetName: PresetName): DetectedConfig {
+	const preset = getPreset(presetName)
+	return { ...detected, ...preset }
 }
 
 export function buildDetectionSummary(detected: DetectedConfig): string {
@@ -89,6 +95,14 @@ export const defaultCommand = defineCommand({
 			detectSpinner.error("Failed to detect project configuration")
 			log.error(err instanceof Error ? err.message : String(err))
 			process.exit(1)
+		}
+
+		if (args.preset) {
+			if (!PRESET_NAMES.includes(args.preset as PresetName)) {
+				log.error(`Unknown preset "${args.preset}". Available: ${PRESET_NAMES.join(", ")}`)
+				process.exit(1)
+			}
+			detected = applyPreset(detected, args.preset as PresetName)
 		}
 
 		if (args.database) {
