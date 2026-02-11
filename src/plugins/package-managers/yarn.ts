@@ -17,6 +17,14 @@ export const yarnPlugin: PackageManagerPlugin = {
 		return `yarn remove ${pkg}`
 	},
 
+	dockerBaseImage(nodeVersion: string): string {
+		return `node:${nodeVersion}-alpine`
+	},
+
+	dockerSetupSteps(): string[] {
+		return []
+	},
+
 	dockerCopyFiles(): string[] {
 		return ["package.json", "yarn.lock"]
 	},

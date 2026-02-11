@@ -21,6 +21,15 @@ describe("npmPlugin", () => {
 	})
 
 	describe("docker steps", () => {
+		it("returns node alpine base image", () => {
+			expect(npmPlugin.dockerBaseImage("20")).toBe("node:20-alpine")
+			expect(npmPlugin.dockerBaseImage("18")).toBe("node:18-alpine")
+		})
+
+		it("returns no setup steps", () => {
+			expect(npmPlugin.dockerSetupSteps()).toEqual([])
+		})
+
 		it("copies package.json and lock file", () => {
 			expect(npmPlugin.dockerCopyFiles()).toEqual(["package.json", "package-lock.json"])
 		})

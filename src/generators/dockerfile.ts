@@ -12,8 +12,14 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 export async function generateDockerfiles(config: ResolvedConfig, registry: PluginRegistry, cwd: string): Promise<void> {
 	const pm = registry.getPackageManager(config.packageManager)
 
+	const nodeVersion = NODE_VERSIONS[config.strapiVersion]
+	const baseImage = pm.dockerBaseImage(nodeVersion)
+
 	const context = {
-		nodeVersion: NODE_VERSIONS[config.strapiVersion],
+		nodeVersion,
+		baseImage,
+		runtimeImage: baseImage,
+		pmSetupSteps: pm.dockerSetupSteps(),
 		pmCopyFiles: pm.dockerCopyFiles(),
 		pmInstallStep: pm.dockerInstallStep(false),
 		pmInstallStepProd: pm.dockerInstallStep(true),

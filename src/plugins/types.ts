@@ -40,6 +40,8 @@ export interface PackageManagerPlugin {
 	devCommand: string
 	addPackageCommand(pkg: string): string
 	removePackageCommand(pkg: string): string
+	dockerBaseImage(nodeVersion: string): string
+	dockerSetupSteps(): string[]
 	dockerCopyFiles(): string[]
 	dockerInstallStep(production: boolean): string
 	dockerBuildStep(): string

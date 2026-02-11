@@ -17,6 +17,14 @@ export const pnpmPlugin: PackageManagerPlugin = {
 		return `pnpm remove ${pkg}`
 	},
 
+	dockerBaseImage(nodeVersion: string): string {
+		return `node:${nodeVersion}-alpine`
+	},
+
+	dockerSetupSteps(): string[] {
+		return ["RUN corepack enable"]
+	},
+
 	dockerCopyFiles(): string[] {
 		return ["package.json", "pnpm-lock.yaml"]
 	},

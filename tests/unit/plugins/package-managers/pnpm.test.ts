@@ -21,6 +21,14 @@ describe("pnpmPlugin", () => {
 	})
 
 	describe("docker steps", () => {
+		it("returns node alpine base image", () => {
+			expect(pnpmPlugin.dockerBaseImage("20")).toBe("node:20-alpine")
+		})
+
+		it("returns corepack enable setup step", () => {
+			expect(pnpmPlugin.dockerSetupSteps()).toEqual(["RUN corepack enable"])
+		})
+
 		it("copies package.json and lock file", () => {
 			expect(pnpmPlugin.dockerCopyFiles()).toEqual(["package.json", "pnpm-lock.yaml"])
 		})

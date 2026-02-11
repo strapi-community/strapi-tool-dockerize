@@ -17,6 +17,14 @@ export const npmPlugin: PackageManagerPlugin = {
 		return `npm uninstall ${pkg}`
 	},
 
+	dockerBaseImage(nodeVersion: string): string {
+		return `node:${nodeVersion}-alpine`
+	},
+
+	dockerSetupSteps(): string[] {
+		return []
+	},
+
 	dockerCopyFiles(): string[] {
 		return ["package.json", "package-lock.json"]
 	},

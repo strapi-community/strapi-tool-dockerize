@@ -17,6 +17,14 @@ export const bunPlugin: PackageManagerPlugin = {
 		return `bun remove ${pkg}`
 	},
 
+	dockerBaseImage(_nodeVersion: string): string {
+		return "oven/bun:1-alpine"
+	},
+
+	dockerSetupSteps(): string[] {
+		return []
+	},
+
 	dockerCopyFiles(): string[] {
 		return ["package.json", "bun.lockb"]
 	},
