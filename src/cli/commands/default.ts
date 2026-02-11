@@ -75,6 +75,7 @@ export const defaultCommand = defineCommand({
 					databasePassword: detected.databasePassword ?? "strapi",
 					useCompose: detected.useCompose ?? true,
 					useAdminer: detected.useAdminer ?? false,
+					isESM: detected.isESM ?? false,
 					envVars: detected.envVars ?? {},
 				})
 			: await runPrompts(detected)
@@ -128,7 +129,13 @@ export const defaultCommand = defineCommand({
 			generated.push("docker-compose.yml")
 		}
 		generated.push(".env")
-		generated.push(`config/env/development/database.${config.projectType === "ts" ? "ts" : "js"}`)
+		const dbExt = config.projectType === "ts" ? "ts" : "js"
+		const envDirs = config.environment === "both"
+			? ["development", "production"]
+			: [config.environment]
+		for (const envDir of envDirs) {
+			generated.push(`config/env/${envDir}/database.${dbExt}`)
+		}
 
 		log.success("Docker configuration complete!")
 		log.info("Generated files:")

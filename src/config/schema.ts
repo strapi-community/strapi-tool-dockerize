@@ -29,6 +29,7 @@ export const detectedConfigSchema = z.object({
 	databasePassword: z.string().optional(),
 	useCompose: z.boolean().optional(),
 	useAdminer: z.boolean().optional(),
+	isESM: z.boolean().optional(),
 	envVars: z.record(z.string()).optional(),
 })
 
@@ -48,6 +49,7 @@ export const resolvedConfigSchema = z.object({
 	databasePassword: z.string().min(1),
 	useCompose: z.boolean(),
 	useAdminer: z.boolean(),
+	isESM: z.boolean(),
 	envVars: z.record(z.string()),
 })
 

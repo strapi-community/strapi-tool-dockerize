@@ -137,6 +137,7 @@ export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConf
 		...dbConnection,
 		useCompose,
 		useAdminer,
+		isESM: detected.isESM ?? false,
 		envVars: detected.envVars ?? {},
 	}
 

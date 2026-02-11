@@ -3,6 +3,7 @@ import type { DetectedConfig, ProjectType, StrapiVersion } from "../config"
 
 interface PackageJson {
 	name?: string
+	type?: string
 	dependencies?: Record<string, string>
 	devDependencies?: Record<string, string>
 }
@@ -34,6 +35,7 @@ export async function detectStrapi(cwd: string): Promise<Partial<DetectedConfig>
 			strapiVersion: detectStrapiVersion(allDeps),
 			projectType: detectProjectType(allDeps),
 			projectName: pkg.name,
+			isESM: pkg.type === "module",
 		}
 	} catch {
 		return {}

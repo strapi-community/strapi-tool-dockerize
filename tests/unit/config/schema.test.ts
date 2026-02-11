@@ -130,6 +130,7 @@ describe("resolvedConfigSchema", () => {
 		databasePassword: "strapi",
 		useCompose: true,
 		useAdminer: false,
+		isESM: false,
 		envVars: {},
 	}
 
