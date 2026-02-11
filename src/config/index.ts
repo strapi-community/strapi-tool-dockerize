@@ -37,3 +37,5 @@ export {
 	ADMINER_PORT,
 	DEFAULT_SECRET_BACKEND,
 } from "./defaults"
+
+export type { StrapiHealthCheckOverrides } from "./health-check"

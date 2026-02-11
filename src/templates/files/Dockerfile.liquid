@@ -31,6 +31,6 @@ COPY --from=build /opt/app .
 RUN chown -R strapi:strapi /opt/app
 USER strapi
 EXPOSE {{ strapiPort }}
-HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+HEALTHCHECK --interval={{ healthInterval }} --timeout={{ healthTimeout }} --start-period={{ healthStartPeriod }} --retries={{ healthRetries }} \
   CMD wget --no-verbose --tries=1 --spider http://localhost:{{ strapiPort }}/_health || exit 1
 CMD {{ pmDevStep }}

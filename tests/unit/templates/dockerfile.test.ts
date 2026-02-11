@@ -13,6 +13,10 @@ const baseContext = {
 	pmDevStep: '["npm", "run", "develop"]',
 	projectName: "test-project",
 	strapiPort: 1337,
+	healthInterval: "30s",
+	healthTimeout: "10s",
+	healthStartPeriod: "40s",
+	healthRetries: 3,
 }
 
 function extractStage(dockerfile: string, stageName: string): string {
