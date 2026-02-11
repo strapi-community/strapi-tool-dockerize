@@ -39,7 +39,7 @@ export const postgresPlugin: DatabasePlugin = {
 
 	healthcheck(): HealthCheck {
 		return {
-			test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"],
+			test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"],
 			interval: "10s",
 			timeout: "5s",
 			retries: 5,

@@ -42,7 +42,7 @@ export const mysqlPlugin: DatabasePlugin = {
 		return {
 			test: [
 				"CMD-SHELL",
-				"mysqladmin ping -h localhost -u root -p${MYSQL_ROOT_PASSWORD}",
+				"mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD}",
 			],
 			interval: "10s",
 			timeout: "5s",
