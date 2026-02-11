@@ -139,7 +139,7 @@ async function createFixture(fixture: Fixture) {
 	console.log(`  created ${fixture.name}`)
 }
 
-console.log(`\nCreating fixtures in tmp/fixtures/\n`)
+console.log("\nCreating fixtures in tmp/fixtures/\n")
 
 for (const fixture of fixtures) {
 	await createFixture(fixture)

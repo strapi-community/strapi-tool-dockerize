@@ -81,9 +81,7 @@ async function removeConfigEnvDatabaseFiles(cwd: string): Promise<number> {
 			await unlink(join(cwd, file))
 			console.log(pc.red(`  Removed ${file}`))
 			removed++
-		} catch {
-			continue
-		}
+		} catch {}
 	}
 
 	if (removed > 0) {
@@ -129,9 +127,7 @@ export const resetCommand = defineCommand({
 				await unlink(join(cwd, file))
 				console.log(pc.red(`  Removed ${file}`))
 				removed++
-			} catch {
-				continue
-			}
+			} catch {}
 		}
 
 		for (const file of BAK_FILES) {
@@ -139,9 +135,7 @@ export const resetCommand = defineCommand({
 				await unlink(join(cwd, file))
 				console.log(pc.red(`  Removed ${file}`))
 				removed++
-			} catch {
-				continue
-			}
+			} catch {}
 		}
 
 		if (await cleanEnvMarkers(cwd)) {

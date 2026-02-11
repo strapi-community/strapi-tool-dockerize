@@ -41,9 +41,7 @@ async function detectFromConfigFiles(cwd: string): Promise<DatabaseClient | unde
 			const content = await readFile(`${cwd}/${configPath}`, "utf-8")
 			const match = content.match(CLIENT_REGEX)
 			if (match) return match[1] as DatabaseClient
-		} catch {
-			continue
-		}
+		} catch {}
 	}
 	return undefined
 }

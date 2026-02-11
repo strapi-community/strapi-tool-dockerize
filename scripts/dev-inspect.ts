@@ -25,9 +25,7 @@ for (const file of FILES) {
 		console.log(`${"=".repeat(60)}\n`)
 		console.log(content)
 		found++
-	} catch {
-		continue
-	}
+	} catch {}
 }
 
 if (found === 0) {

@@ -4,7 +4,7 @@ import { defineCommand } from "citty"
 import pc from "picocolors"
 import { ZodError } from "zod"
 import { installDatabaseDriver } from "../../actions"
-import type { DetectedConfig, Environment } from "../../config"
+import type { DetectedConfig, Environment, ResolvedConfig } from "../../config"
 import { DEFAULT_PORTS, resolvedConfigSchema } from "../../config"
 import { detectAll } from "../../detection"
 import {
@@ -92,7 +92,7 @@ export const defaultCommand = defineCommand({
 			log.info(`Detected: ${buildDetectionSummary(detected)}`)
 		}
 
-		let config
+		let config: ResolvedConfig
 		if (args.yes) {
 			if (shouldWarnDatabaseDefault(detected)) {
 				log.warn("No database detected, defaulting to postgres")

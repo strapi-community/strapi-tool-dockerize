@@ -6,7 +6,7 @@
 		"useIgnoreFile": true
 	},
 	"files": {
-		"ignore": ["dist/", "tmp/", "node_modules/"]
+		"ignore": ["dist/", "tmp/", "node_modules/", "cli/", "core/", "utils/", "index.js"]
 	},
 	"organizeImports": {
 		"enabled": true

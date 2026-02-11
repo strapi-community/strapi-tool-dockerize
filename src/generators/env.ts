@@ -84,13 +84,13 @@ export async function generateEnv(
 				content.slice(0, startIdx) + managedSection + content.slice(endIdx + MARKER_END.length)
 		} else {
 			const trimmed = content.trimEnd()
-			content = trimmed ? trimmed + "\n\n" + managedSection + "\n" : managedSection + "\n"
+			content = trimmed ? `${trimmed}\n\n${managedSection}\n` : `${managedSection}\n`
 		}
 
 		content = commentOutDuplicateKeys(content, managedKeys)
 
 		await writeFile(envPath, content)
 	} else {
-		await writeFile(envPath, managedSection + "\n")
+		await writeFile(envPath, `${managedSection}\n`)
 	}
 }
