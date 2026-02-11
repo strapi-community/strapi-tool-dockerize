@@ -15,26 +15,26 @@ services:
     ports:
       - "{{ strapiPort }}:{{ strapiPort }}"
     volumes:
-{% if environment != "production" %}
+{%- if environment != "production" %}
       - ./config:/opt/app/config
       - ./src:/opt/app/src
       - ./package.json:/opt/app/package.json
-{% if lockFile %}
+{%- if lockFile %}
       - ./{{ lockFile }}:/opt/app/{{ lockFile }}
-{% endif %}
-{% endif %}
+{%- endif %}
+{%- endif %}
       - strapi-uploads:/opt/app/public/uploads
-{% if databaseClient == "sqlite" %}
+{%- if databaseClient == "sqlite" %}
       - strapi-data:/opt/app/.tmp
-{% endif %}
-{% if databaseClient != "sqlite" %}
+{%- endif %}
+{%- if databaseClient != "sqlite" %}
     depends_on:
       {{ projectName }}-db:
         condition: service_healthy
-{% endif %}
+{%- endif %}
     networks:
       - {{ projectName }}-network
-{% if databaseClient != "sqlite" %}
+{%- if databaseClient != "sqlite" %}
 
   {{ projectName }}-db:
     image: {{ dbImage }}
@@ -45,35 +45,35 @@ services:
         max-size: "10m"
         max-file: "3"
     environment:
-{% for entry in dbEnvironment %}
+{%- for entry in dbEnvironment %}
       {{ entry.key }}: "{{ entry.value }}"
-{% endfor %}
+{%- endfor %}
     ports:
-{% for port in dbPorts %}
+{%- for port in dbPorts %}
       - "{{ port }}"
-{% endfor %}
+{%- endfor %}
     volumes:
-{% for volume in dbVolumes %}
+{%- for volume in dbVolumes %}
       - {{ volume }}
-{% endfor %}
+{%- endfor %}
     healthcheck:
-{% for line in dbHealthTest %}
+{%- for line in dbHealthTest %}
       {{ line }}
-{% endfor %}
+{%- endfor %}
       interval: {{ dbHealthInterval }}
       timeout: {{ dbHealthTimeout }}
       retries: {{ dbHealthRetries }}
-{% if dbHealthStartPeriod %}
+{%- if dbHealthStartPeriod %}
       start_period: {{ dbHealthStartPeriod }}
-{% endif %}
-{% if environment == "production" %}
+{%- endif %}
+{%- if environment == "production" %}
     secrets:
       - db_password
-{% endif %}
+{%- endif %}
     networks:
       - {{ projectName }}-network
-{% endif %}
-{% if useAdminer and databaseClient != "sqlite" %}
+{%- endif %}
+{%- if useAdminer and databaseClient != "sqlite" %}
 
   {{ projectName }}-adminer:
     image: {{ adminerImage }}
@@ -90,25 +90,25 @@ services:
         condition: service_healthy
     networks:
       - {{ projectName }}-network
-{% endif %}
+{%- endif %}
 
 volumes:
   strapi-uploads:
-{% if databaseClient == "sqlite" %}
+{%- if databaseClient == "sqlite" %}
   strapi-data:
-{% endif %}
-{% if databaseClient != "sqlite" %}
-{% for volume in namedVolumes %}
+{%- endif %}
+{%- if databaseClient != "sqlite" %}
+{%- for volume in namedVolumes %}
   {{ volume }}:
-{% endfor %}
-{% endif %}
+{%- endfor %}
+{%- endif %}
 
 networks:
   {{ projectName }}-network:
     driver: bridge
-{% if environment == "production" and databaseClient != "sqlite" %}
+{%- if environment == "production" and databaseClient != "sqlite" %}
 
 secrets:
   db_password:
     file: ./secrets/db_password.txt
-{% endif %}
+{%- endif %}
