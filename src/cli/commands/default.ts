@@ -171,6 +171,7 @@ export const defaultCommand = defineCommand({
 
 		const genSpinner = createSpinner("Generating Docker configuration...")
 
+		let secretFiles: string[] = []
 		try {
 			await generateDockerfiles(config, pluginRegistry, cwd, healthCheckOverrides)
 			genSpinner.update("Generating .dockerignore...")
@@ -186,6 +187,9 @@ export const defaultCommand = defineCommand({
 
 			genSpinner.update("Generating database config...")
 			await generateDatabaseConfig(config, cwd)
+
+			const secretManager = pluginRegistry.getSecretManager(config.secretBackend)
+			secretFiles = await secretManager.generateFiles(config, cwd)
 
 			genSpinner.success("Docker configuration ready!")
 		} catch (err) {
@@ -222,6 +226,9 @@ export const defaultCommand = defineCommand({
 			}
 		}
 		generated.push(".env")
+		for (const sf of secretFiles) {
+			generated.push(sf)
+		}
 		const dbExt = config.projectType === "ts" ? "ts" : "js"
 		const envDirs =
 			config.environment === "both" ? ["development", "production"] : [config.environment]
