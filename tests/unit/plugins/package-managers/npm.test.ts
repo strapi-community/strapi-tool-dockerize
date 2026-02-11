@@ -39,7 +39,7 @@ describe("npmPlugin", () => {
 		})
 
 		it("uses production flag for prod install", () => {
-			expect(npmPlugin.dockerInstallStep(true)).toBe("npm ci --only=production")
+			expect(npmPlugin.dockerInstallStep(true)).toBe("npm ci --omit=dev")
 		})
 
 		it("uses npm run build", () => {

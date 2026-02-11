@@ -30,7 +30,7 @@ export const npmPlugin: PackageManagerPlugin = {
 	},
 
 	dockerInstallStep(production: boolean): string {
-		return production ? "npm ci --only=production" : "npm ci"
+		return production ? "npm ci --omit=dev" : "npm ci"
 	},
 
 	dockerBuildStep(): string {
