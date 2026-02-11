@@ -71,6 +71,10 @@ export async function generateEnv(
 		vars.DATABASE_FILENAME = ".tmp/data.db"
 	}
 
+	const secretManager = registry.getSecretManager(config.secretBackend)
+	const secretOverrides = secretManager.envOverrides(config)
+	Object.assign(vars, secretOverrides)
+
 	const managedSection = buildManagedSection(vars)
 	const managedKeys = new Set(Object.keys(vars))
 
