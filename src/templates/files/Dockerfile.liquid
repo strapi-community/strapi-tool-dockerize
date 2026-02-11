@@ -18,7 +18,14 @@ FROM deps AS build
 COPY . .
 RUN {{ pmBuildStep }}
 
-FROM base AS runtime
+FROM {{ runtimeImage }} AS runtime
+RUN apk update && apk add --no-cache vips
+{% for step in pmSetupSteps %}
+{{ step }}
+{% endfor %}
+ARG NODE_ENV=development
+ENV NODE_ENV=${NODE_ENV}
+RUN addgroup -S strapi && adduser -S strapi -G strapi
 WORKDIR /opt/app
 COPY --from=build /opt/app .
 RUN chown -R strapi:strapi /opt/app

@@ -19,7 +19,7 @@ COPY . .
 RUN {{ pmBuildStep }}
 
 FROM {{ runtimeImage }} AS runtime
-RUN apk update && apk add --no-cache vips-dev
+RUN apk update && apk add --no-cache vips
 RUN addgroup -S strapi && adduser -S strapi -G strapi
 ENV NODE_ENV=production
 WORKDIR /opt/app
