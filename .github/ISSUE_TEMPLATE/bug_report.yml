@@ -1,0 +1,135 @@
+name: Bug Report
+description: Something isn't working as expected
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please fill out the details below so the issue can be reproduced and fixed.
+
+  - type: input
+    id: dockerize-version
+    attributes:
+      label: Dockerize version
+      description: Output of `npx strapi-dockerize --version` or the version you installed
+      placeholder: "2.5.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: strapi-version
+    attributes:
+      label: Strapi version
+      options:
+        - v4
+        - v5
+    validations:
+      required: true
+
+  - type: dropdown
+    id: database
+    attributes:
+      label: Database
+      options:
+        - postgres
+        - mysql
+        - mariadb
+        - sqlite
+    validations:
+      required: true
+
+  - type: dropdown
+    id: package-manager
+    attributes:
+      label: Package manager
+      options:
+        - npm
+        - yarn
+        - pnpm
+        - bun
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment target
+      options:
+        - development
+        - production
+        - both
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - macOS
+        - Linux
+        - Windows
+        - WSL
+    validations:
+      required: true
+
+  - type: input
+    id: node-version
+    attributes:
+      label: Node.js version
+      description: Output of `node --version`
+      placeholder: "v20.11.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug description
+      description: A clear and concise description of the bug
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps to reproduce the behavior
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What you expected to happen
+    validations:
+      required: true
+
+  - type: textarea
+    id: error-output
+    attributes:
+      label: Error output
+      description: Paste any error messages or stack traces
+      render: shell
+
+  - type: textarea
+    id: generated-files
+    attributes:
+      label: Generated file snippets
+      description: Paste relevant parts of generated Dockerfile, docker-compose.yml, or .env files
+      render: yaml
+
+  - type: checkboxes
+    id: validation
+    attributes:
+      label: Validation
+      options:
+        - label: I searched existing issues and this hasn't been reported yet
+          required: true
+        - label: I'm running the latest version of strapi-tool-dockerize
+          required: true

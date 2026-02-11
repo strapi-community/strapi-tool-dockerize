@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions
+    url: https://github.com/strapi-community/strapi-tool-dockerize/discussions
+    about: Ask questions and get help from the community
+  - name: Strapi Documentation
+    url: https://docs.strapi.io
+    about: For general Strapi questions, check the official docs
+  - name: Docker Documentation
+    url: https://docs.docker.com
+    about: For general Docker questions, check the official docs
