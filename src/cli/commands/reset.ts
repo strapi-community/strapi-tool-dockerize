@@ -1,6 +1,6 @@
 import { defineCommand } from "citty"
 import { resolve, join } from "node:path"
-import { unlink, readFile, writeFile, rm } from "node:fs/promises"
+import { unlink, readFile, writeFile, readdir, rmdir } from "node:fs/promises"
 import pc from "picocolors"
 
 const DOCKER_FILES = [
@@ -11,6 +11,15 @@ const DOCKER_FILES = [
 	"docker-compose.dev.yml",
 	"docker-compose.prod.yml",
 	".dockerignore",
+]
+
+const BAK_FILES = DOCKER_FILES.map((f) => `${f}.bak`)
+
+const CONFIG_ENV_DATABASE_FILES = [
+	join("config", "env", "development", "database.ts"),
+	join("config", "env", "development", "database.js"),
+	join("config", "env", "production", "database.ts"),
+	join("config", "env", "production", "database.js"),
 ]
 
 const MARKER_START = "# --- Dockerize Start ---"
@@ -34,14 +43,55 @@ async function cleanEnvMarkers(cwd: string): Promise<boolean> {
 	}
 }
 
-async function removeConfigEnvDir(cwd: string): Promise<boolean> {
-	const configEnvDir = join(cwd, "config", "env")
+async function isDirEmpty(dirPath: string): Promise<boolean> {
 	try {
-		await rm(configEnvDir, { recursive: true, force: true })
-		return true
+		const entries = await readdir(dirPath)
+		return entries.length === 0
 	} catch {
 		return false
 	}
+}
+
+async function removeEmptyDirChain(dirPath: string, stopAt: string): Promise<void> {
+	let current = dirPath
+	while (current !== stopAt && current.startsWith(stopAt)) {
+		if (await isDirEmpty(current)) {
+			try {
+				await rmdir(current)
+			} catch {
+				break
+			}
+			current = join(current, "..")
+			current = resolve(current)
+		} else {
+			break
+		}
+	}
+}
+
+async function removeConfigEnvDatabaseFiles(cwd: string): Promise<number> {
+	let removed = 0
+	for (const file of CONFIG_ENV_DATABASE_FILES) {
+		try {
+			await unlink(join(cwd, file))
+			console.log(pc.red(`  Removed ${file}`))
+			removed++
+		} catch {
+			continue
+		}
+	}
+
+	if (removed > 0) {
+		const devDir = join(cwd, "config", "env", "development")
+		const prodDir = join(cwd, "config", "env", "production")
+		const envDir = join(cwd, "config", "env")
+
+		await removeEmptyDirChain(devDir, join(cwd, "config"))
+		await removeEmptyDirChain(prodDir, join(cwd, "config"))
+		await removeEmptyDirChain(envDir, join(cwd, "config"))
+	}
+
+	return removed
 }
 
 export const resetCommand = defineCommand({
@@ -71,7 +121,17 @@ export const resetCommand = defineCommand({
 
 		for (const file of DOCKER_FILES) {
 			try {
-				await unlink(`${cwd}/${file}`)
+				await unlink(join(cwd, file))
+				console.log(pc.red(`  Removed ${file}`))
+				removed++
+			} catch {
+				continue
+			}
+		}
+
+		for (const file of BAK_FILES) {
+			try {
+				await unlink(join(cwd, file))
 				console.log(pc.red(`  Removed ${file}`))
 				removed++
 			} catch {
@@ -84,10 +144,7 @@ export const resetCommand = defineCommand({
 			removed++
 		}
 
-		if (await removeConfigEnvDir(cwd)) {
-			console.log(pc.red("  Removed config/env/"))
-			removed++
-		}
+		removed += await removeConfigEnvDatabaseFiles(cwd)
 
 		if (removed === 0) {
 			console.log(pc.dim("  No Docker files found to remove."))
