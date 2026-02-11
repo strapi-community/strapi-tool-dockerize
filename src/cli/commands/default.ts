@@ -1,6 +1,7 @@
 import { defineCommand } from "citty"
 import { access } from "node:fs/promises"
 import { join, resolve } from "node:path"
+import { ZodError } from "zod"
 import type { DetectedConfig, Environment } from "../../config"
 import { DEFAULT_PORTS, resolvedConfigSchema } from "../../config"
 import { detectAll } from "../../detection"
@@ -11,6 +12,22 @@ import { showBanner, createSpinner, log } from "../../ui"
 import { backupDockerFiles } from "../../utils"
 import { installDatabaseDriver } from "../../actions"
 import { sharedFlags } from "../flags"
+
+export function formatZodErrors(error: ZodError): string[] {
+	return error.issues.map((issue) => {
+		const path = issue.path.length > 0 ? issue.path.join(".") : "config"
+		return `${path}: ${issue.message}`
+	})
+}
+
+export function buildDetectionSummary(detected: DetectedConfig): string {
+	const parts: string[] = []
+	parts.push(`strapi ${detected.strapiVersion ?? "unknown"}`)
+	parts.push(detected.projectType ?? "unknown")
+	parts.push(detected.databaseClient ?? "not detected")
+	parts.push(detected.packageManager ?? "unknown")
+	return parts.join(" | ")
+}
 
 export const defaultCommand = defineCommand({
 	meta: {
@@ -40,6 +57,9 @@ export const defaultCommand = defineCommand({
 		try {
 			detected = await detectAll(cwd)
 			detectSpinner.success("Project scanned")
+			if (args.yes) {
+				log.info(`Detected: ${buildDetectionSummary(detected)}`)
+			}
 		} catch (err) {
 			detectSpinner.error("Failed to detect project configuration")
 			log.error(err instanceof Error ? err.message : String(err))
@@ -60,8 +80,10 @@ export const defaultCommand = defineCommand({
 			detected.useCompose = args.compose
 		}
 
-		const config = args.yes
-			? resolvedConfigSchema.parse({
+		let config
+		if (args.yes) {
+			try {
+				config = resolvedConfigSchema.parse({
 					strapiVersion: detected.strapiVersion ?? "v5",
 					projectType: detected.projectType ?? "ts",
 					databaseClient: detected.databaseClient ?? "postgres",
@@ -78,7 +100,19 @@ export const defaultCommand = defineCommand({
 					isESM: detected.isESM ?? false,
 					envVars: detected.envVars ?? {},
 				})
-			: await runPrompts(detected)
+			} catch (err) {
+				if (err instanceof ZodError) {
+					log.error("Invalid configuration:")
+					for (const msg of formatZodErrors(err)) {
+						log.error(`  ${msg}`)
+					}
+					process.exit(1)
+				}
+				throw err
+			}
+		} else {
+			config = await runPrompts(detected)
+		}
 
 		const backedUp = await backupDockerFiles(cwd)
 		if (backedUp.length > 0) {
