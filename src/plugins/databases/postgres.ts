@@ -7,8 +7,8 @@ export const postgresPlugin: DatabasePlugin = {
 	displayName: "PostgreSQL",
 	defaultPort: DEFAULT_PORTS.postgres,
 	driverPackage: "pg",
-	v4DriverPackage: "pg",
-	v5DriverPackage: "pg",
+	v4DriverPackage: "pg@^8.8.0",
+	v5DriverPackage: "pg@^8.8.0",
 	strapiClient: "postgres",
 
 	composeService(config: ResolvedConfig): ComposeService {

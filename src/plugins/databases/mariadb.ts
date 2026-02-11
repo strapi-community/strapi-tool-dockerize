@@ -7,8 +7,8 @@ export const mariadbPlugin: DatabasePlugin = {
 	displayName: "MariaDB",
 	defaultPort: DEFAULT_PORTS.mariadb,
 	driverPackage: "mysql2",
-	v4DriverPackage: "mysql2",
-	v5DriverPackage: "mysql2",
+	v4DriverPackage: "mysql2@^3.10.0",
+	v5DriverPackage: "mysql2@^3.9.8",
 	strapiClient: "mysql",
 
 	composeService(config: ResolvedConfig): ComposeService {

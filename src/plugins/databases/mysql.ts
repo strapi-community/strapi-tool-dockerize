@@ -7,8 +7,8 @@ export const mysqlPlugin: DatabasePlugin = {
 	displayName: "MySQL",
 	defaultPort: DEFAULT_PORTS.mysql,
 	driverPackage: "mysql2",
-	v4DriverPackage: "mysql2",
-	v5DriverPackage: "mysql2",
+	v4DriverPackage: "mysql2@^3.10.0",
+	v5DriverPackage: "mysql2@^3.9.8",
 	strapiClient: "mysql",
 
 	composeService(config: ResolvedConfig): ComposeService {

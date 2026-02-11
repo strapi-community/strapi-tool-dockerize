@@ -6,8 +6,8 @@ export const sqlitePlugin: DatabasePlugin = {
 	displayName: "SQLite",
 	defaultPort: 0,
 	driverPackage: "better-sqlite3",
-	v4DriverPackage: "better-sqlite3",
-	v5DriverPackage: "better-sqlite3",
+	v4DriverPackage: "better-sqlite3@^8.6.0",
+	v5DriverPackage: "better-sqlite3@^12.4.1",
 	strapiClient: "sqlite",
 
 	composeService(_config: ResolvedConfig): ComposeService {

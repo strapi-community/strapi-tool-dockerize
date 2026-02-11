@@ -6,6 +6,11 @@ import { exec } from "../utils/process"
 
 const KNOWN_DRIVER_PACKAGES = ["pg", "mysql2", "better-sqlite3"]
 
+function parsePackageName(spec: string): string {
+	const atIndex = spec.indexOf("@", 1)
+	return atIndex > 0 ? spec.slice(0, atIndex) : spec
+}
+
 function getDriverForVersion(registry: PluginRegistry, config: ResolvedConfig): string {
 	const dbPlugin = registry.getDatabase(config.databaseClient)
 	return config.strapiVersion === "v4" ? dbPlugin.v4DriverPackage : dbPlugin.v5DriverPackage
@@ -37,17 +42,18 @@ export async function installDatabaseDriver(
 ): Promise<void> {
 	const pmPlugin = registry.getPackageManager(config.packageManager)
 	const targetDriver = getDriverForVersion(registry, config)
+	const targetName = parsePackageName(targetDriver)
 	const allDeps = await readProjectDependencies(cwd)
 	const installedDrivers = getInstalledDrivers(allDeps)
 
-	const conflicting = [...installedDrivers].filter((d) => d !== targetDriver)
+	const conflicting = [...installedDrivers].filter((d) => d !== targetName)
 	for (const pkg of conflicting) {
 		const removeCmd = pmPlugin.removePackageCommand(pkg)
 		const [cmd, ...args] = removeCmd.split(" ")
 		await exec(cmd, args, { cwd })
 	}
 
-	if (!installedDrivers.has(targetDriver)) {
+	if (!installedDrivers.has(targetName)) {
 		const addCmd = pmPlugin.addPackageCommand(targetDriver)
 		const [cmd, ...args] = addCmd.split(" ")
 		await exec(cmd, args, { cwd })
