@@ -7,7 +7,7 @@ export async function promptEnvironment(): Promise<Environment> {
 		options: [
 			{ value: "development", label: "Development", hint: "hot-reload, debug friendly" },
 			{ value: "production", label: "Production", hint: "optimized, multi-stage build" },
-			{ value: "both", label: "Both", hint: "multi-stage with dev and prod targets" },
+			{ value: "both", label: "Both", hint: "generates dev + prod Dockerfiles and compose files" },
 		],
 	})
 

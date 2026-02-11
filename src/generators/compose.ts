@@ -46,10 +46,9 @@ export async function generateCompose(config: ResolvedConfig, registry: PluginRe
 		dbHealthStartPeriod = hc.startPeriod || ""
 	}
 
-	const context = {
+	const baseContext = {
 		projectName: config.projectName,
 		strapiPort: STRAPI_DEFAULT_PORT,
-		environment: config.environment,
 		databaseClient: config.databaseClient,
 		lockFile: pm.lockFile,
 		useAdminer: config.useAdminer,
@@ -67,6 +66,14 @@ export async function generateCompose(config: ResolvedConfig, registry: PluginRe
 		namedVolumes,
 	}
 
-	const output = await renderTemplate("docker-compose", context)
-	await writeFile(join(cwd, "docker-compose.yml"), output)
+	if (config.environment === "both") {
+		const devOutput = await renderTemplate("docker-compose", { ...baseContext, environment: "development" })
+		await writeFile(join(cwd, "docker-compose.yml"), devOutput)
+
+		const prodOutput = await renderTemplate("docker-compose", { ...baseContext, environment: "production" })
+		await writeFile(join(cwd, "docker-compose.prod.yml"), prodOutput)
+	} else {
+		const output = await renderTemplate("docker-compose", { ...baseContext, environment: config.environment })
+		await writeFile(join(cwd, "docker-compose.yml"), output)
+	}
 }

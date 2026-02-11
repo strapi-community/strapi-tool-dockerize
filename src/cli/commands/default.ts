@@ -172,7 +172,12 @@ export const defaultCommand = defineCommand({
 		}
 		generated.push(".dockerignore")
 		if (config.useCompose) {
-			generated.push("docker-compose.yml")
+			if (config.environment === "both") {
+				generated.push("docker-compose.yml")
+				generated.push("docker-compose.prod.yml")
+			} else {
+				generated.push("docker-compose.yml")
+			}
 		}
 		generated.push(".env")
 		const dbExt = config.projectType === "ts" ? "ts" : "js"
@@ -190,7 +195,12 @@ export const defaultCommand = defineCommand({
 		}
 
 		if (config.useCompose) {
-			log.info("Next: docker compose up -d")
+			if (config.environment === "both") {
+				log.info("Dev:  docker compose up -d")
+				log.info("Prod: docker compose -f docker-compose.prod.yml up -d")
+			} else {
+				log.info("Next: docker compose up -d")
+			}
 		} else {
 			log.info(`Next: docker build -t ${config.projectName} .`)
 		}
