@@ -81,10 +81,9 @@ export async function promptDatabaseConnection(dbClient: DatabaseClient): Promis
 					defaultValue: DEFAULT_DATABASE_USERNAME,
 				}),
 			databasePassword: () =>
-				p.text({
-					message: "Database password",
-					placeholder: DEFAULT_DATABASE_PASSWORD,
-					defaultValue: DEFAULT_DATABASE_PASSWORD,
+				p.password({
+					message: `Database password (default: ${DEFAULT_DATABASE_PASSWORD})`,
+					mask: "*",
 				}),
 		},
 		{
@@ -100,6 +99,6 @@ export async function promptDatabaseConnection(dbClient: DatabaseClient): Promis
 		databasePort: Number.parseInt(result.databasePort, 10),
 		databaseName: result.databaseName,
 		databaseUsername: result.databaseUsername,
-		databasePassword: result.databasePassword,
+		databasePassword: result.databasePassword || DEFAULT_DATABASE_PASSWORD,
 	}
 }
