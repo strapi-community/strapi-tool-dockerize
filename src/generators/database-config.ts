@@ -158,10 +158,27 @@ export default ({ env }) => ({
 })
 `
 
+const V5_ESM_SQLITE_TS_CONFIG = `import path from "path"
+import { fileURLToPath } from "node:url"
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+export default ({ env }) => ({
+  connection: {
+    client: "sqlite",
+    connection: {
+      filename: path.join(__dirname, "..", "..", "..", env("DATABASE_FILENAME", ".tmp/data.db")),
+    },
+    useNullAsDefault: true,
+  },
+})
+`
+
 function getConfigContent(config: ResolvedConfig): string {
 	const isSqlite = config.databaseClient === "sqlite"
 	const isTs = config.projectType === "ts"
-	const isESM = config.isESM && !isTs
+	const isESM = config.isESM
 
 	if (config.strapiVersion === "v4") {
 		if (isSqlite) return isTs ? V4_SQLITE_TS_CONFIG : V4_SQLITE_JS_CONFIG
@@ -169,8 +186,8 @@ function getConfigContent(config: ResolvedConfig): string {
 	}
 
 	if (isSqlite) {
-		if (isTs) return V5_SQLITE_TS_CONFIG
-		return isESM ? V5_ESM_SQLITE_JS_CONFIG : V5_SQLITE_JS_CONFIG
+		if (isESM) return isTs ? V5_ESM_SQLITE_TS_CONFIG : V5_ESM_SQLITE_JS_CONFIG
+		return isTs ? V5_SQLITE_TS_CONFIG : V5_SQLITE_JS_CONFIG
 	}
 	if (isTs) return V5_TS_CONFIG
 	return isESM ? V5_ESM_JS_CONFIG : V5_JS_CONFIG
