@@ -1,7 +1,8 @@
 import { defineCommand } from "citty"
-import { resolve } from "node:path"
+import { access } from "node:fs/promises"
+import { join, resolve } from "node:path"
 import type { DetectedConfig, Environment } from "../../config"
-import { resolvedConfigSchema } from "../../config"
+import { DEFAULT_PORTS, resolvedConfigSchema } from "../../config"
 import { detectAll } from "../../detection"
 import { generateCompose, generateDatabaseConfig, generateDockerfiles, generateDockerignore, generateEnv } from "../../generators"
 import { pluginRegistry } from "../../plugins"
@@ -19,6 +20,13 @@ export const defaultCommand = defineCommand({
 	args: sharedFlags,
 	async run({ args }) {
 		const cwd = resolve(args.path)
+
+		try {
+			await access(join(cwd, "package.json"))
+		} catch {
+			log.error(`No Strapi project found at ${cwd}`)
+			process.exit(1)
+		}
 
 		if (!process.stdin.isTTY && !args.yes) {
 			log.error("Non-interactive environment detected. Use --yes flag for non-interactive mode.")
@@ -40,6 +48,7 @@ export const defaultCommand = defineCommand({
 
 		if (args.database) {
 			detected.databaseClient = args.database as DetectedConfig["databaseClient"]
+			detected.databasePort = DEFAULT_PORTS[detected.databaseClient]
 		}
 		if (args["package-manager"]) {
 			detected.packageManager = args["package-manager"] as DetectedConfig["packageManager"]
