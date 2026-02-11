@@ -34,3 +34,23 @@ export const ADMINER_IMAGE = "adminer:4.8.1"
 export const ADMINER_PORT = 8080
 
 export const DEFAULT_SECRET_BACKEND = "none" as const
+
+export const BACKUP_IMAGES: Record<string, string> = {
+	postgres: "prodrigestivill/postgres-backup-local:16",
+	mysql: "databack/mysql-backup:latest",
+	mariadb: "databack/mysql-backup:latest",
+}
+
+export const BACKUP_SCHEDULE = "0 2 * * *"
+export const BACKUP_RETENTION_DAYS = 7
+
+export const RESOURCE_LIMITS = {
+	development: {
+		memory: "2g",
+		cpus: "2",
+	},
+	production: {
+		memory: "1g",
+		cpus: "1",
+	},
+}

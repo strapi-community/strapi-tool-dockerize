@@ -46,6 +46,10 @@ export const sharedFlags = {
 		type: "string",
 		description: "Named preset (local-dev, production, ci)",
 	},
+	backups: {
+		type: "boolean",
+		description: "Include database backup sidecar in production compose",
+	},
 	"dry-run": {
 		type: "boolean",
 		description: "Preview generated files without writing to disk",

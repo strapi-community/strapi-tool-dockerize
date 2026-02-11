@@ -5,6 +5,7 @@ export {
 	projectTypeSchema,
 	strapiVersionSchema,
 	secretBackendSchema,
+	detectedPluginSchema,
 	detectedConfigSchema,
 	resolvedConfigSchema,
 } from "./schema"
@@ -16,6 +17,7 @@ export type {
 	ProjectType,
 	StrapiVersion,
 	SecretBackend,
+	DetectedPlugin,
 	DetectedConfig,
 	ResolvedConfig,
 } from "./schema"
@@ -37,6 +39,9 @@ export {
 	ADMINER_PORT,
 	DEFAULT_SECRET_BACKEND,
 	RESOURCE_LIMITS,
+	BACKUP_IMAGES,
+	BACKUP_SCHEDULE,
+	BACKUP_RETENTION_DAYS,
 } from "./defaults"
 
 export type { StrapiHealthCheckOverrides } from "./health-check"
