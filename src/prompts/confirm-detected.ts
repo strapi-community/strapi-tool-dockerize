@@ -20,7 +20,12 @@ const LANG_LABELS: Record<string, string> = {
 	js: "JavaScript",
 }
 
-export { DB_LABELS, PM_LABELS, LANG_LABELS }
+const SECRET_BACKEND_LABELS: Record<string, string> = {
+	none: "None",
+	"docker-secrets": "Docker Secrets",
+}
+
+export { DB_LABELS, PM_LABELS, LANG_LABELS, SECRET_BACKEND_LABELS }
 
 export function buildDetectionSummary(detected: DetectedConfig): string {
 	const parts: string[] = []

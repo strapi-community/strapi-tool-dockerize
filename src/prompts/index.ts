@@ -5,6 +5,7 @@ import type {
 	PackageManager,
 	ProjectType,
 	ResolvedConfig,
+	SecretBackend,
 	StrapiVersion,
 } from "../config"
 import {
@@ -13,11 +14,24 @@ import {
 	DEFAULT_DATABASE_PASSWORD,
 	DEFAULT_DATABASE_USERNAME,
 	DEFAULT_PORTS,
+	DEFAULT_SECRET_BACKEND,
 } from "../config"
 import { resolvedConfigSchema } from "../config"
-import { DB_LABELS, LANG_LABELS, PM_LABELS, logDetectedSummary } from "./confirm-detected"
+import {
+	DB_LABELS,
+	LANG_LABELS,
+	PM_LABELS,
+	SECRET_BACKEND_LABELS,
+	logDetectedSummary,
+} from "./confirm-detected"
 import { promptDatabaseConnection, selectDatabase } from "./database"
-import { promptEnvironment, promptProjectName, promptUseAdminer, promptUseCompose } from "./options"
+import {
+	promptEnvironment,
+	promptProjectName,
+	promptSecretBackend,
+	promptUseAdminer,
+	promptUseCompose,
+} from "./options"
 
 async function selectStrapiVersion(detected?: StrapiVersion): Promise<StrapiVersion> {
 	const selected = await p.select({
@@ -150,6 +164,13 @@ export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConf
 
 	const environment = await promptEnvironment(detected.environment)
 
+	let secretBackend: SecretBackend = DEFAULT_SECRET_BACKEND
+	const showSecretPrompt =
+		(environment === "production" || environment === "both") && databaseClient !== "sqlite"
+	if (showSecretPrompt) {
+		secretBackend = await promptSecretBackend(detected.secretBackend)
+	}
+
 	const useCompose = await promptUseCompose()
 
 	let useAdminer = false
@@ -167,6 +188,7 @@ export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConf
 		...dbConnection,
 		useCompose,
 		useAdminer,
+		secretBackend,
 		isESM: detected.isESM ?? false,
 		envVars: detected.envVars ?? {},
 	}
@@ -184,6 +206,10 @@ export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConf
 			`Database: ${dbConnection.databaseHost}:${dbConnection.databasePort}/${dbConnection.databaseName}`,
 		)
 		summaryLines.push(`DB User: ${dbConnection.databaseUsername}`)
+	}
+
+	if (secretBackend !== "none") {
+		summaryLines.push(`Secrets: ${SECRET_BACKEND_LABELS[secretBackend]}`)
 	}
 
 	if (useCompose) summaryLines.push(`Compose: yes${useAdminer ? " + Adminer (port 8080)" : ""}`)
@@ -216,6 +242,13 @@ export {
 	DB_LABELS,
 	PM_LABELS,
 	LANG_LABELS,
+	SECRET_BACKEND_LABELS,
 } from "./confirm-detected"
 export { selectDatabase, promptDatabaseConnection } from "./database"
-export { promptEnvironment, promptProjectName, promptUseCompose, promptUseAdminer } from "./options"
+export {
+	promptEnvironment,
+	promptProjectName,
+	promptSecretBackend,
+	promptUseCompose,
+	promptUseAdminer,
+} from "./options"
