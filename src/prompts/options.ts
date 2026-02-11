@@ -87,3 +87,17 @@ export async function promptUseAdminer(): Promise<boolean> {
 
 	return result
 }
+
+export async function promptUseBackups(detected?: boolean): Promise<boolean> {
+	const result = await p.confirm({
+		message: "Include automated database backups?",
+		initialValue: detected ?? false,
+	})
+
+	if (p.isCancel(result)) {
+		p.cancel("Setup cancelled.")
+		process.exit(0)
+	}
+
+	return result
+}

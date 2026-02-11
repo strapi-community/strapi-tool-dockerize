@@ -73,4 +73,62 @@ describe("generateEnv", () => {
 		const content = await readFile(join(tmpDir, ".env"))
 		expect(content.endsWith("\n")).toBe(true)
 	})
+
+	it("includes plugin env vars in managed section", async () => {
+		const configWithPlugins: ResolvedConfig = {
+			...baseConfig,
+			detectedPlugins: [
+				{
+					name: "AWS S3 Upload",
+					envVars: {
+						AWS_ACCESS_KEY_ID: "",
+						AWS_ACCESS_SECRET: "",
+						AWS_REGION: "",
+						AWS_BUCKET: "",
+					},
+				},
+			],
+		}
+		await generateEnv(configWithPlugins, pluginRegistry, tmpDir)
+		const content = await readFile(join(tmpDir, ".env"))
+		expect(content).toContain("# AWS S3 Upload")
+		expect(content).toContain("AWS_ACCESS_KEY_ID=")
+		expect(content).toContain("AWS_ACCESS_SECRET=")
+		expect(content).toContain("AWS_REGION=")
+		expect(content).toContain("AWS_BUCKET=")
+		expect(content).toContain(MARKER_START)
+		expect(content).toContain(MARKER_END)
+	})
+
+	it("includes multiple plugin sections", async () => {
+		const configWithPlugins: ResolvedConfig = {
+			...baseConfig,
+			detectedPlugins: [
+				{
+					name: "AWS S3 Upload",
+					envVars: { AWS_ACCESS_KEY_ID: "", AWS_BUCKET: "" },
+				},
+				{
+					name: "SendGrid Email",
+					envVars: { SENDGRID_API_KEY: "" },
+				},
+			],
+		}
+		await generateEnv(configWithPlugins, pluginRegistry, tmpDir)
+		const content = await readFile(join(tmpDir, ".env"))
+		expect(content).toContain("# AWS S3 Upload")
+		expect(content).toContain("# SendGrid Email")
+		expect(content).toContain("SENDGRID_API_KEY=")
+	})
+
+	it("does not include plugin section when no plugins detected", async () => {
+		const configNoPlugins: ResolvedConfig = {
+			...baseConfig,
+			detectedPlugins: [],
+		}
+		await generateEnv(configNoPlugins, pluginRegistry, tmpDir)
+		const content = await readFile(join(tmpDir, ".env"))
+		expect(content).not.toContain("# AWS S3 Upload")
+		expect(content).not.toContain("# SendGrid Email")
+	})
 })

@@ -269,6 +269,124 @@ describe("docker-compose template", () => {
 		})
 	})
 
+	describe("backup sidecar", () => {
+		it("includes backup service for postgres production with backups enabled", async () => {
+			const output = await renderTemplate(
+				"docker-compose",
+				postgresContext({
+					environment: "production",
+					useBackups: true,
+					backupImage: "prodrigestivill/postgres-backup-local:16",
+				}),
+			)
+			expect(output).toContain("my-project-backup:")
+			expect(output).toContain("prodrigestivill/postgres-backup-local:16")
+			expect(output).toContain("POSTGRES_HOST: my-project-db")
+			expect(output).toContain("POSTGRES_DB: ${DATABASE_NAME}")
+			expect(output).toContain("POSTGRES_USER: ${DATABASE_USERNAME}")
+			expect(output).toContain("POSTGRES_PASSWORD: ${DATABASE_PASSWORD}")
+			expect(output).toContain("SCHEDULE: 0 2 * * *")
+			expect(output).toContain("BACKUP_KEEP_DAYS: 7")
+			expect(output).toContain("my-project-backups:/backups")
+		})
+
+		it("includes backup service for mysql production with backups enabled", async () => {
+			const output = await renderTemplate(
+				"docker-compose",
+				mysqlContext({
+					environment: "production",
+					useBackups: true,
+					backupImage: "databack/mysql-backup:latest",
+				}),
+			)
+			expect(output).toContain("my-project-backup:")
+			expect(output).toContain("databack/mysql-backup:latest")
+			expect(output).toContain("DB_SERVER: my-project-db")
+			expect(output).toContain("DB_USER: ${DATABASE_USERNAME}")
+			expect(output).toContain("DB_PASS: ${DATABASE_PASSWORD}")
+			expect(output).toContain("DB_NAMES: ${DATABASE_NAME}")
+			expect(output).toContain("DB_DUMP_CRON: 0 2 * * *")
+			expect(output).toContain("RETENTION: 7d")
+			expect(output).toContain("my-project-backups:/backups")
+		})
+
+		it("does not include backup service when useBackups is false", async () => {
+			const output = await renderTemplate(
+				"docker-compose",
+				postgresContext({
+					environment: "production",
+					useBackups: false,
+				}),
+			)
+			expect(output).not.toContain("my-project-backup:")
+			expect(output).not.toContain("my-project-backups:")
+		})
+
+		it("does not include backup service for development environment", async () => {
+			const output = await renderTemplate(
+				"docker-compose",
+				postgresContext({
+					environment: "development",
+					useBackups: true,
+					backupImage: "prodrigestivill/postgres-backup-local:16",
+				}),
+			)
+			expect(output).not.toContain("my-project-backup:")
+			expect(output).not.toContain("my-project-backups:")
+		})
+
+		it("does not include backup service for sqlite", async () => {
+			const output = await renderTemplate(
+				"docker-compose",
+				sqliteContext({
+					environment: "production",
+					useBackups: true,
+				}),
+			)
+			expect(output).not.toContain("my-project-backup:")
+			expect(output).not.toContain("my-project-backups:")
+		})
+
+		it("includes backup volume in named volumes section", async () => {
+			const output = await renderTemplate(
+				"docker-compose",
+				postgresContext({
+					environment: "production",
+					useBackups: true,
+					backupImage: "prodrigestivill/postgres-backup-local:16",
+				}),
+			)
+			const topLevelVolumes = output.split(/^volumes:/m)[1]
+			expect(topLevelVolumes).toContain("my-project-backups:")
+		})
+
+		it("does not include backup volume when backups disabled", async () => {
+			const output = await renderTemplate(
+				"docker-compose",
+				postgresContext({
+					environment: "production",
+					useBackups: false,
+				}),
+			)
+			expect(output).not.toContain("my-project-backups:")
+		})
+
+		it("backup service depends on healthy db", async () => {
+			const output = await renderTemplate(
+				"docker-compose",
+				postgresContext({
+					environment: "production",
+					useBackups: true,
+					backupImage: "prodrigestivill/postgres-backup-local:16",
+				}),
+			)
+			const backupSection = output.split("my-project-backup:")[1]
+			expect(backupSection).toContain("depends_on:")
+			expect(backupSection).toContain("my-project-db:")
+			expect(backupSection).toContain("condition: service_healthy")
+		})
+	})
+
 	describe("environment-specific compose files", () => {
 		it("generates docker-compose.yml for development environment", async () => {
 			const output = await renderTemplate(

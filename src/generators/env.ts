@@ -1,14 +1,27 @@
 import { join } from "node:path"
-import type { ResolvedConfig } from "../config"
+import type { DetectedPlugin, ResolvedConfig } from "../config"
 import type { PluginRegistry } from "../plugins/types"
 import { fileExists, readFile, writeFile } from "../utils/fs"
 
 const MARKER_START = "# --- Dockerize Start ---"
 const MARKER_END = "# --- Dockerize End ---"
 
-function buildManagedSection(vars: Record<string, string>): string {
+function buildPluginSection(plugins: DetectedPlugin[]): string {
+	if (plugins.length === 0) return ""
+
+	const sections: string[] = []
+	for (const plugin of plugins) {
+		const header = `\n# ${plugin.name}`
+		const lines = Object.entries(plugin.envVars).map(([key, value]) => `${key}=${value}`)
+		sections.push(`${header}\n${lines.join("\n")}`)
+	}
+	return sections.join("")
+}
+
+function buildManagedSection(vars: Record<string, string>, plugins: DetectedPlugin[]): string {
 	const lines = Object.entries(vars).map(([key, value]) => `${key}=${value}`)
-	return `${MARKER_START}\n${lines.join("\n")}\n${MARKER_END}`
+	const pluginSection = buildPluginSection(plugins)
+	return `${MARKER_START}\n${lines.join("\n")}${pluginSection}\n${MARKER_END}`
 }
 
 function commentOutDuplicateKeys(content: string, managedKeys: Set<string>): string {
@@ -75,8 +88,10 @@ export async function generateEnv(
 	const secretOverrides = secretManager.envOverrides(config)
 	Object.assign(vars, secretOverrides)
 
-	const managedSection = buildManagedSection(vars)
-	const managedKeys = new Set(Object.keys(vars))
+	const plugins = config.detectedPlugins ?? []
+	const managedSection = buildManagedSection(vars, plugins)
+	const pluginKeys = plugins.flatMap((p) => Object.keys(p.envVars))
+	const managedKeys = new Set([...Object.keys(vars), ...pluginKeys])
 
 	if (await fileExists(envPath)) {
 		let content = await readFile(envPath)

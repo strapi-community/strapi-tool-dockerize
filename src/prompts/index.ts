@@ -30,6 +30,7 @@ import {
 	promptProjectName,
 	promptSecretBackend,
 	promptUseAdminer,
+	promptUseBackups,
 	promptUseCompose,
 } from "./options"
 
@@ -178,6 +179,15 @@ export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConf
 		useAdminer = await promptUseAdminer()
 	}
 
+	let useBackups = false
+	const showBackupPrompt =
+		useCompose &&
+		databaseClient !== "sqlite" &&
+		(environment === "production" || environment === "both")
+	if (showBackupPrompt) {
+		useBackups = await promptUseBackups(detected.useBackups)
+	}
+
 	const raw: ResolvedConfig = {
 		strapiVersion,
 		projectType,
@@ -188,9 +198,11 @@ export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConf
 		...dbConnection,
 		useCompose,
 		useAdminer,
+		useBackups,
 		secretBackend,
 		isESM: detected.isESM ?? false,
 		envVars: detected.envVars ?? {},
+		detectedPlugins: detected.detectedPlugins ?? [],
 	}
 
 	const config = resolvedConfigSchema.parse(raw)
@@ -212,7 +224,17 @@ export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConf
 		summaryLines.push(`Secrets: ${SECRET_BACKEND_LABELS[secretBackend]}`)
 	}
 
-	if (useCompose) summaryLines.push(`Compose: yes${useAdminer ? " + Adminer (port 8080)" : ""}`)
+	if (useCompose) {
+		const extras: string[] = []
+		if (useAdminer) extras.push("Adminer (port 8080)")
+		if (useBackups) extras.push("database backups")
+		summaryLines.push(`Compose: yes${extras.length > 0 ? ` + ${extras.join(", ")}` : ""}`)
+	}
+
+	const plugins = detected.detectedPlugins ?? []
+	if (plugins.length > 0) {
+		summaryLines.push(`Plugins: ${plugins.map((p) => p.name).join(", ")}`)
+	}
 
 	p.note(summaryLines.join("\n"), "Configuration")
 
@@ -251,4 +273,5 @@ export {
 	promptSecretBackend,
 	promptUseCompose,
 	promptUseAdminer,
+	promptUseBackups,
 } from "./options"

@@ -18,6 +18,13 @@ export type SecretBackend = z.infer<typeof secretBackendSchema>
 export const strapiVersionSchema = z.enum(["v4", "v5"])
 export type StrapiVersion = z.infer<typeof strapiVersionSchema>
 
+export const detectedPluginSchema = z.object({
+	name: z.string(),
+	envVars: z.record(z.string()),
+})
+
+export type DetectedPlugin = z.infer<typeof detectedPluginSchema>
+
 export const detectedConfigSchema = z.object({
 	strapiVersion: strapiVersionSchema.optional(),
 	projectType: projectTypeSchema.optional(),
@@ -32,9 +39,11 @@ export const detectedConfigSchema = z.object({
 	databasePassword: z.string().optional(),
 	useCompose: z.boolean().optional(),
 	useAdminer: z.boolean().optional(),
+	useBackups: z.boolean().optional(),
 	secretBackend: secretBackendSchema.optional(),
 	isESM: z.boolean().optional(),
 	envVars: z.record(z.string()).optional(),
+	detectedPlugins: z.array(detectedPluginSchema).optional(),
 })
 
 export type DetectedConfig = z.infer<typeof detectedConfigSchema>
@@ -53,9 +62,11 @@ export const resolvedConfigSchema = z.object({
 	databasePassword: z.string().min(1),
 	useCompose: z.boolean(),
 	useAdminer: z.boolean(),
+	useBackups: z.boolean().default(false),
 	secretBackend: secretBackendSchema.default("none"),
 	isESM: z.boolean(),
 	envVars: z.record(z.string()),
+	detectedPlugins: z.array(detectedPluginSchema).default([]),
 })
 
 export type ResolvedConfig = z.infer<typeof resolvedConfigSchema>

@@ -108,6 +108,39 @@ describe("previewGeneration", () => {
 		expect(filenames).toContain("config/env/development/database.js")
 		expect(filenames).not.toContain("config/env/development/database.ts")
 	})
+
+	it("includes plugin env vars in .env preview", async () => {
+		const files = await previewGeneration(
+			makeConfig({
+				detectedPlugins: [
+					{
+						name: "AWS S3 Upload",
+						envVars: {
+							AWS_ACCESS_KEY_ID: "",
+							AWS_ACCESS_SECRET: "",
+							AWS_REGION: "",
+							AWS_BUCKET: "",
+						},
+					},
+				],
+			}),
+			pluginRegistry,
+		)
+		const envFile = files.find((f) => f.filename === ".env")
+
+		expect(envFile).toBeDefined()
+		expect(envFile?.content).toContain("# AWS S3 Upload")
+		expect(envFile?.content).toContain("AWS_ACCESS_KEY_ID=")
+		expect(envFile?.content).toContain("AWS_BUCKET=")
+	})
+
+	it("does not include plugin section when no plugins", async () => {
+		const files = await previewGeneration(makeConfig({ detectedPlugins: [] }), pluginRegistry)
+		const envFile = files.find((f) => f.filename === ".env")
+
+		expect(envFile).toBeDefined()
+		expect(envFile?.content).not.toContain("# AWS S3 Upload")
+	})
 })
 
 describe("formatPreviewOutput", () => {
