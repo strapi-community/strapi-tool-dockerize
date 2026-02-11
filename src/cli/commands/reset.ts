@@ -25,6 +25,10 @@ const CONFIG_ENV_DATABASE_FILES = [
 const MARKER_START = "# --- Dockerize Start ---"
 const MARKER_END = "# --- Dockerize End ---"
 
+function uncommentDatabaseKeys(content: string): string {
+	return content.replace(/^# (DATABASE_\w+=.*)$/gm, "$1")
+}
+
 async function cleanEnvMarkers(cwd: string): Promise<boolean> {
 	const envPath = join(cwd, ".env")
 	try {
@@ -35,7 +39,8 @@ async function cleanEnvMarkers(cwd: string): Promise<boolean> {
 
 		const before = content.slice(0, startIdx).trimEnd()
 		const after = content.slice(endIdx + MARKER_END.length).trimStart()
-		const cleaned = [before, after].filter(Boolean).join("\n\n")
+		const joined = [before, after].filter(Boolean).join("\n\n")
+		const cleaned = uncommentDatabaseKeys(joined)
 		await writeFile(envPath, cleaned ? `${cleaned}\n` : "")
 		return true
 	} catch {

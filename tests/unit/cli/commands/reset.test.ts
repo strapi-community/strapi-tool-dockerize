@@ -190,5 +190,89 @@ describe("reset command", () => {
 			expect(result).not.toContain("DATABASE_CLIENT")
 			expect(result).toContain("HOST=0.0.0.0")
 		})
+
+		it("uncomments commented-out DATABASE_ keys after removing markers", async () => {
+			const envContent = [
+				"HOST=0.0.0.0",
+				"PORT=1337",
+				"# DATABASE_CLIENT=sqlite",
+				"# DATABASE_HOST=127.0.0.1",
+				"# DATABASE_PORT=5432",
+				"# DATABASE_NAME=strapi",
+				"# DATABASE_USERNAME=strapi",
+				"# DATABASE_PASSWORD=secret",
+				"",
+				"# --- Dockerize Start ---",
+				"DATABASE_CLIENT=postgres",
+				"DATABASE_HOST=my-db",
+				"DATABASE_PORT=5432",
+				"DATABASE_NAME=strapi",
+				"DATABASE_USERNAME=strapi",
+				"DATABASE_PASSWORD=secret",
+				"# --- Dockerize End ---",
+			].join("\n")
+
+			await createFixtureFiles(tempDir, {
+				".env": envContent,
+			})
+
+			await runReset(tempDir)
+
+			const result = await readFile(join(tempDir, ".env"), "utf-8")
+			expect(result).not.toContain("Dockerize Start")
+			expect(result).toContain("DATABASE_CLIENT=sqlite")
+			expect(result).toContain("DATABASE_HOST=127.0.0.1")
+			expect(result).toContain("DATABASE_PORT=5432")
+			expect(result).toContain("DATABASE_NAME=strapi")
+			expect(result).toContain("DATABASE_USERNAME=strapi")
+			expect(result).toContain("DATABASE_PASSWORD=secret")
+			expect(result).not.toMatch(/^# DATABASE_/m)
+		})
+
+		it("preserves non-DATABASE comments when uncommenting", async () => {
+			const envContent = [
+				"HOST=0.0.0.0",
+				"# This is a regular comment",
+				"# DATABASE_CLIENT=sqlite",
+				"",
+				"# --- Dockerize Start ---",
+				"DATABASE_CLIENT=postgres",
+				"# --- Dockerize End ---",
+			].join("\n")
+
+			await createFixtureFiles(tempDir, {
+				".env": envContent,
+			})
+
+			await runReset(tempDir)
+
+			const result = await readFile(join(tempDir, ".env"), "utf-8")
+			expect(result).toContain("# This is a regular comment")
+			expect(result).toContain("DATABASE_CLIENT=sqlite")
+			expect(result).not.toContain("# DATABASE_CLIENT")
+		})
+
+		it("handles .env with only markers and commented keys", async () => {
+			const envContent = [
+				"# DATABASE_CLIENT=sqlite",
+				"# DATABASE_FILENAME=.tmp/data.db",
+				"",
+				"# --- Dockerize Start ---",
+				"DATABASE_CLIENT=postgres",
+				"DATABASE_FILENAME=.tmp/data.db",
+				"# --- Dockerize End ---",
+			].join("\n")
+
+			await createFixtureFiles(tempDir, {
+				".env": envContent,
+			})
+
+			await runReset(tempDir)
+
+			const result = await readFile(join(tempDir, ".env"), "utf-8")
+			expect(result).toContain("DATABASE_CLIENT=sqlite")
+			expect(result).toContain("DATABASE_FILENAME=.tmp/data.db")
+			expect(result).not.toMatch(/^# DATABASE_/m)
+		})
 	})
 })
