@@ -33,11 +33,11 @@ describe("postgresPlugin", () => {
 			expect(service.image).toBe("postgres:16-alpine")
 		})
 
-		it("maps config to postgres environment vars", () => {
+		it("maps config to postgres environment vars using env substitution", () => {
 			const service = postgresPlugin.composeService(baseConfig)
-			expect(service.environment.POSTGRES_USER).toBe("strapi")
-			expect(service.environment.POSTGRES_PASSWORD).toBe("secret")
-			expect(service.environment.POSTGRES_DB).toBe("strapi")
+			expect(service.environment.POSTGRES_USER).toBe("${DATABASE_USERNAME}")
+			expect(service.environment.POSTGRES_PASSWORD).toBe("${DATABASE_PASSWORD}")
+			expect(service.environment.POSTGRES_DB).toBe("${DATABASE_NAME}")
 		})
 
 		it("maps port correctly", () => {

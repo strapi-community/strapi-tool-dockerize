@@ -15,9 +15,9 @@ export const postgresPlugin: DatabasePlugin = {
 		return {
 			image: DEFAULT_DATABASE_IMAGES.postgres,
 			environment: {
-				POSTGRES_USER: config.databaseUsername,
-				POSTGRES_PASSWORD: config.databasePassword,
-				POSTGRES_DB: config.databaseName,
+				POSTGRES_USER: "${DATABASE_USERNAME}",
+				POSTGRES_PASSWORD: "${DATABASE_PASSWORD}",
+				POSTGRES_DB: "${DATABASE_NAME}",
 			},
 			ports: [`${config.databasePort}:5432`],
 			volumes: [`${config.projectName}-data:/var/lib/postgresql/data`],

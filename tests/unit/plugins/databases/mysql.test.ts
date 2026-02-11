@@ -33,12 +33,12 @@ describe("mysqlPlugin", () => {
 			expect(service.image).toBe("mysql:8.4")
 		})
 
-		it("maps config to mysql environment vars", () => {
+		it("maps config to mysql environment vars using env substitution", () => {
 			const service = mysqlPlugin.composeService(baseConfig)
-			expect(service.environment.MYSQL_ROOT_PASSWORD).toBe("secret")
-			expect(service.environment.MYSQL_DATABASE).toBe("strapi")
-			expect(service.environment.MYSQL_USER).toBe("strapi")
-			expect(service.environment.MYSQL_PASSWORD).toBe("secret")
+			expect(service.environment.MYSQL_ROOT_PASSWORD).toBe("${DATABASE_PASSWORD}")
+			expect(service.environment.MYSQL_DATABASE).toBe("${DATABASE_NAME}")
+			expect(service.environment.MYSQL_USER).toBe("${DATABASE_USERNAME}")
+			expect(service.environment.MYSQL_PASSWORD).toBe("${DATABASE_PASSWORD}")
 		})
 
 		it("maps port correctly", () => {
