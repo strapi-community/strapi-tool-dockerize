@@ -23,11 +23,10 @@
 	],
 	"scripts": {
 		"dev": "bun run src/index.ts",
-		"build": "bun build src/index.ts --target=node --outfile dist/index.js",
+		"build": "bun build src/index.ts --target=node --outfile dist/index.js && printf '#!/usr/bin/env node\\n' | cat - dist/index.js > dist/temp.js && mv dist/temp.js dist/index.js",
 		"test": "bun test",
 		"lint": "bunx ultracite",
-		"lint:fix": "bunx ultracite --fix",
-		"semantic-release": "semantic-release --branches main"
+		"lint:fix": "bunx ultracite --fix"
 	},
 	"dependencies": {
 		"@clack/prompts": "^0.9.1",
@@ -38,7 +37,10 @@
 		"zod": "^3.24.2"
 	},
 	"devDependencies": {
+		"@semantic-release/changelog": "^6.0.3",
+		"@semantic-release/git": "^10.0.1",
 		"@types/bun": "^1.2.2",
+		"conventional-changelog-conventionalcommits": "^9.1.0",
 		"semantic-release": "^24.2.1",
 		"ultracite": "^4.1.17"
 	},
