@@ -1,0 +1,46 @@
+name: Feature Request
+description: Suggest an improvement or new feature
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea to make strapi-tool-dockerize better? Describe it below.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem description
+      description: What problem does this feature solve? What's frustrating or missing?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: How should this work? Be as specific as possible.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any other approaches you thought about and why they don't work as well
+
+  - type: checkboxes
+    id: area
+    attributes:
+      label: Affected area
+      description: Which parts of the tool does this relate to?
+      options:
+        - label: Dockerfile
+        - label: Docker Compose
+        - label: Database config
+        - label: Environment variables
+        - label: CLI flags
+        - label: Plugin system
+        - label: Detection
+        - label: Documentation
+        - label: Other
