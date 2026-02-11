@@ -12,6 +12,9 @@ export type Environment = z.infer<typeof environmentSchema>
 export const projectTypeSchema = z.enum(["js", "ts"])
 export type ProjectType = z.infer<typeof projectTypeSchema>
 
+export const secretBackendSchema = z.enum(["none", "docker-secrets"])
+export type SecretBackend = z.infer<typeof secretBackendSchema>
+
 export const strapiVersionSchema = z.enum(["v4", "v5"])
 export type StrapiVersion = z.infer<typeof strapiVersionSchema>
 
@@ -29,6 +32,7 @@ export const detectedConfigSchema = z.object({
 	databasePassword: z.string().optional(),
 	useCompose: z.boolean().optional(),
 	useAdminer: z.boolean().optional(),
+	secretBackend: secretBackendSchema.optional(),
 	isESM: z.boolean().optional(),
 	envVars: z.record(z.string()).optional(),
 })
@@ -49,6 +53,7 @@ export const resolvedConfigSchema = z.object({
 	databasePassword: z.string().min(1),
 	useCompose: z.boolean(),
 	useAdminer: z.boolean(),
+	secretBackend: secretBackendSchema.default("none"),
 	isESM: z.boolean(),
 	envVars: z.record(z.string()),
 })

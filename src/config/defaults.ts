@@ -25,7 +25,12 @@ export const DEFAULT_DATABASE_PASSWORD = "strapi"
 export const DEFAULT_DATABASE_HOST = "localhost"
 
 export const STRAPI_HEALTH_CHECK_START_PERIOD = "40s"
+export const STRAPI_HEALTH_CHECK_INTERVAL = "30s"
+export const STRAPI_HEALTH_CHECK_TIMEOUT = "10s"
+export const STRAPI_HEALTH_CHECK_RETRIES = 3
 export const STRAPI_DEFAULT_PORT = 1337
 
 export const ADMINER_IMAGE = "adminer:4.8.1"
 export const ADMINER_PORT = 8080
+
+export const DEFAULT_SECRET_BACKEND = "none" as const
