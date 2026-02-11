@@ -4,6 +4,9 @@
 	"version": "0.0.0-development",
 	"type": "module",
 	"license": "MIT",
+	"engines": {
+		"node": ">=18.0.0"
+	},
 	"bin": {
 		"strapi-dockerize": "dist/index.js"
 	},
