@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test"
 import { ZodError } from "zod"
 import {
 	buildDetectionSummary,
+	buildResourceLimitOverrides,
 	formatZodErrors,
 	shouldWarnDatabaseDefault,
 } from "../../../src/cli/commands/default"
@@ -195,6 +196,33 @@ describe("buildDetectionSummary", () => {
 		const summary = buildDetectionSummary(detected)
 		expect(summary).toBe("strapi v5 | ts | mariadb | unknown")
 	})
+
+	it("includes detected plugins in summary", () => {
+		const detected: DetectedConfig = {
+			strapiVersion: "v5",
+			projectType: "ts",
+			databaseClient: "postgres",
+			packageManager: "npm",
+			detectedPlugins: [
+				{ name: "AWS S3 Upload", envVars: { AWS_ACCESS_KEY_ID: "" } },
+				{ name: "SendGrid Email", envVars: { SENDGRID_API_KEY: "" } },
+			],
+		}
+		const summary = buildDetectionSummary(detected)
+		expect(summary).toBe("strapi v5 | ts | postgres | npm | plugins: AWS S3 Upload, SendGrid Email")
+	})
+
+	it("does not include plugins section when no plugins detected", () => {
+		const detected: DetectedConfig = {
+			strapiVersion: "v5",
+			projectType: "ts",
+			databaseClient: "postgres",
+			packageManager: "npm",
+			detectedPlugins: [],
+		}
+		const summary = buildDetectionSummary(detected)
+		expect(summary).toBe("strapi v5 | ts | postgres | npm")
+	})
 })
 
 describe("yes mode port resolution", () => {
@@ -313,5 +341,27 @@ describe("detection summary reflects flag overrides", () => {
 
 		const summary = buildDetectionSummary(detected)
 		expect(summary).toBe("strapi v5 | ts | postgres | npm")
+	})
+})
+
+describe("buildResourceLimitOverrides", () => {
+	it("returns undefined when no resource args provided", () => {
+		const result = buildResourceLimitOverrides({})
+		expect(result).toBeUndefined()
+	})
+
+	it("returns overrides with memory when --memory provided", () => {
+		const result = buildResourceLimitOverrides({ memory: "4g" })
+		expect(result).toEqual({ memory: "4g" })
+	})
+
+	it("returns overrides with cpus when --cpus provided", () => {
+		const result = buildResourceLimitOverrides({ cpus: "0.5" })
+		expect(result).toEqual({ cpus: "0.5" })
+	})
+
+	it("returns overrides with both when both provided", () => {
+		const result = buildResourceLimitOverrides({ memory: "512m", cpus: "1" })
+		expect(result).toEqual({ memory: "512m", cpus: "1" })
 	})
 })

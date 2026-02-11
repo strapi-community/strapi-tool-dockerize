@@ -22,6 +22,14 @@ const baseContext = {
 	secrets: [],
 	serviceSecrets: [],
 	hasSecrets: false,
+	useBackups: false,
+	backupImage: "",
+	backupSchedule: "0 2 * * *",
+	backupRetentionDays: 7,
+	memoryLimit: "2g",
+	cpuLimit: "2",
+	dbMemoryLimit: "1g",
+	dbCpuLimit: "1",
 }
 
 function sqliteContext(overrides = {}) {
@@ -199,6 +207,65 @@ describe("docker-compose template", () => {
 				}),
 			)
 			expect(output).not.toContain("secrets:")
+		})
+	})
+
+	describe("resource limits", () => {
+		it("includes deploy.resources on strapi service for sqlite", async () => {
+			const output = await renderTemplate("docker-compose", sqliteContext())
+			expect(output).toContain("deploy:")
+			expect(output).toContain("resources:")
+			expect(output).toContain("memory: 2g")
+			expect(output).toContain('cpus: "2"')
+		})
+
+		it("includes deploy.resources on strapi service for postgres", async () => {
+			const output = await renderTemplate("docker-compose", postgresContext())
+			const lines = output.split("\n")
+			const dbServiceLine = lines.findIndex(
+				(l: string) => /^\s{2}\S/.test(l) && l.includes("my-project-db:"),
+			)
+			const strapiSection = lines.slice(0, dbServiceLine).join("\n")
+			expect(strapiSection).toContain("memory: 2g")
+			expect(strapiSection).toContain('cpus: "2"')
+		})
+
+		it("includes deploy.resources on database service", async () => {
+			const output = await renderTemplate("docker-compose", postgresContext())
+			const lines = output.split("\n")
+			const dbServiceLine = lines.findIndex(
+				(l: string) => /^\s{2}\S/.test(l) && l.includes("my-project-db:"),
+			)
+			const dbSection = lines.slice(dbServiceLine).join("\n")
+			expect(dbSection).toContain("memory: 1g")
+			expect(dbSection).toContain('cpus: "1"')
+		})
+
+		it("uses custom resource limits when provided", async () => {
+			const output = await renderTemplate(
+				"docker-compose",
+				postgresContext({
+					memoryLimit: "4g",
+					cpuLimit: "4",
+					dbMemoryLimit: "2g",
+					dbCpuLimit: "2",
+				}),
+			)
+			const lines = output.split("\n")
+			const dbServiceLine = lines.findIndex(
+				(l: string) => /^\s{2}\S/.test(l) && l.includes("my-project-db:"),
+			)
+			const strapiSection = lines.slice(0, dbServiceLine).join("\n")
+			const dbSection = lines.slice(dbServiceLine).join("\n")
+			expect(strapiSection).toContain("memory: 4g")
+			expect(strapiSection).toContain('cpus: "4"')
+			expect(dbSection).toContain("memory: 2g")
+			expect(dbSection).toContain('cpus: "2"')
+		})
+
+		it("does not include db resource limits for sqlite", async () => {
+			const output = await renderTemplate("docker-compose", sqliteContext())
+			expect(output).not.toContain("memory: 1g")
 		})
 	})
 
