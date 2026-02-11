@@ -1,5 +1,8 @@
-FROM node:{{ nodeVersion }}-alpine AS base
+FROM {{ baseImage }} AS base
 RUN apk update && apk add --no-cache build-base gcc autoconf automake zlib-dev libpng-dev vips-dev
+{% for step in pmSetupSteps %}
+{{ step }}
+{% endfor %}
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 RUN addgroup -S strapi && adduser -S strapi -G strapi
@@ -15,7 +18,7 @@ FROM deps AS build
 COPY . .
 RUN {{ pmBuildStep }}
 
-FROM node:{{ nodeVersion }}-alpine AS runtime
+FROM {{ runtimeImage }} AS runtime
 RUN apk update && apk add --no-cache vips-dev
 RUN addgroup -S strapi && adduser -S strapi -G strapi
 ENV NODE_ENV=production
