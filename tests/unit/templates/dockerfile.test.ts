@@ -88,6 +88,30 @@ describe("Dockerfile dev template", () => {
 		const runtime = extractStage(result, "runtime")
 		expect(runtime).not.toContain("corepack")
 	})
+
+	it("has no extra blank lines within stages when pmSetupSteps is empty", async () => {
+		const result = await renderTemplate("Dockerfile", baseContext)
+		const base = extractStage(result, "base")
+		expect(base).not.toMatch(/\n\n\n/)
+		const runtime = extractStage(result, "runtime")
+		expect(runtime).not.toMatch(/\n\n\n/)
+	})
+
+	it("has no extra blank lines within stages when pmSetupSteps has values", async () => {
+		const ctx = { ...baseContext, pmSetupSteps: ["RUN corepack enable"] }
+		const result = await renderTemplate("Dockerfile", ctx)
+		const base = extractStage(result, "base")
+		expect(base).not.toMatch(/\n\n\n/)
+		const runtime = extractStage(result, "runtime")
+		expect(runtime).not.toMatch(/\n\n\n/)
+	})
+
+	it("preserves single blank lines between stages", async () => {
+		const result = await renderTemplate("Dockerfile", baseContext)
+		expect(result).toMatch(/WORKDIR \/opt\/app\n\nFROM base AS deps/)
+		expect(result).toMatch(/RUN npm ci\n\nFROM deps AS build/)
+		expect(result).toMatch(/RUN npm run build\n\nFROM node:20-alpine AS runtime/)
+	})
 })
 
 describe("Dockerfile prod template", () => {
@@ -122,5 +146,56 @@ describe("Dockerfile prod template", () => {
 		const runtime = extractStage(result, "runtime")
 		expect(runtime).toMatch(/^FROM node:20-alpine AS runtime/)
 		expect(runtime).not.toContain("FROM base")
+	})
+
+	it("runtime stage includes pm setup steps for pnpm", async () => {
+		const ctx = { ...baseContext, pmSetupSteps: ["RUN corepack enable"] }
+		const result = await renderTemplate("Dockerfile.prod", ctx)
+		const runtime = extractStage(result, "runtime")
+		expect(runtime).toContain("RUN corepack enable")
+	})
+
+	it("runtime stage includes pm setup steps for yarn", async () => {
+		const ctx = { ...baseContext, pmSetupSteps: ["RUN corepack enable"] }
+		const result = await renderTemplate("Dockerfile.prod", ctx)
+		const runtime = extractStage(result, "runtime")
+		expect(runtime).toContain("RUN corepack enable")
+	})
+
+	it("runtime stage omits pm setup steps for npm", async () => {
+		const result = await renderTemplate("Dockerfile.prod", baseContext)
+		const runtime = extractStage(result, "runtime")
+		expect(runtime).not.toContain("corepack")
+	})
+
+	it("runtime stage omits pm setup steps for bun", async () => {
+		const ctx = { ...baseContext, pmSetupSteps: [] }
+		const result = await renderTemplate("Dockerfile.prod", ctx)
+		const runtime = extractStage(result, "runtime")
+		expect(runtime).not.toContain("corepack")
+	})
+
+	it("has no extra blank lines within stages when pmSetupSteps is empty", async () => {
+		const result = await renderTemplate("Dockerfile.prod", baseContext)
+		const base = extractStage(result, "base")
+		expect(base).not.toMatch(/\n\n\n/)
+		const runtime = extractStage(result, "runtime")
+		expect(runtime).not.toMatch(/\n\n\n/)
+	})
+
+	it("has no extra blank lines within stages when pmSetupSteps has values", async () => {
+		const ctx = { ...baseContext, pmSetupSteps: ["RUN corepack enable"] }
+		const result = await renderTemplate("Dockerfile.prod", ctx)
+		const base = extractStage(result, "base")
+		expect(base).not.toMatch(/\n\n\n/)
+		const runtime = extractStage(result, "runtime")
+		expect(runtime).not.toMatch(/\n\n\n/)
+	})
+
+	it("preserves single blank lines between stages", async () => {
+		const result = await renderTemplate("Dockerfile.prod", baseContext)
+		expect(result).toMatch(/WORKDIR \/opt\/app\n\nFROM base AS deps/)
+		expect(result).toMatch(/RUN npm ci --omit=dev\n\nFROM deps AS build/)
+		expect(result).toMatch(/RUN npm run build\n\nFROM node:20-alpine AS runtime/)
 	})
 })

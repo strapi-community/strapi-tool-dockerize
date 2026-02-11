@@ -1,17 +1,17 @@
 FROM {{ baseImage }} AS base
 RUN apk update && apk add --no-cache build-base gcc autoconf automake zlib-dev libpng-dev vips-dev
-{% for step in pmSetupSteps %}
+{%- for step in pmSetupSteps %}
 {{ step }}
-{% endfor %}
+{%- endfor %}
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 RUN addgroup -S strapi && adduser -S strapi -G strapi
 WORKDIR /opt/app
 
 FROM base AS deps
-{% for file in pmCopyFiles %}
+{%- for file in pmCopyFiles %}
 COPY {{ file }} ./
-{% endfor %}
+{%- endfor %}
 RUN {{ pmInstallStepProd }}
 
 FROM deps AS build
@@ -20,6 +20,9 @@ RUN {{ pmBuildStep }}
 
 FROM {{ runtimeImage }} AS runtime
 RUN apk update && apk add --no-cache vips
+{%- for step in pmSetupSteps %}
+{{ step }}
+{%- endfor %}
 RUN addgroup -S strapi && adduser -S strapi -G strapi
 ENV NODE_ENV=production
 WORKDIR /opt/app
