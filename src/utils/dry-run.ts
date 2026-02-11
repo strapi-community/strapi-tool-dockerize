@@ -1,11 +1,15 @@
 import { readFile as nodeReadFile } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
-import type { ResolvedConfig, StrapiHealthCheckOverrides } from "../config"
+import type { ResolvedConfig, ResourceLimitOverrides, StrapiHealthCheckOverrides } from "../config"
 import {
 	ADMINER_IMAGE,
 	ADMINER_PORT,
+	BACKUP_IMAGES,
+	BACKUP_RETENTION_DAYS,
+	BACKUP_SCHEDULE,
 	NODE_VERSIONS,
+	RESOURCE_LIMITS,
 	STRAPI_DEFAULT_PORT,
 	STRAPI_HEALTH_CHECK_INTERVAL,
 	STRAPI_HEALTH_CHECK_RETRIES,
@@ -82,9 +86,29 @@ function extractNamedVolumes(volumes: string[]): string[] {
 	return volumes.map((v) => v.split(":")[0]).filter((v) => !v.startsWith(".") && !v.startsWith("/"))
 }
 
+function resolveResourceLimits(
+	environment: "development" | "production",
+	overrides?: ResourceLimitOverrides,
+) {
+	const defaults = RESOURCE_LIMITS[environment]
+	return {
+		memoryLimit: overrides?.memory ?? defaults.memory,
+		cpuLimit: overrides?.cpus ?? defaults.cpus,
+	}
+}
+
+function halveResourceValue(value: string): string {
+	const match = value.match(/^(\d+(?:\.\d+)?)\s*(.*)$/)
+	if (!match) return value
+	const num = Number.parseFloat(match[1])
+	const unit = match[2]
+	return `${num / 2}${unit}`
+}
+
 async function renderComposeFiles(
 	config: ResolvedConfig,
 	registry: PluginRegistry,
+	resourceLimits?: ResourceLimitOverrides,
 ): Promise<PreviewFile[]> {
 	if (!config.useCompose) return []
 
@@ -128,6 +152,10 @@ async function renderComposeFiles(
 		useAdminer: config.useAdminer,
 		adminerImage: ADMINER_IMAGE,
 		adminerPort: ADMINER_PORT,
+		useBackups: config.useBackups,
+		backupImage: BACKUP_IMAGES[config.databaseClient] ?? "",
+		backupSchedule: BACKUP_SCHEDULE,
+		backupRetentionDays: BACKUP_RETENTION_DAYS,
 		dbImage,
 		dbEnvironment,
 		dbPorts,
@@ -143,21 +171,34 @@ async function renderComposeFiles(
 	const files: PreviewFile[] = []
 
 	if (config.environment === "both") {
+		const devLimits = resolveResourceLimits("development", resourceLimits)
 		const devOutput = await renderTemplate("docker-compose", {
 			...baseContext,
 			environment: "development",
+			...devLimits,
+			dbMemoryLimit: halveResourceValue(devLimits.memoryLimit),
+			dbCpuLimit: halveResourceValue(devLimits.cpuLimit),
 		})
 		files.push({ filename: "docker-compose.yml", content: devOutput })
 
+		const prodLimits = resolveResourceLimits("production", resourceLimits)
 		const prodOutput = await renderTemplate("docker-compose", {
 			...baseContext,
 			environment: "production",
+			...prodLimits,
+			dbMemoryLimit: halveResourceValue(prodLimits.memoryLimit),
+			dbCpuLimit: halveResourceValue(prodLimits.cpuLimit),
 		})
 		files.push({ filename: "docker-compose.prod.yml", content: prodOutput })
 	} else {
+		const env = config.environment as "development" | "production"
+		const limits = resolveResourceLimits(env, resourceLimits)
 		const output = await renderTemplate("docker-compose", {
 			...baseContext,
 			environment: config.environment,
+			...limits,
+			dbMemoryLimit: halveResourceValue(limits.memoryLimit),
+			dbCpuLimit: halveResourceValue(limits.cpuLimit),
 		})
 		files.push({ filename: "docker-compose.yml", content: output })
 	}
@@ -182,7 +223,17 @@ function renderEnvVars(config: ResolvedConfig, registry: PluginRegistry): Previe
 	}
 
 	const lines = Object.entries(vars).map(([key, value]) => `${key}=${value}`)
-	const content = `# --- Dockerize Start ---\n${lines.join("\n")}\n# --- Dockerize End ---\n`
+
+	let pluginSection = ""
+	const plugins = config.detectedPlugins ?? []
+	for (const plugin of plugins) {
+		pluginSection += `\n# ${plugin.name}`
+		for (const [key, value] of Object.entries(plugin.envVars)) {
+			pluginSection += `\n${key}=${value}`
+		}
+	}
+
+	const content = `# --- Dockerize Start ---\n${lines.join("\n")}${pluginSection}\n# --- Dockerize End ---\n`
 
 	return { filename: ".env", content }
 }
@@ -384,12 +435,13 @@ export async function previewGeneration(
 	config: ResolvedConfig,
 	registry: PluginRegistry,
 	healthCheckOverrides?: StrapiHealthCheckOverrides,
+	resourceLimits?: ResourceLimitOverrides,
 ): Promise<PreviewFile[]> {
 	const files: PreviewFile[] = []
 
 	files.push(...(await renderDockerfiles(config, registry, healthCheckOverrides)))
 	files.push(await renderDockerignore())
-	files.push(...(await renderComposeFiles(config, registry)))
+	files.push(...(await renderComposeFiles(config, registry, resourceLimits)))
 	files.push(renderEnvVars(config, registry))
 	files.push(...renderDatabaseConfig(config))
 

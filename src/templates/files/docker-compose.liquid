@@ -34,6 +34,11 @@ services:
     networks:
       - {{ projectName }}-network
 {%- endif %}
+    deploy:
+      resources:
+        limits:
+          memory: {{ memoryLimit }}
+          cpus: "{{ cpuLimit }}"
 {%- if databaseClient != "sqlite" %}
 
   {{ projectName }}-db:
@@ -74,6 +79,11 @@ services:
 {%- endif %}
     networks:
       - {{ projectName }}-network
+    deploy:
+      resources:
+        limits:
+          memory: {{ dbMemoryLimit }}
+          cpus: "{{ dbCpuLimit }}"
 {%- endif %}
 {%- if useAdminer and databaseClient != "sqlite" %}
 
@@ -93,6 +103,40 @@ services:
     networks:
       - {{ projectName }}-network
 {%- endif %}
+{%- if useBackups and databaseClient != "sqlite" and environment == "production" %}
+
+  {{ projectName }}-backup:
+    image: {{ backupImage }}
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    depends_on:
+      {{ projectName }}-db:
+        condition: service_healthy
+    environment:
+{%- if databaseClient == "postgres" %}
+      POSTGRES_HOST: {{ projectName }}-db
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      SCHEDULE: {{ backupSchedule }}
+      BACKUP_KEEP_DAYS: {{ backupRetentionDays }}
+{%- else %}
+      DB_SERVER: {{ projectName }}-db
+      DB_USER: ${DATABASE_USERNAME}
+      DB_PASS: ${DATABASE_PASSWORD}
+      DB_NAMES: ${DATABASE_NAME}
+      DB_DUMP_CRON: {{ backupSchedule }}
+      RETENTION: {{ backupRetentionDays }}d
+{%- endif %}
+    volumes:
+      - {{ projectName }}-backups:/backups
+    networks:
+      - {{ projectName }}-network
+{%- endif %}
 
 volumes:
   strapi-uploads:
@@ -103,6 +147,9 @@ volumes:
 {%- for volume in namedVolumes %}
   {{ volume }}:
 {%- endfor %}
+{%- endif %}
+{%- if useBackups and databaseClient != "sqlite" and environment == "production" %}
+  {{ projectName }}-backups:
 {%- endif %}
 
 {%- if databaseClient != "sqlite" %}

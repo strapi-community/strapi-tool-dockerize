@@ -9,6 +9,7 @@ import type {
 	Environment,
 	PresetName,
 	ResolvedConfig,
+	ResourceLimitOverrides,
 	SecretBackend,
 	StrapiHealthCheckOverrides,
 } from "../../config"
@@ -49,6 +50,15 @@ export function buildHealthCheckOverrides(
 	return Object.keys(overrides).length > 0 ? overrides : undefined
 }
 
+export function buildResourceLimitOverrides(
+	args: Record<string, unknown>,
+): ResourceLimitOverrides | undefined {
+	const overrides: ResourceLimitOverrides = {}
+	if (args.memory) overrides.memory = String(args.memory)
+	if (args.cpus) overrides.cpus = String(args.cpus)
+	return Object.keys(overrides).length > 0 ? overrides : undefined
+}
+
 export function applyPreset(detected: DetectedConfig, presetName: PresetName): DetectedConfig {
 	const preset = getPreset(presetName)
 	return { ...detected, ...preset }
@@ -60,6 +70,10 @@ export function buildDetectionSummary(detected: DetectedConfig): string {
 	parts.push(detected.projectType ?? "unknown")
 	parts.push(detected.databaseClient ?? "not detected")
 	parts.push(detected.packageManager ?? "unknown")
+	if (detected.detectedPlugins && detected.detectedPlugins.length > 0) {
+		const pluginNames = detected.detectedPlugins.map((p) => p.name)
+		parts.push(`plugins: ${pluginNames.join(", ")}`)
+	}
 	return parts.join(" | ")
 }
 
@@ -121,6 +135,9 @@ export const defaultCommand = defineCommand({
 		if (args.secrets) {
 			detected.secretBackend = args.secrets as SecretBackend
 		}
+		if (args.backups !== undefined) {
+			detected.useBackups = args.backups
+		}
 
 		if (args.yes) {
 			log.info(`Detected: ${buildDetectionSummary(detected)}`)
@@ -147,9 +164,11 @@ export const defaultCommand = defineCommand({
 					databasePassword: detected.databasePassword ?? "strapi",
 					useCompose: detected.useCompose ?? true,
 					useAdminer: detected.useAdminer ?? false,
+					useBackups: detected.useBackups ?? false,
 					secretBackend: detected.secretBackend ?? "none",
 					isESM: detected.isESM ?? false,
 					envVars: detected.envVars ?? {},
+					detectedPlugins: detected.detectedPlugins ?? [],
 				})
 			} catch (err) {
 				if (err instanceof ZodError) {
@@ -166,10 +185,16 @@ export const defaultCommand = defineCommand({
 		}
 
 		const healthCheckOverrides = buildHealthCheckOverrides(args)
+		const resourceLimits = buildResourceLimitOverrides(args)
 
 		if (args["dry-run"]) {
 			try {
-				const files = await previewGeneration(config, pluginRegistry, healthCheckOverrides)
+				const files = await previewGeneration(
+					config,
+					pluginRegistry,
+					healthCheckOverrides,
+					resourceLimits,
+				)
 				console.log(formatPreviewOutput(files))
 			} catch (err) {
 				log.error(err instanceof Error ? err.message : String(err))
@@ -193,7 +218,7 @@ export const defaultCommand = defineCommand({
 
 			if (config.useCompose) {
 				genSpinner.update("Generating docker-compose.yml...")
-				await generateCompose(config, pluginRegistry, cwd)
+				await generateCompose(config, pluginRegistry, cwd, resourceLimits)
 			}
 
 			genSpinner.update("Updating .env...")
