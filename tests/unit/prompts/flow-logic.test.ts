@@ -16,7 +16,7 @@ const mockNote = mock(() => {})
 const mockIsCancel = mock(() => false)
 const mockSelect = mock(() => Promise.resolve("v5"))
 const mockConfirm = mock(() => Promise.resolve(true))
-const mockText = mock(() => Promise.resolve("default"))
+const mockText = mock(() => Promise.resolve("strapi"))
 const mockPassword = mock(() => Promise.resolve("strapi"))
 const mockGroup = mock(() =>
 	Promise.resolve({
@@ -74,13 +74,13 @@ function setupConfirmResponses(responses: boolean[]) {
 	})
 }
 
-describe("prompt flow: useCompose bypass", () => {
+describe("prompt flow: useCompose respects useDetected", () => {
 	beforeEach(() => {
 		resetMocks()
 	})
 
-	it("uses detected useCompose=true without prompting even when useDetected is false", async () => {
-		setupConfirmResponses([false])
+	it("prompts for useCompose when useDetected is false even if detected value exists", async () => {
+		setupConfirmResponses([false, false])
 		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
 		mockGroup.mockResolvedValue({
 			databaseHost: "localhost",
@@ -97,22 +97,39 @@ describe("prompt flow: useCompose bypass", () => {
 
 		const config = await runPrompts(detected)
 
+		expect(config.useCompose).toBe(false)
+	})
+
+	it("uses detected useCompose when useDetected is true", async () => {
+		setupConfirmResponses([true])
+		setupSelectResponses(["development"])
+
+		const detected: DetectedConfig = {
+			strapiVersion: "v5",
+			projectType: "ts",
+			packageManager: "npm",
+			databaseClient: "postgres",
+			databaseHost: "localhost",
+			databasePort: 5432,
+			useCompose: true,
+		}
+
+		const config = await runPrompts(detected)
+
 		expect(config.useCompose).toBe(true)
 	})
 
-	it("uses detected useCompose=false without prompting even when useDetected is false", async () => {
-		setupConfirmResponses([false])
-		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
-		mockGroup.mockResolvedValue({
-			databaseHost: "localhost",
-			databasePort: "5432",
-			databaseName: "strapi",
-			databaseUsername: "strapi",
-			databasePassword: "strapi",
-		})
+	it("uses detected useCompose=false when useDetected is true", async () => {
+		setupConfirmResponses([true])
+		setupSelectResponses(["development"])
 
 		const detected: DetectedConfig = {
-			strapiVersion: "v4",
+			strapiVersion: "v5",
+			projectType: "ts",
+			packageManager: "npm",
+			databaseClient: "postgres",
+			databaseHost: "localhost",
+			databasePort: 5432,
 			useCompose: false,
 		}
 
@@ -122,13 +139,13 @@ describe("prompt flow: useCompose bypass", () => {
 	})
 })
 
-describe("prompt flow: useAdminer bypass", () => {
+describe("prompt flow: useAdminer respects useDetected", () => {
 	beforeEach(() => {
 		resetMocks()
 	})
 
-	it("uses detected useAdminer=true without prompting even when useDetected is false", async () => {
-		setupConfirmResponses([false, true])
+	it("prompts for useAdminer when useDetected is false even if detected value exists", async () => {
+		setupConfirmResponses([false, true, false])
 		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
 		mockGroup.mockResolvedValue({
 			databaseHost: "localhost",
@@ -145,7 +162,47 @@ describe("prompt flow: useAdminer bypass", () => {
 
 		const config = await runPrompts(detected)
 
+		expect(config.useAdminer).toBe(false)
+	})
+
+	it("uses detected useAdminer when useDetected is true", async () => {
+		setupConfirmResponses([true])
+		setupSelectResponses(["development"])
+
+		const detected: DetectedConfig = {
+			strapiVersion: "v5",
+			projectType: "ts",
+			packageManager: "npm",
+			databaseClient: "postgres",
+			databaseHost: "localhost",
+			databasePort: 5432,
+			useCompose: true,
+			useAdminer: true,
+		}
+
+		const config = await runPrompts(detected)
+
 		expect(config.useAdminer).toBe(true)
+	})
+
+	it("uses detected useAdminer=false when useDetected is true", async () => {
+		setupConfirmResponses([true])
+		setupSelectResponses(["development"])
+
+		const detected: DetectedConfig = {
+			strapiVersion: "v5",
+			projectType: "ts",
+			packageManager: "npm",
+			databaseClient: "postgres",
+			databaseHost: "localhost",
+			databasePort: 5432,
+			useCompose: true,
+			useAdminer: false,
+		}
+
+		const config = await runPrompts(detected)
+
+		expect(config.useAdminer).toBe(false)
 	})
 })
 
@@ -226,16 +283,9 @@ describe("prompt flow: database defaults", () => {
 		expect(config.databasePassword).toBe("custom-pass")
 	})
 
-	it("prompts for db connection when useDetected is true but host is missing", async () => {
+	it("uses detected port with defaults when useDetected is true but host is missing", async () => {
 		setupConfirmResponses([true, true])
 		setupSelectResponses(["development"])
-		mockGroup.mockResolvedValue({
-			databaseHost: "localhost",
-			databasePort: "5432",
-			databaseName: "strapi",
-			databaseUsername: "strapi",
-			databasePassword: "strapi",
-		})
 
 		const detected: DetectedConfig = {
 			strapiVersion: "v5",
@@ -245,21 +295,16 @@ describe("prompt flow: database defaults", () => {
 			databasePort: 5432,
 		}
 
-		await runPrompts(detected)
+		const config = await runPrompts(detected)
 
-		expect(mockGroup).toHaveBeenCalledTimes(1)
+		expect(mockGroup).not.toHaveBeenCalled()
+		expect(config.databaseHost).toBe(DEFAULT_DATABASE_HOST)
+		expect(config.databasePort).toBe(5432)
 	})
 
-	it("prompts for db connection when useDetected is true but port is missing", async () => {
+	it("uses detected host with defaults when useDetected is true but port is missing", async () => {
 		setupConfirmResponses([true, true])
 		setupSelectResponses(["development"])
-		mockGroup.mockResolvedValue({
-			databaseHost: "localhost",
-			databasePort: "5432",
-			databaseName: "strapi",
-			databaseUsername: "strapi",
-			databasePassword: "strapi",
-		})
 
 		const detected: DetectedConfig = {
 			strapiVersion: "v5",
@@ -269,9 +314,11 @@ describe("prompt flow: database defaults", () => {
 			databaseHost: "localhost",
 		}
 
-		await runPrompts(detected)
+		const config = await runPrompts(detected)
 
-		expect(mockGroup).toHaveBeenCalledTimes(1)
+		expect(mockGroup).not.toHaveBeenCalled()
+		expect(config.databaseHost).toBe("localhost")
+		expect(config.databasePort).toBe(DEFAULT_PORTS.postgres)
 	})
 })
 
@@ -341,4 +388,51 @@ describe("prompt flow: all database types produce valid config", () => {
 			expect(() => resolvedConfigSchema.parse(config)).not.toThrow()
 		})
 	}
+})
+
+describe("prompt flow: projectName respects useDetected", () => {
+	beforeEach(() => {
+		resetMocks()
+	})
+
+	it("prompts for projectName when useDetected is false", async () => {
+		setupConfirmResponses([false, true])
+		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
+		mockText.mockResolvedValue("prompted-name")
+		mockGroup.mockResolvedValue({
+			databaseHost: "localhost",
+			databasePort: "5432",
+			databaseName: "strapi",
+			databaseUsername: "strapi",
+			databasePassword: "strapi",
+		})
+
+		const detected: DetectedConfig = {
+			strapiVersion: "v4",
+			projectName: "detected-name",
+		}
+
+		const config = await runPrompts(detected)
+
+		expect(config.projectName).toBe("prompted-name")
+	})
+
+	it("uses detected projectName when useDetected is true", async () => {
+		setupConfirmResponses([true])
+		setupSelectResponses(["development"])
+
+		const detected: DetectedConfig = {
+			strapiVersion: "v5",
+			projectType: "ts",
+			packageManager: "npm",
+			databaseClient: "postgres",
+			databaseHost: "localhost",
+			databasePort: 5432,
+			projectName: "detected-name",
+		}
+
+		const config = await runPrompts(detected)
+
+		expect(config.projectName).toBe("detected-name")
+	})
 })

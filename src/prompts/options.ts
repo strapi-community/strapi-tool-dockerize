@@ -1,6 +1,20 @@
 import * as p from "@clack/prompts"
 import type { Environment } from "../config"
 
+export async function promptProjectName(detected?: string): Promise<string> {
+	const name = await p.text({
+		message: "Project name",
+		placeholder: detected ?? "strapi",
+		defaultValue: detected ?? "strapi",
+		validate: (value) => {
+			if (!value.trim()) return "Project name cannot be empty"
+			if (!/^[a-z0-9][a-z0-9._-]*$/i.test(value)) return "Project name must start with alphanumeric and contain only letters, numbers, dots, hyphens, underscores"
+		},
+	})
+	if (p.isCancel(name)) process.exit(0)
+	return name as string
+}
+
 export async function promptEnvironment(): Promise<Environment> {
 	const selected = await p.select({
 		message: "Which environment(s) should the Dockerfile target?",

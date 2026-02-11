@@ -10,7 +10,7 @@ import {
 import { resolvedConfigSchema } from "../config"
 import { confirmDetected } from "./confirm-detected"
 import { promptDatabaseConnection, selectDatabase } from "./database"
-import { promptEnvironment, promptUseAdminer, promptUseCompose } from "./options"
+import { promptEnvironment, promptProjectName, promptUseAdminer, promptUseCompose } from "./options"
 
 async function selectStrapiVersion(): Promise<StrapiVersion> {
 	const selected = await p.select({
@@ -104,10 +104,10 @@ export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConf
 		databasePassword: string
 	}
 
-	if (useDetected && detected.databaseHost && detected.databasePort) {
+	if (useDetected && (detected.databaseHost || detected.databasePort)) {
 		dbConnection = {
-			databaseHost: detected.databaseHost,
-			databasePort: detected.databasePort,
+			databaseHost: detected.databaseHost ?? defaults.databaseHost!,
+			databasePort: detected.databasePort ?? defaults.databasePort!,
 			databaseName: detected.databaseName ?? defaults.databaseName!,
 			databaseUsername: detected.databaseUsername ?? defaults.databaseUsername!,
 			databasePassword: detected.databasePassword ?? defaults.databasePassword!,
@@ -118,14 +118,16 @@ export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConf
 
 	const environment = useDetected && detected.environment ? detected.environment : await promptEnvironment()
 
-	const useCompose = detected.useCompose ?? (await promptUseCompose())
+	const useCompose = (useDetected && detected.useCompose !== undefined) ? detected.useCompose : await promptUseCompose()
 
 	let useAdminer = false
 	if (useCompose && databaseClient !== "sqlite") {
-		useAdminer = detected.useAdminer ?? (await promptUseAdminer())
+		useAdminer = (useDetected && detected.useAdminer !== undefined) ? detected.useAdminer : await promptUseAdminer()
 	}
 
-	const projectName = detected.projectName ?? "strapi"
+	const projectName = useDetected && detected.projectName
+		? detected.projectName
+		: await promptProjectName(detected.projectName)
 
 	const raw: ResolvedConfig = {
 		strapiVersion,
@@ -150,4 +152,4 @@ export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConf
 
 export { confirmDetected } from "./confirm-detected"
 export { selectDatabase, promptDatabaseConnection } from "./database"
-export { promptEnvironment, promptUseCompose, promptUseAdminer } from "./options"
+export { promptEnvironment, promptProjectName, promptUseCompose, promptUseAdminer } from "./options"

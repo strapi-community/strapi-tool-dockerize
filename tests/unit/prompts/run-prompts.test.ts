@@ -17,7 +17,7 @@ const mockIsCancel = mock(() => false)
 
 const mockSelect = mock(() => Promise.resolve("v5"))
 const mockConfirm = mock(() => Promise.resolve(true))
-const mockText = mock(() => Promise.resolve("default"))
+const mockText = mock(() => Promise.resolve("strapi"))
 const mockPassword = mock(() => Promise.resolve("strapi"))
 const mockGroup = mock(() =>
 	Promise.resolve({
@@ -305,9 +305,10 @@ describe("runPrompts", () => {
 		expect(config.projectName).toBe("strapi")
 	})
 
-	it("uses detected projectName when available", async () => {
+	it("prompts for projectName when useDetected is false", async () => {
 		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
 		setupConfirmResponses([true])
+		mockText.mockResolvedValue("custom-name")
 		mockGroup.mockResolvedValue({
 			databaseHost: "localhost",
 			databasePort: "5432",
@@ -316,7 +317,26 @@ describe("runPrompts", () => {
 			databasePassword: "strapi",
 		})
 
-		const detected: DetectedConfig = { projectName: "my-cool-app" }
+		const detected: DetectedConfig = {}
+		const config = await runPrompts(detected)
+
+		expect(config.projectName).toBe("custom-name")
+	})
+
+	it("uses detected projectName when useDetected is true", async () => {
+		setupConfirmResponses([true])
+		setupSelectResponses(["development"])
+
+		const detected: DetectedConfig = {
+			strapiVersion: "v5",
+			projectType: "ts",
+			packageManager: "npm",
+			databaseClient: "postgres",
+			databaseHost: "localhost",
+			databasePort: 5432,
+			projectName: "my-cool-app",
+		}
+
 		const config = await runPrompts(detected)
 
 		expect(config.projectName).toBe("my-cool-app")
