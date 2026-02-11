@@ -1,6 +1,6 @@
 import { defineCommand } from "citty"
 import { resolve } from "node:path"
-import type { DetectedConfig } from "../../config"
+import type { DetectedConfig, Environment } from "../../config"
 import { resolvedConfigSchema } from "../../config"
 import { detectAll } from "../../detection"
 import { generateCompose, generateDatabaseConfig, generateDockerfiles, generateDockerignore, generateEnv } from "../../generators"
@@ -20,6 +20,11 @@ export const defaultCommand = defineCommand({
 	async run({ args }) {
 		const cwd = resolve(args.path)
 
+		if (!process.stdin.isTTY && !args.yes) {
+			log.error("Non-interactive environment detected. Use --yes flag for non-interactive mode.")
+			process.exit(1)
+		}
+
 		showBanner()
 
 		const detectSpinner = createSpinner("Detecting project configuration...")
@@ -38,6 +43,12 @@ export const defaultCommand = defineCommand({
 		}
 		if (args["package-manager"]) {
 			detected.packageManager = args["package-manager"] as DetectedConfig["packageManager"]
+		}
+		if (args.env) {
+			detected.environment = args.env as Environment
+		}
+		if (args.compose !== undefined) {
+			detected.useCompose = args.compose
 		}
 
 		const config = args.yes
@@ -89,7 +100,7 @@ export const defaultCommand = defineCommand({
 			process.exit(1)
 		}
 
-		if (config.databaseClient !== "sqlite") {
+		if (config.databaseClient !== "sqlite" && !args["skip-deps"]) {
 			const depsSpinner = createSpinner("Installing database driver...")
 			try {
 				await installDatabaseDriver(config, pluginRegistry, cwd)
@@ -115,5 +126,12 @@ export const defaultCommand = defineCommand({
 		for (const file of generated) {
 			log.info(`  ${file}`)
 		}
+
+		if (config.useCompose) {
+			log.info("Next: docker compose up -d")
+		} else {
+			log.info(`Next: docker build -t ${config.projectName} .`)
+		}
+		log.info("Docs: https://github.com/strapi-community/strapi-tool-dockerize")
 	},
 })

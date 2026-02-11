@@ -17,6 +17,20 @@ export const sharedFlags = {
 		description: "Package manager (npm, yarn, pnpm, bun)",
 		alias: "pm",
 	},
+	env: {
+		type: "string",
+		description: "Environment (development, production, both)",
+		alias: "e",
+	},
+	compose: {
+		type: "boolean",
+		description: "Generate docker-compose.yml (use --no-compose to skip)",
+	},
+	"skip-deps": {
+		type: "boolean",
+		description: "Skip installing database driver",
+		default: false,
+	},
 	yes: {
 		type: "boolean",
 		description: "Skip prompts and use detected/default values",
