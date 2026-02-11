@@ -195,7 +195,99 @@ describe("Dockerfile prod template", () => {
 	it("preserves single blank lines between stages", async () => {
 		const result = await renderTemplate("Dockerfile.prod", baseContext)
 		expect(result).toMatch(/WORKDIR \/opt\/app\n\nFROM base AS deps/)
-		expect(result).toMatch(/RUN npm ci --omit=dev\n\nFROM deps AS build/)
-		expect(result).toMatch(/RUN npm run build\n\nFROM node:20-alpine AS runtime/)
+		expect(result).toMatch(/RUN npm ci\n\nFROM deps AS build/)
+		expect(result).toMatch(/RUN npm run build\n\nFROM base AS production-deps/)
+		expect(result).toMatch(/RUN npm ci --omit=dev\n\nFROM node:20-alpine AS runtime/)
+	})
+
+	it("has a production-deps stage", async () => {
+		const result = await renderTemplate("Dockerfile.prod", baseContext)
+		const prodDeps = extractStage(result, "production-deps")
+		expect(prodDeps).not.toBe("")
+		expect(prodDeps).toMatch(/^FROM base AS production-deps/)
+	})
+
+	it("deps stage uses full install without production flags", async () => {
+		const result = await renderTemplate("Dockerfile.prod", baseContext)
+		const deps = extractStage(result, "deps")
+		expect(deps).toContain("RUN npm ci")
+		expect(deps).not.toContain("--omit=dev")
+		expect(deps).not.toContain("--production")
+		expect(deps).not.toContain("--prod")
+	})
+
+	it("production-deps stage uses production-only install", async () => {
+		const result = await renderTemplate("Dockerfile.prod", baseContext)
+		const prodDeps = extractStage(result, "production-deps")
+		expect(prodDeps).toContain("RUN npm ci --omit=dev")
+	})
+
+	it("runtime copies node_modules from production-deps", async () => {
+		const result = await renderTemplate("Dockerfile.prod", baseContext)
+		const runtime = extractStage(result, "runtime")
+		expect(runtime).toContain("COPY --chown=strapi:strapi --from=production-deps /opt/app/node_modules ./node_modules")
+	})
+
+	it("runtime copies built output from build stage", async () => {
+		const result = await renderTemplate("Dockerfile.prod", baseContext)
+		const runtime = extractStage(result, "runtime")
+		expect(runtime).toContain("COPY --chown=strapi:strapi --from=build /opt/app .")
+	})
+
+	it("production-deps stage uses pnpm prod install", async () => {
+		const ctx = {
+			...baseContext,
+			pmInstallStep: "pnpm install --frozen-lockfile",
+			pmInstallStepProd: "pnpm install --frozen-lockfile --prod",
+			pmCopyFiles: ["package.json", "pnpm-lock.yaml"],
+		}
+		const result = await renderTemplate("Dockerfile.prod", ctx)
+		const deps = extractStage(result, "deps")
+		expect(deps).toContain("RUN pnpm install --frozen-lockfile")
+		expect(deps).not.toContain("--prod")
+		const prodDeps = extractStage(result, "production-deps")
+		expect(prodDeps).toContain("RUN pnpm install --frozen-lockfile --prod")
+	})
+
+	it("production-deps stage uses yarn prod install", async () => {
+		const ctx = {
+			...baseContext,
+			pmInstallStep: "yarn install --frozen-lockfile",
+			pmInstallStepProd: "yarn install --frozen-lockfile --production",
+			pmCopyFiles: ["package.json", "yarn.lock"],
+		}
+		const result = await renderTemplate("Dockerfile.prod", ctx)
+		const deps = extractStage(result, "deps")
+		expect(deps).toContain("RUN yarn install --frozen-lockfile")
+		expect(deps).not.toContain("--production")
+		const prodDeps = extractStage(result, "production-deps")
+		expect(prodDeps).toContain("RUN yarn install --frozen-lockfile --production")
+	})
+
+	it("production-deps stage uses bun prod install", async () => {
+		const ctx = {
+			...baseContext,
+			pmInstallStep: "bun install --frozen-lockfile",
+			pmInstallStepProd: "bun install --frozen-lockfile --production",
+			pmCopyFiles: ["package.json", "bun.lockb"],
+		}
+		const result = await renderTemplate("Dockerfile.prod", ctx)
+		const deps = extractStage(result, "deps")
+		expect(deps).toContain("RUN bun install --frozen-lockfile")
+		expect(deps).not.toContain("--production")
+		const prodDeps = extractStage(result, "production-deps")
+		expect(prodDeps).toContain("RUN bun install --frozen-lockfile --production")
+	})
+
+	it("has no extra blank lines within production-deps stage", async () => {
+		const result = await renderTemplate("Dockerfile.prod", baseContext)
+		const prodDeps = extractStage(result, "production-deps")
+		expect(prodDeps).not.toMatch(/\n\n\n/)
+	})
+
+	it("build stage sets NODE_ENV to production", async () => {
+		const result = await renderTemplate("Dockerfile.prod", baseContext)
+		const build = extractStage(result, "build")
+		expect(build).toContain("ENV NODE_ENV=production")
 	})
 })

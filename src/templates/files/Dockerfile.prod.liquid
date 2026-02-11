@@ -12,11 +12,18 @@ FROM base AS deps
 {%- for file in pmCopyFiles %}
 COPY {{ file }} ./
 {%- endfor %}
-RUN {{ pmInstallStepProd }}
+RUN {{ pmInstallStep }}
 
 FROM deps AS build
 COPY . .
+ENV NODE_ENV=production
 RUN {{ pmBuildStep }}
+
+FROM base AS production-deps
+{%- for file in pmCopyFiles %}
+COPY {{ file }} ./
+{%- endfor %}
+RUN {{ pmInstallStepProd }}
 
 FROM {{ runtimeImage }} AS runtime
 RUN apk update && apk add --no-cache vips
@@ -26,6 +33,7 @@ RUN apk update && apk add --no-cache vips
 RUN addgroup -S strapi && adduser -S strapi -G strapi
 ENV NODE_ENV=production
 WORKDIR /opt/app
+COPY --chown=strapi:strapi --from=production-deps /opt/app/node_modules ./node_modules
 COPY --chown=strapi:strapi --from=build /opt/app .
 USER strapi
 EXPOSE {{ strapiPort }}
