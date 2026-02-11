@@ -2,7 +2,29 @@ import { describe, it, expect } from "bun:test"
 import { ZodError } from "zod"
 import { formatZodErrors, buildDetectionSummary, shouldWarnDatabaseDefault } from "../../../src/cli/commands/default"
 import { resolvedConfigSchema } from "../../../src/config/schema"
-import type { DetectedConfig } from "../../../src/config/schema"
+import { DEFAULT_PORTS } from "../../../src/config/defaults"
+import type { DetectedConfig, DatabaseClient } from "../../../src/config/schema"
+
+function buildYesModeConfig(detected: DetectedConfig) {
+	const resolvedClient = detected.databaseClient ?? "postgres"
+	return resolvedConfigSchema.parse({
+		strapiVersion: detected.strapiVersion ?? "v5",
+		projectType: detected.projectType ?? "ts",
+		databaseClient: resolvedClient,
+		packageManager: detected.packageManager ?? "npm",
+		environment: detected.environment ?? "development",
+		projectName: detected.projectName ?? "strapi",
+		databaseHost: detected.databaseHost ?? "localhost",
+		databasePort: detected.databasePort ?? DEFAULT_PORTS[resolvedClient],
+		databaseName: detected.databaseName ?? "strapi",
+		databaseUsername: detected.databaseUsername ?? "strapi",
+		databasePassword: detected.databasePassword ?? "strapi",
+		useCompose: detected.useCompose ?? true,
+		useAdminer: detected.useAdminer ?? false,
+		isESM: detected.isESM ?? false,
+		envVars: detected.envVars ?? {},
+	})
+}
 
 describe("formatZodErrors", () => {
 	it("formats a single field error with path", () => {
@@ -168,5 +190,82 @@ describe("buildDetectionSummary", () => {
 		}
 		const summary = buildDetectionSummary(detected)
 		expect(summary).toBe("strapi v5 | ts | mariadb | unknown")
+	})
+})
+
+describe("yes mode port resolution", () => {
+	it("uses port 3306 when mysql is auto-detected", () => {
+		const detected: DetectedConfig = {
+			databaseClient: "mysql",
+			databasePort: 3306,
+		}
+		const config = buildYesModeConfig(detected)
+		expect(config.databaseClient).toBe("mysql")
+		expect(config.databasePort).toBe(3306)
+	})
+
+	it("uses port 3306 when mariadb is auto-detected", () => {
+		const detected: DetectedConfig = {
+			databaseClient: "mariadb",
+			databasePort: 3306,
+		}
+		const config = buildYesModeConfig(detected)
+		expect(config.databaseClient).toBe("mariadb")
+		expect(config.databasePort).toBe(3306)
+	})
+
+	it("uses port 5432 when postgres is auto-detected", () => {
+		const detected: DetectedConfig = {
+			databaseClient: "postgres",
+			databasePort: 5432,
+		}
+		const config = buildYesModeConfig(detected)
+		expect(config.databaseClient).toBe("postgres")
+		expect(config.databasePort).toBe(5432)
+	})
+
+	it("falls back to port 3306 for mysql when detection provides no port", () => {
+		const detected: DetectedConfig = {
+			databaseClient: "mysql",
+		}
+		const config = buildYesModeConfig(detected)
+		expect(config.databaseClient).toBe("mysql")
+		expect(config.databasePort).toBe(3306)
+	})
+
+	it("falls back to port 3306 for mariadb when detection provides no port", () => {
+		const detected: DetectedConfig = {
+			databaseClient: "mariadb",
+		}
+		const config = buildYesModeConfig(detected)
+		expect(config.databaseClient).toBe("mariadb")
+		expect(config.databasePort).toBe(3306)
+	})
+
+	it("falls back to port 5432 for postgres when detection provides no port", () => {
+		const detected: DetectedConfig = {
+			databaseClient: "postgres",
+		}
+		const config = buildYesModeConfig(detected)
+		expect(config.databaseClient).toBe("postgres")
+		expect(config.databasePort).toBe(5432)
+	})
+
+	it("defaults to postgres port 5432 when nothing is detected", () => {
+		const detected: DetectedConfig = {}
+		const config = buildYesModeConfig(detected)
+		expect(config.databaseClient).toBe("postgres")
+		expect(config.databasePort).toBe(5432)
+	})
+
+	it("uses explicit database override with correct port", () => {
+		const detected: DetectedConfig = {
+			databaseClient: "mysql" as DatabaseClient,
+		}
+		detected.databasePort = DEFAULT_PORTS[detected.databaseClient!]
+
+		const config = buildYesModeConfig(detected)
+		expect(config.databaseClient).toBe("mysql")
+		expect(config.databasePort).toBe(3306)
 	})
 })

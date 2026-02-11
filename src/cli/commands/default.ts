@@ -90,15 +90,16 @@ export const defaultCommand = defineCommand({
 				log.warn("No database detected, defaulting to postgres")
 			}
 			try {
+				const resolvedClient = detected.databaseClient ?? "postgres"
 				config = resolvedConfigSchema.parse({
 					strapiVersion: detected.strapiVersion ?? "v5",
 					projectType: detected.projectType ?? "ts",
-					databaseClient: detected.databaseClient ?? "postgres",
+					databaseClient: resolvedClient,
 					packageManager: detected.packageManager ?? "npm",
 					environment: detected.environment ?? "development",
 					projectName: detected.projectName ?? "strapi",
 					databaseHost: detected.databaseHost ?? "localhost",
-					databasePort: detected.databasePort ?? 5432,
+					databasePort: detected.databasePort ?? DEFAULT_PORTS[resolvedClient],
 					databaseName: detected.databaseName ?? "strapi",
 					databaseUsername: detected.databaseUsername ?? "strapi",
 					databasePassword: detected.databasePassword ?? "strapi",

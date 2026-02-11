@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises"
 import type { DatabaseClient, DetectedConfig } from "../config"
+import { DEFAULT_PORTS } from "../config"
 import { parseEnvFile } from "../utils"
 
 const DEP_TO_CLIENT: Record<string, DatabaseClient> = {
@@ -64,13 +65,13 @@ async function detectFromDeps(cwd: string): Promise<DatabaseClient | undefined> 
 
 export async function detectDatabase(cwd: string): Promise<Partial<DetectedConfig>> {
 	const fromEnv = await detectFromEnv(cwd)
-	if (fromEnv) return { databaseClient: fromEnv }
+	if (fromEnv) return { databaseClient: fromEnv, databasePort: DEFAULT_PORTS[fromEnv] }
 
 	const fromConfig = await detectFromConfigFiles(cwd)
-	if (fromConfig) return { databaseClient: fromConfig }
+	if (fromConfig) return { databaseClient: fromConfig, databasePort: DEFAULT_PORTS[fromConfig] }
 
 	const fromDeps = await detectFromDeps(cwd)
-	if (fromDeps) return { databaseClient: fromDeps }
+	if (fromDeps) return { databaseClient: fromDeps, databasePort: DEFAULT_PORTS[fromDeps] }
 
 	return {}
 }
