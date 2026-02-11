@@ -27,6 +27,11 @@ describe("mysqlPlugin", () => {
 		expect(mysqlPlugin.driverPackage).toBe("mysql2")
 	})
 
+	it("pins driver versions for each strapi version", () => {
+		expect(mysqlPlugin.v4DriverPackage).toBe("mysql2@^3.10.0")
+		expect(mysqlPlugin.v5DriverPackage).toBe("mysql2@^3.9.8")
+	})
+
 	describe("composeService", () => {
 		it("returns service with correct image", () => {
 			const service = mysqlPlugin.composeService(baseConfig)

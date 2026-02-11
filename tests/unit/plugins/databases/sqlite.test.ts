@@ -27,6 +27,11 @@ describe("sqlitePlugin", () => {
 		expect(sqlitePlugin.driverPackage).toBe("better-sqlite3")
 	})
 
+	it("pins driver versions for each strapi version", () => {
+		expect(sqlitePlugin.v4DriverPackage).toBe("better-sqlite3@^8.6.0")
+		expect(sqlitePlugin.v5DriverPackage).toBe("better-sqlite3@^12.4.1")
+	})
+
 	describe("composeService", () => {
 		it("returns empty service since sqlite needs no container", () => {
 			const service = sqlitePlugin.composeService(baseConfig)

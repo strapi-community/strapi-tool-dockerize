@@ -27,6 +27,11 @@ describe("postgresPlugin", () => {
 		expect(postgresPlugin.driverPackage).toBe("pg")
 	})
 
+	it("pins driver versions for each strapi version", () => {
+		expect(postgresPlugin.v4DriverPackage).toBe("pg@^8.8.0")
+		expect(postgresPlugin.v5DriverPackage).toBe("pg@^8.8.0")
+	})
+
 	describe("composeService", () => {
 		it("returns service with correct image", () => {
 			const service = postgresPlugin.composeService(baseConfig)
