@@ -19,6 +19,9 @@ const baseContext = {
 	dbHealthRetries: 0,
 	dbHealthStartPeriod: "",
 	namedVolumes: [],
+	secrets: [],
+	serviceSecrets: [],
+	hasSecrets: false,
 }
 
 function sqliteContext(overrides = {}) {
@@ -151,6 +154,51 @@ describe("docker-compose template", () => {
 			const output = await renderTemplate("docker-compose", mysqlContext())
 			expect(output).toContain("my-project-db:")
 			expect(output).toContain("mysql:8.4")
+		})
+	})
+
+	describe("secrets", () => {
+		it("includes secrets section when hasSecrets is true", async () => {
+			const output = await renderTemplate(
+				"docker-compose",
+				postgresContext({
+					environment: "production",
+					hasSecrets: true,
+					secrets: [{ name: "db_password", file: "./secrets/db_password.txt" }],
+					serviceSecrets: ["db_password"],
+				}),
+			)
+			expect(output).toContain("secrets:")
+			expect(output).toContain("db_password:")
+			expect(output).toContain("file: ./secrets/db_password.txt")
+			expect(output).toContain("- db_password")
+		})
+
+		it("does not include secrets section when hasSecrets is false", async () => {
+			const output = await renderTemplate(
+				"docker-compose",
+				postgresContext({
+					environment: "production",
+					hasSecrets: false,
+					secrets: [],
+					serviceSecrets: [],
+				}),
+			)
+			expect(output).not.toContain("secrets:")
+			expect(output).not.toContain("db_password")
+		})
+
+		it("does not include secrets for development even with hasSecrets", async () => {
+			const output = await renderTemplate(
+				"docker-compose",
+				postgresContext({
+					environment: "development",
+					hasSecrets: false,
+					secrets: [],
+					serviceSecrets: [],
+				}),
+			)
+			expect(output).not.toContain("secrets:")
 		})
 	})
 
