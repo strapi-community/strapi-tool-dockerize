@@ -9,7 +9,11 @@ import { writeFile } from "../utils/fs"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-export async function generateDockerfiles(config: ResolvedConfig, registry: PluginRegistry, cwd: string): Promise<void> {
+export async function generateDockerfiles(
+	config: ResolvedConfig,
+	registry: PluginRegistry,
+	cwd: string,
+): Promise<void> {
 	const pm = registry.getPackageManager(config.packageManager)
 
 	const nodeVersion = NODE_VERSIONS[config.strapiVersion]

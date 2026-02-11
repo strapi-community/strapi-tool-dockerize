@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test"
+import { afterEach, beforeEach, describe, expect, it } from "bun:test"
+import { readFile, readdir } from "node:fs/promises"
 import { join } from "node:path"
-import { readdir, readFile } from "node:fs/promises"
-import { createTempDir, cleanupTempDir, createFixtureFiles } from "../../../setup"
 import { resetCommand } from "../../../../src/cli/commands/reset"
+import { cleanupTempDir, createFixtureFiles, createTempDir } from "../../../setup"
 
 let tempDir: string
 
@@ -120,7 +120,7 @@ describe("reset command", () => {
 
 		it("removes both original and .bak files", async () => {
 			await createFixtureFiles(tempDir, {
-				"Dockerfile": "FROM node:18",
+				Dockerfile: "FROM node:18",
 				"Dockerfile.bak": "FROM node:16",
 				"docker-compose.yml": "version: '3'",
 				"docker-compose.yml.bak": "version: '2'",
@@ -148,7 +148,7 @@ describe("reset command", () => {
 	describe("docker file removal", () => {
 		it("removes all standard docker files", async () => {
 			await createFixtureFiles(tempDir, {
-				"Dockerfile": "FROM node:18",
+				Dockerfile: "FROM node:18",
 				"Dockerfile.prod": "FROM node:18",
 				"docker-compose.yml": "version: '3'",
 				"docker-compose.dev.yml": "version: '3'",

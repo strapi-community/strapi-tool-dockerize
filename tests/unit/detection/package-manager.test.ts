@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test"
+import { afterEach, beforeEach, describe, expect, it } from "bun:test"
 import { detectPackageManager } from "../../../src/detection/package-manager"
-import { fixturePath, createTempDir, cleanupTempDir, createFixtureFiles } from "../../setup"
+import { cleanupTempDir, createFixtureFiles, createTempDir, fixturePath } from "../../setup"
 
 describe("detectPackageManager", () => {
 	it("detects pnpm from pnpm-lock.yaml", async () => {

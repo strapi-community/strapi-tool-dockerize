@@ -8,7 +8,8 @@ export async function promptProjectName(detected?: string): Promise<string> {
 		defaultValue: detected ?? "strapi",
 		validate: (value) => {
 			if (!value.trim()) return "Project name cannot be empty"
-			if (!/^[a-z0-9][a-z0-9._-]*$/i.test(value)) return "Project name must start with alphanumeric and contain only letters, numbers, dots, hyphens, underscores"
+			if (!/^[a-z0-9][a-z0-9._-]*$/i.test(value))
+				return "Project name must start with alphanumeric and contain only letters, numbers, dots, hyphens, underscores"
 		},
 	})
 	if (p.isCancel(name)) {

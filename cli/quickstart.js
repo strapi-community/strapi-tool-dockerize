@@ -1,10 +1,10 @@
-const { setConfig } = require(`../utils`);
+const { setConfig } = require(`../utils`)
 
 /**
  * It takes the flags passed to the CLI and sets them as the config for the project
  * @returns true
  */
-const quickStart = async flags => {
+const quickStart = async (flags) => {
 	const {
 		projectname,
 		projecttype,
@@ -16,16 +16,15 @@ const quickStart = async flags => {
 		dbname,
 		dbuser,
 		dbpassword,
-		dbport
-	} = flags;
+		dbport,
+	} = flags
 
 	setConfig({
 		projectName: (projectname && projectname.toLowerCase()) || `mystrapi`,
 		projectType: (projecttype && projecttype.toLowerCase()) || `js`,
 		packageManager: (packagemanager && packagemanager.toLowerCase()) || `yarn`,
 		env: (env && env.toLowerCase()) || `development`,
-		dockerCompose:
-			usecompose && usecompose.toLowerCase() === `false` ? false : true,
+		dockerCompose: usecompose && usecompose.toLowerCase() === `false` ? false : true,
 		dbtype:
 			dbtype && dbtype.toLowerCase() === `postgres`
 				? `postgresql`
@@ -35,9 +34,9 @@ const quickStart = async flags => {
 		dbname: dbname || ``,
 		dbuser: dbuser || ``,
 		dbpassword: dbpassword || ``,
-		quickStart: true
-	});
-	return true;
-};
+		quickStart: true,
+	})
+	return true
+}
 
-module.exports = quickStart;
+module.exports = quickStart

@@ -1,108 +1,113 @@
-const prompts = require(`prompts`);
-const { promisify } = require(`util`);
-const { spawn } = require(`child_process`);
-const ora = require(`ora`);
-const spinner = ora({ text: `` });
-const chalk = require(`chalk`);
-const goodbye = require(`./goodbye`);
-const path = require(`path`);
+const prompts = require(`prompts`)
+const { promisify } = require(`util`)
+const { spawn } = require(`child_process`)
+const ora = require(`ora`)
+const spinner = ora({ text: `` })
+const chalk = require(`chalk`)
+const goodbye = require(`./goodbye`)
+const path = require(`path`)
 const createStrapiProject = async () => {
 	const newProject = await prompts({
 		name: `strapiProject`,
 		message: `Do you want to create a new Strapi Project`,
 		active: `Yes`,
 		inactive: `No`,
-		type: `toggle`
-	});
+		type: `toggle`,
+	})
 	if (newProject.strapiProject) {
 		const extraQuestions = await prompts([
 			{
 				type: `text`,
 				name: `projectName`,
 				message: `Whats the name of the project?`,
-				initial: `my-project`
+				initial: `my-project`,
 			},
 			{
 				name: `typescript`,
 				message: `Do you want to use TypeScript`,
 				active: `Yes`,
 				inactive: `No`,
-				type: `toggle`
+				type: `toggle`,
 			},
 			{
 				name: `projectPath`,
-				message: `Do you want to assign a path for new project ?`
-					+ ` (leave blank for current directory )`,
+				message:
+					`Do you want to assign a path for new project ?` +
+					` (leave blank for current directory )`,
 				type: `text`,
-				initial: process.cwd()
-			}
-		]);
+				initial: process.cwd(),
+			},
+		])
 
 		/* eslint-disable */
 		async function checkPathAccessibility(targetPath) {
 			if (!path.isAbsolute(targetPath)) {
-				console.error(`${chalk.bold.red(
-					` \n 🛑 Path is not valid. Please use a valid path for creating project, exiting...`
-				)}\n`);
-				await goodbye();
-				process.exit(1);
+				console.error(
+					`${chalk.bold.red(
+						` \n 🛑 Path is not valid. Please use a valid path for creating project, exiting...`,
+					)}\n`,
+				)
+				await goodbye()
+				process.exit(1)
 			} else {
-				console.log(`${chalk.bold.green(`\n 📝 Path is valid, proceeding! \n`)}`);
+				console.log(`${chalk.bold.green(`\n 📝 Path is valid, proceeding! \n`)}`)
 			}
 		}
 
-		const checkIfPathExists = extraQuestions.projectPath;
+		const checkIfPathExists = extraQuestions.projectPath
 
-		if (checkIfPathExists === `` || checkIfPathExists === `undefined` || checkIfPathExists === null) {
-			extraQuestions.projectPath = `.`;
+		if (
+			checkIfPathExists === `` ||
+			checkIfPathExists === `undefined` ||
+			checkIfPathExists === null
+		) {
+			extraQuestions.projectPath = `.`
 		} else {
-			await checkPathAccessibility(checkIfPathExists);
+			await checkPathAccessibility(checkIfPathExists)
 		}
 
-		if(extraQuestions.projectPath !== process.cwd()) {
-			extraQuestions.initial = ``;
+		if (extraQuestions.projectPath !== process.cwd()) {
+			extraQuestions.initial = ``
 		}
 
-		const projectPath = `${extraQuestions.projectPath}/${extraQuestions.projectName}`;
+		const projectPath = `${extraQuestions.projectPath}/${extraQuestions.projectName}`
 
-		const command = `npx`;
+		const command = `npx`
 		const args = [
 			`create-strapi-app@latest`,
 			projectPath,
 			`--quickstart`,
 			extraQuestions.typescript ? `--typescript` : ``,
 			`--no-run`,
-			'--skip-cloud'
-		];
+			"--skip-cloud",
+		]
 
-		const childProcess = spawn(command, args);
-		childProcess.stdout.on(`data`, data => {
-			console.log(`${data}`);
-		});
+		const childProcess = spawn(command, args)
+		childProcess.stdout.on(`data`, (data) => {
+			console.log(`${data}`)
+		})
 
-		childProcess.stderr.on(`data`, data => {
-			console.log(`${data}`);
-		});
+		childProcess.stderr.on(`data`, (data) => {
+			console.log(`${data}`)
+		})
 
 		// Convert the childProcess.on('close') event into a Promise
-		const onClosePromise = promisify(childProcess.on.bind(childProcess));
+		const onClosePromise = promisify(childProcess.on.bind(childProcess))
 		spinner.stopAndPersist({
 			symbol: `🚀`,
 			text: ` ${chalk.bold.yellow(
-				`Creating Strapi Project from npx create-strapi-app@latest - please wait...`
-			)} \n`
-		});
-		await onClosePromise(`close`);
+				`Creating Strapi Project from npx create-strapi-app@latest - please wait...`,
+			)} \n`,
+		})
+		await onClosePromise(`close`)
 		spinner.stopAndPersist({
 			symbol: `🚀`,
-			text: ` ${chalk.bold.yellow(
-				`Strapi Project created! at path  ${projectPath}`
-			)} \n`
-		});
-		return projectPath;
+			text: ` ${chalk.bold.yellow(`Strapi Project created! at path  ${projectPath}`)} \n`,
+		})
+		return projectPath
 	} else {
-		process.exit(1);
+		process.exit(1)
 	}
-};
+}
 
-module.exports = { createStrapiProject };
+module.exports = { createStrapiProject }

@@ -1,6 +1,4 @@
-import { describe, it, expect, mock, beforeEach, spyOn } from "bun:test"
-import type { DetectedConfig, ResolvedConfig } from "../../../src/config/schema"
-import { resolvedConfigSchema } from "../../../src/config/schema"
+import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test"
 import {
 	DEFAULT_DATABASE_HOST,
 	DEFAULT_DATABASE_NAME,
@@ -8,6 +6,8 @@ import {
 	DEFAULT_DATABASE_USERNAME,
 	DEFAULT_PORTS,
 } from "../../../src/config/defaults"
+import type { DetectedConfig, ResolvedConfig } from "../../../src/config/schema"
+import { resolvedConfigSchema } from "../../../src/config/schema"
 
 const mockIntro = mock(() => {})
 const mockCancel = mock(() => {})
@@ -173,7 +173,8 @@ describe("runPrompts", () => {
 		await runPrompts({})
 
 		const autoDetectCall = mockLogInfo.mock.calls.find(
-			(call: unknown[]) => typeof call[0] === "string" && (call[0] as string).includes("Auto-detected"),
+			(call: unknown[]) =>
+				typeof call[0] === "string" && (call[0] as string).includes("Auto-detected"),
 		)
 		expect(autoDetectCall).toBeUndefined()
 	})
@@ -278,9 +279,7 @@ describe("runPrompts", () => {
 
 		await runPrompts({})
 
-		const summaryCall = mockNote.mock.calls.find(
-			(call: unknown[]) => call[1] === "Configuration",
-		)
+		const summaryCall = mockNote.mock.calls.find((call: unknown[]) => call[1] === "Configuration")
 		expect(summaryCall).toBeDefined()
 		expect(summaryCall![0]).toContain("Strapi v5")
 	})
@@ -291,9 +290,7 @@ describe("runPrompts", () => {
 
 		await runPrompts({})
 
-		const summaryCall = mockNote.mock.calls.find(
-			(call: unknown[]) => call[1] === "Configuration",
-		)
+		const summaryCall = mockNote.mock.calls.find((call: unknown[]) => call[1] === "Configuration")
 		expect(summaryCall![0]).toContain("localhost:5432/strapi")
 		expect(summaryCall![0]).toContain("DB User: strapi")
 	})
@@ -304,9 +301,7 @@ describe("runPrompts", () => {
 
 		await runPrompts({})
 
-		const summaryCall = mockNote.mock.calls.find(
-			(call: unknown[]) => call[1] === "Configuration",
-		)
+		const summaryCall = mockNote.mock.calls.find((call: unknown[]) => call[1] === "Configuration")
 		expect(summaryCall![0]).not.toContain("Database:")
 		expect(summaryCall![0]).not.toContain("DB User:")
 	})
@@ -317,9 +312,7 @@ describe("runPrompts", () => {
 
 		await runPrompts({})
 
-		const summaryCall = mockNote.mock.calls.find(
-			(call: unknown[]) => call[1] === "Configuration",
-		)
+		const summaryCall = mockNote.mock.calls.find((call: unknown[]) => call[1] === "Configuration")
 		expect(summaryCall![0]).toContain("Compose: yes")
 	})
 
@@ -361,9 +354,7 @@ describe("runPrompts", () => {
 
 		await runPrompts({})
 
-		const summaryCall = mockNote.mock.calls.find(
-			(call: unknown[]) => call[1] === "Configuration",
-		)
+		const summaryCall = mockNote.mock.calls.find((call: unknown[]) => call[1] === "Configuration")
 		expect(summaryCall![0]).toContain("TypeScript")
 		expect(summaryCall![0]).toContain("PostgreSQL")
 		expect(summaryCall![0]).toContain("npm")
@@ -399,7 +390,8 @@ describe("runPrompts", () => {
 		await runPrompts({})
 
 		const warnCalls = mockLogWarn.mock.calls.filter(
-			(call: unknown[]) => typeof call[0] === "string" && (call[0] as string).includes("credentials"),
+			(call: unknown[]) =>
+				typeof call[0] === "string" && (call[0] as string).includes("credentials"),
 		)
 		expect(warnCalls.length).toBeGreaterThan(0)
 	})
@@ -411,7 +403,8 @@ describe("runPrompts", () => {
 		await runPrompts({})
 
 		const warnCalls = mockLogWarn.mock.calls.filter(
-			(call: unknown[]) => typeof call[0] === "string" && (call[0] as string).includes("credentials"),
+			(call: unknown[]) =>
+				typeof call[0] === "string" && (call[0] as string).includes("credentials"),
 		)
 		expect(warnCalls.length).toBeGreaterThan(0)
 	})
@@ -423,7 +416,8 @@ describe("runPrompts", () => {
 		await runPrompts({})
 
 		const warnCalls = mockLogWarn.mock.calls.filter(
-			(call: unknown[]) => typeof call[0] === "string" && (call[0] as string).includes("credentials"),
+			(call: unknown[]) =>
+				typeof call[0] === "string" && (call[0] as string).includes("credentials"),
 		)
 		expect(warnCalls).toHaveLength(0)
 	})

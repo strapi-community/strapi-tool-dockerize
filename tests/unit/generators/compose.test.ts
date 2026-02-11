@@ -1,4 +1,4 @@
-import { describe, it, expect } from "bun:test"
+import { describe, expect, it } from "bun:test"
 import { renderTemplate } from "../../../src/templates"
 
 const baseContext = {
@@ -110,7 +110,9 @@ describe("docker-compose template", () => {
 		it("includes network references on strapi service", async () => {
 			const output = await renderTemplate("docker-compose", postgresContext())
 			const lines = output.split("\n")
-			const dbServiceLine = lines.findIndex((l: string) => /^\s{2}\S/.test(l) && l.includes("my-project-db:"))
+			const dbServiceLine = lines.findIndex(
+				(l: string) => /^\s{2}\S/.test(l) && l.includes("my-project-db:"),
+			)
 			const strapiSection = lines.slice(0, dbServiceLine).join("\n")
 			expect(strapiSection).toContain("- my-project-network")
 		})
@@ -118,7 +120,9 @@ describe("docker-compose template", () => {
 		it("includes network references on database service", async () => {
 			const output = await renderTemplate("docker-compose", postgresContext())
 			const lines = output.split("\n")
-			const dbServiceLine = lines.findIndex((l: string) => /^\s{2}\S/.test(l) && l.includes("my-project-db:"))
+			const dbServiceLine = lines.findIndex(
+				(l: string) => /^\s{2}\S/.test(l) && l.includes("my-project-db:"),
+			)
 			const dbSection = lines.slice(dbServiceLine).join("\n")
 			expect(dbSection).toContain("- my-project-network")
 		})
@@ -152,43 +156,67 @@ describe("docker-compose template", () => {
 
 	describe("environment-specific compose files", () => {
 		it("generates docker-compose.yml for development environment", async () => {
-			const output = await renderTemplate("docker-compose", sqliteContext({ environment: "development" }))
+			const output = await renderTemplate(
+				"docker-compose",
+				sqliteContext({ environment: "development" }),
+			)
 			expect(output).toContain("dockerfile: Dockerfile")
 			expect(output).not.toContain("Dockerfile.prod")
 		})
 
 		it("generates docker-compose.prod.yml for production environment", async () => {
-			const output = await renderTemplate("docker-compose", sqliteContext({ environment: "production" }))
+			const output = await renderTemplate(
+				"docker-compose",
+				sqliteContext({ environment: "production" }),
+			)
 			expect(output).toContain("dockerfile: Dockerfile.prod")
 		})
 
 		it("generates both docker-compose.yml and docker-compose.prod.yml for both environment", async () => {
-			const devOutput = await renderTemplate("docker-compose", sqliteContext({ environment: "development" }))
-			const prodOutput = await renderTemplate("docker-compose", sqliteContext({ environment: "production" }))
+			const devOutput = await renderTemplate(
+				"docker-compose",
+				sqliteContext({ environment: "development" }),
+			)
+			const prodOutput = await renderTemplate(
+				"docker-compose",
+				sqliteContext({ environment: "production" }),
+			)
 			expect(devOutput).toContain("dockerfile: Dockerfile")
 			expect(devOutput).not.toContain("Dockerfile.prod")
 			expect(prodOutput).toContain("dockerfile: Dockerfile.prod")
 		})
 
 		it("docker-compose.yml references Dockerfile for development", async () => {
-			const output = await renderTemplate("docker-compose", postgresContext({ environment: "development" }))
+			const output = await renderTemplate(
+				"docker-compose",
+				postgresContext({ environment: "development" }),
+			)
 			expect(output).toContain("dockerfile: Dockerfile")
 			expect(output).not.toContain("Dockerfile.prod")
 		})
 
 		it("docker-compose.prod.yml references Dockerfile.prod for production", async () => {
-			const output = await renderTemplate("docker-compose", postgresContext({ environment: "production" }))
+			const output = await renderTemplate(
+				"docker-compose",
+				postgresContext({ environment: "production" }),
+			)
 			expect(output).toContain("dockerfile: Dockerfile.prod")
 		})
 
 		it("both compose files have correct volume mounts", async () => {
-			const devOutput = await renderTemplate("docker-compose", postgresContext({ environment: "development" }))
+			const devOutput = await renderTemplate(
+				"docker-compose",
+				postgresContext({ environment: "development" }),
+			)
 			expect(devOutput).toContain("./config:/opt/app/config")
 			expect(devOutput).toContain("./src:/opt/app/src")
 			expect(devOutput).toContain("./package.json:/opt/app/package.json")
 			expect(devOutput).toContain("./package-lock.json:/opt/app/package-lock.json")
 
-			const prodOutput = await renderTemplate("docker-compose", postgresContext({ environment: "production" }))
+			const prodOutput = await renderTemplate(
+				"docker-compose",
+				postgresContext({ environment: "production" }),
+			)
 			expect(prodOutput).not.toContain("./config:/opt/app/config")
 			expect(prodOutput).not.toContain("./src:/opt/app/src")
 			expect(prodOutput).not.toContain("./package.json:/opt/app/package.json")

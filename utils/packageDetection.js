@@ -1,34 +1,34 @@
-const { exec } = require(`child_process`);
-const isWindows = process.platform === `win32`;
+const { exec } = require(`child_process`)
+const isWindows = process.platform === `win32`
 
 async function checkPackage(packageName) {
 	return new Promise((resolve) => {
-		const command = isWindows ? `where ${packageName}` : `which ${packageName}`;
+		const command = isWindows ? `where ${packageName}` : `which ${packageName}`
 		exec(command, (error) => {
 			if (error) {
-				resolve(false); 
+				resolve(false)
 			} else {
-				resolve(true); 
+				resolve(true)
 			}
-		});
-	});
+		})
+	})
 }
 
 async function checkInstalledPackages() {
-	const npmExists = await checkPackage(`npm`);
-	const yarnExists = await checkPackage(`yarn`);
+	const npmExists = await checkPackage(`npm`)
+	const yarnExists = await checkPackage(`yarn`)
 
 	if (npmExists && yarnExists) {
-		return [`npm`, `yarn`]; 
+		return [`npm`, `yarn`]
 	} else if (npmExists) {
-		return [`npm`]; 
+		return [`npm`]
 	} else if (yarnExists) {
-		return [`yarn`]; 
+		return [`yarn`]
 	} else {
-		return []; 
+		return []
 	}
 }
 
 module.exports = {
-	checkInstalledPackages
-};
+	checkInstalledPackages,
+}

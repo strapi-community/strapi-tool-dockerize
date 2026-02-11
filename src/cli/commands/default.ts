@@ -1,17 +1,23 @@
-import { defineCommand } from "citty"
-import pc from "picocolors"
 import { access } from "node:fs/promises"
 import { join, resolve } from "node:path"
+import { defineCommand } from "citty"
+import pc from "picocolors"
 import { ZodError } from "zod"
+import { installDatabaseDriver } from "../../actions"
 import type { DetectedConfig, Environment } from "../../config"
 import { DEFAULT_PORTS, resolvedConfigSchema } from "../../config"
 import { detectAll } from "../../detection"
-import { generateCompose, generateDatabaseConfig, generateDockerfiles, generateDockerignore, generateEnv } from "../../generators"
+import {
+	generateCompose,
+	generateDatabaseConfig,
+	generateDockerfiles,
+	generateDockerignore,
+	generateEnv,
+} from "../../generators"
 import { pluginRegistry } from "../../plugins"
 import { runPrompts } from "../../prompts"
-import { showBanner, createSpinner, log } from "../../ui"
+import { createSpinner, log, showBanner } from "../../ui"
 import { backupDockerFiles } from "../../utils"
-import { installDatabaseDriver } from "../../actions"
 import { sharedFlags } from "../flags"
 
 export function formatZodErrors(error: ZodError): string[] {
@@ -183,14 +189,13 @@ export const defaultCommand = defineCommand({
 		}
 		generated.push(".env")
 		const dbExt = config.projectType === "ts" ? "ts" : "js"
-		const envDirs = config.environment === "both"
-			? ["development", "production"]
-			: [config.environment]
+		const envDirs =
+			config.environment === "both" ? ["development", "production"] : [config.environment]
 		for (const envDir of envDirs) {
 			generated.push(`config/env/${envDir}/database.${dbExt}`)
 		}
 
-		const fileList = generated.map(f => `  ${pc.dim(">")} ${f}`).join("\n")
+		const fileList = generated.map((f) => `  ${pc.dim(">")} ${f}`).join("\n")
 		console.log()
 		console.log(pc.bold("  Generated files:"))
 		console.log(fileList)
@@ -199,8 +204,12 @@ export const defaultCommand = defineCommand({
 		console.log(pc.bold("  Next steps:"))
 		if (config.useCompose) {
 			if (config.environment === "both") {
-				console.log(`  ${pc.cyan("$")} ${pc.bold("docker compose up -d")}  ${pc.dim("(development)")}`)
-				console.log(`  ${pc.cyan("$")} ${pc.bold("docker compose -f docker-compose.prod.yml up -d")}  ${pc.dim("(production)")}`)
+				console.log(
+					`  ${pc.cyan("$")} ${pc.bold("docker compose up -d")}  ${pc.dim("(development)")}`,
+				)
+				console.log(
+					`  ${pc.cyan("$")} ${pc.bold("docker compose -f docker-compose.prod.yml up -d")}  ${pc.dim("(production)")}`,
+				)
 			} else {
 				console.log(`  ${pc.cyan("$")} ${pc.bold("docker compose up -d")}`)
 			}
@@ -208,12 +217,16 @@ export const defaultCommand = defineCommand({
 			console.log(`  ${pc.cyan("$")} ${pc.bold(`docker build -t ${config.projectName} .`)}`)
 		}
 		console.log()
-		console.log(`  ${pc.dim("Your Strapi app will be available at")} ${pc.cyan("http://localhost:1337")}`)
+		console.log(
+			`  ${pc.dim("Your Strapi app will be available at")} ${pc.cyan("http://localhost:1337")}`,
+		)
 		if (config.useAdminer) {
 			console.log(`  ${pc.dim("Adminer database UI at")} ${pc.cyan("http://localhost:8080")}`)
 		}
 		console.log()
-		console.log(`  ${pc.dim("Docs & issues:")} ${pc.dim("https://github.com/strapi-community/strapi-tool-dockerize")}`)
+		console.log(
+			`  ${pc.dim("Docs & issues:")} ${pc.dim("https://github.com/strapi-community/strapi-tool-dockerize")}`,
+		)
 		console.log()
 
 		log.success("Docker configuration generated successfully!")

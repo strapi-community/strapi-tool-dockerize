@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test"
+import { afterEach, beforeEach, describe, expect, it } from "bun:test"
 import { join } from "node:path"
+import type { ResolvedConfig } from "../../../src/config"
 import { generateEnv } from "../../../src/generators/env"
 import { pluginRegistry } from "../../../src/plugins"
-import type { ResolvedConfig } from "../../../src/config"
-import { createTempDir, cleanupTempDir } from "../../setup"
 import { readFile, writeFile } from "../../../src/utils/fs"
+import { cleanupTempDir, createTempDir } from "../../setup"
 
 const MARKER_START = "# --- Dockerize Start ---"
 const MARKER_END = "# --- Dockerize End ---"

@@ -1,4 +1,4 @@
-import { describe, it, expect, mock, beforeEach } from "bun:test"
+import { beforeEach, describe, expect, it, mock } from "bun:test"
 import type { DetectedConfig } from "../../../src/config/schema"
 
 const mockLogInfo = mock(() => {})
@@ -7,7 +7,8 @@ mock.module("@clack/prompts", () => ({
 	log: { info: mockLogInfo },
 }))
 
-const { buildDetectionSummary, logDetectedSummary, DB_LABELS, PM_LABELS, LANG_LABELS } = await import("../../../src/prompts/confirm-detected")
+const { buildDetectionSummary, logDetectedSummary, DB_LABELS, PM_LABELS, LANG_LABELS } =
+	await import("../../../src/prompts/confirm-detected")
 
 describe("buildDetectionSummary", () => {
 	it("returns pipe-separated summary of detected values", () => {

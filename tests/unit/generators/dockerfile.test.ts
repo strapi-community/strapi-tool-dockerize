@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test"
+import { afterEach, beforeEach, describe, expect, it } from "bun:test"
 import { mkdtemp, readdir, rm } from "node:fs/promises"
-import { join } from "node:path"
 import { tmpdir } from "node:os"
+import { join } from "node:path"
 import type { ResolvedConfig } from "../../../src/config"
-import { pluginRegistry } from "../../../src/plugins"
 import { generateDockerfiles } from "../../../src/generators/dockerfile"
+import { pluginRegistry } from "../../../src/plugins"
 
 function makeConfig(environment: "development" | "production" | "both"): ResolvedConfig {
 	return {

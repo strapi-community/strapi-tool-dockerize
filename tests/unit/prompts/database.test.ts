@@ -1,4 +1,4 @@
-import { describe, it, expect, mock, beforeEach } from "bun:test"
+import { beforeEach, describe, expect, it, mock } from "bun:test"
 import {
 	DEFAULT_DATABASE_HOST,
 	DEFAULT_DATABASE_NAME,

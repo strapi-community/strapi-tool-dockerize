@@ -1,5 +1,5 @@
-import { access } from "node:fs/promises"
 import { execFile } from "node:child_process"
+import { access } from "node:fs/promises"
 import type { DetectedConfig, PackageManager } from "../config"
 
 const LOCK_FILE_ORDER: [string, PackageManager][] = [

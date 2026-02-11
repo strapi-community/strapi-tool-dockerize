@@ -30,9 +30,7 @@ export const pnpmPlugin: PackageManagerPlugin = {
 	},
 
 	dockerInstallStep(production: boolean): string {
-		return production
-			? "pnpm install --frozen-lockfile --prod"
-			: "pnpm install --frozen-lockfile"
+		return production ? "pnpm install --frozen-lockfile --prod" : "pnpm install --frozen-lockfile"
 	},
 
 	dockerBuildStep(): string {

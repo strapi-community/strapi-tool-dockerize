@@ -1,11 +1,11 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test"
+import { afterEach, beforeEach, describe, expect, it } from "bun:test"
 import { join } from "node:path"
-import { detectStrapi } from "../../../src/detection/strapi"
-import { detectDatabase } from "../../../src/detection/database"
-import { generateDatabaseConfig } from "../../../src/generators/database-config"
 import type { ResolvedConfig } from "../../../src/config"
-import { createTempDir, cleanupTempDir, createFixtureFiles } from "../../setup"
+import { detectDatabase } from "../../../src/detection/database"
+import { detectStrapi } from "../../../src/detection/strapi"
+import { generateDatabaseConfig } from "../../../src/generators/database-config"
 import { readFile } from "../../../src/utils/fs"
+import { cleanupTempDir, createFixtureFiles, createTempDir } from "../../setup"
 
 function makeConfig(overrides: Partial<ResolvedConfig> = {}): ResolvedConfig {
 	return {
@@ -50,7 +50,8 @@ describe("ESM and MariaDB integration", () => {
 						pg: "^8.0.0",
 					},
 				}),
-				".env": "DATABASE_CLIENT=postgres\nDATABASE_HOST=localhost\nDATABASE_PORT=5432\nDATABASE_NAME=strapi\nDATABASE_USERNAME=strapi\nDATABASE_PASSWORD=strapi",
+				".env":
+					"DATABASE_CLIENT=postgres\nDATABASE_HOST=localhost\nDATABASE_PORT=5432\nDATABASE_NAME=strapi\nDATABASE_USERNAME=strapi\nDATABASE_PASSWORD=strapi",
 			})
 
 			const strapiResult = await detectStrapi(tempDir)
@@ -70,7 +71,8 @@ describe("ESM and MariaDB integration", () => {
 					name: "test-mariadb",
 					dependencies: { "@strapi/strapi": "^5.0.0" },
 				}),
-				".env": "DATABASE_CLIENT=mariadb\nDATABASE_HOST=localhost\nDATABASE_PORT=3306\nDATABASE_NAME=strapi\nDATABASE_USERNAME=strapi\nDATABASE_PASSWORD=strapi",
+				".env":
+					"DATABASE_CLIENT=mariadb\nDATABASE_HOST=localhost\nDATABASE_PORT=3306\nDATABASE_NAME=strapi\nDATABASE_USERNAME=strapi\nDATABASE_PASSWORD=strapi",
 			})
 
 			const result = await detectDatabase(tempDir)

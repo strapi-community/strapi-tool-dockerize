@@ -1,4 +1,4 @@
-import { describe, it, expect } from "bun:test"
+import { describe, expect, it } from "bun:test"
 import { existsSync, readdirSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -8,16 +8,9 @@ const srcTemplatesDir = join(
 	"../../../src/templates/files",
 )
 
-const distTemplatesDir = join(
-	dirname(fileURLToPath(import.meta.url)),
-	"../../../dist/files",
-)
+const distTemplatesDir = join(dirname(fileURLToPath(import.meta.url)), "../../../dist/files")
 
-const EXPECTED_TEMPLATES = [
-	"Dockerfile.liquid",
-	"Dockerfile.prod.liquid",
-	"docker-compose.liquid",
-]
+const EXPECTED_TEMPLATES = ["Dockerfile.liquid", "Dockerfile.prod.liquid", "docker-compose.liquid"]
 
 describe("template directory resolution", () => {
 	it("source templates directory exists", () => {

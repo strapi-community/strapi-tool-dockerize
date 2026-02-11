@@ -1,6 +1,4 @@
-import { describe, it, expect, mock, beforeEach } from "bun:test"
-import type { DetectedConfig } from "../../../src/config/schema"
-import { resolvedConfigSchema } from "../../../src/config/schema"
+import { beforeEach, describe, expect, it, mock } from "bun:test"
 import {
 	DEFAULT_DATABASE_HOST,
 	DEFAULT_DATABASE_NAME,
@@ -8,6 +6,8 @@ import {
 	DEFAULT_DATABASE_USERNAME,
 	DEFAULT_PORTS,
 } from "../../../src/config/defaults"
+import type { DetectedConfig } from "../../../src/config/schema"
+import { resolvedConfigSchema } from "../../../src/config/schema"
 
 const mockIntro = mock(() => {})
 const mockCancel = mock(() => {})
@@ -350,7 +350,8 @@ describe("prompt flow: production credentials warning", () => {
 		await runPrompts({})
 
 		const warnCalls = mockLogWarn.mock.calls.filter(
-			(call: unknown[]) => typeof call[0] === "string" && (call[0] as string).includes("credentials"),
+			(call: unknown[]) =>
+				typeof call[0] === "string" && (call[0] as string).includes("credentials"),
 		)
 		expect(warnCalls.length).toBeGreaterThan(0)
 	})
@@ -364,7 +365,8 @@ describe("prompt flow: production credentials warning", () => {
 		})
 
 		const warnCalls = mockLogWarn.mock.calls.filter(
-			(call: unknown[]) => typeof call[0] === "string" && (call[0] as string).includes("credentials"),
+			(call: unknown[]) =>
+				typeof call[0] === "string" && (call[0] as string).includes("credentials"),
 		)
 		expect(warnCalls).toHaveLength(0)
 	})

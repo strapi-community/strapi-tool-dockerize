@@ -11,9 +11,7 @@
 		"strapi-dockerize": "dist/index.js"
 	},
 	"main": "dist/index.js",
-	"files": [
-		"dist"
-	],
+	"files": ["dist"],
 	"author": "Simen Daehlin <simen.dehlin@gmail.com> (https://dehlin.dev)",
 	"keywords": [
 		"strapi-tool-dockerize",

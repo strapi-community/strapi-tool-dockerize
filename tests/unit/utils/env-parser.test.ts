@@ -1,4 +1,4 @@
-import { describe, it, expect } from "bun:test"
+import { describe, expect, it } from "bun:test"
 import { parseEnvContent } from "../../../src/utils/env-parser"
 
 describe("parseEnvContent", () => {

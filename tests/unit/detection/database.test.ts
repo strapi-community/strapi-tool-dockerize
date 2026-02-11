@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test"
+import { afterEach, beforeEach, describe, expect, it } from "bun:test"
 import { detectDatabase } from "../../../src/detection/database"
-import { fixturePath, createTempDir, cleanupTempDir, createFixtureFiles } from "../../setup"
+import { cleanupTempDir, createFixtureFiles, createTempDir, fixturePath } from "../../setup"
 
 describe("detectDatabase", () => {
 	it("detects postgres from .env DATABASE_CLIENT", async () => {
@@ -116,7 +116,8 @@ describe("detectDatabase", () => {
 		it("detects mariadb from .env DATABASE_CLIENT", async () => {
 			await createFixtureFiles(tempDir, {
 				"package.json": JSON.stringify({ name: "test" }),
-				".env": "DATABASE_CLIENT=mariadb\nDATABASE_HOST=localhost\nDATABASE_PORT=3306\nDATABASE_NAME=strapi\nDATABASE_USERNAME=strapi\nDATABASE_PASSWORD=strapi",
+				".env":
+					"DATABASE_CLIENT=mariadb\nDATABASE_HOST=localhost\nDATABASE_PORT=3306\nDATABASE_NAME=strapi\nDATABASE_USERNAME=strapi\nDATABASE_PASSWORD=strapi",
 			})
 
 			const result = await detectDatabase(tempDir)

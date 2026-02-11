@@ -1,6 +1,6 @@
-import { Liquid } from "liquidjs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
+import { Liquid } from "liquidjs"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const TEMPLATES_DIR = join(__dirname, "files")
@@ -11,7 +11,10 @@ const engine = new Liquid({
 	strictVariables: false,
 })
 
-export async function renderTemplate(templateName: string, context: Record<string, unknown>): Promise<string> {
+export async function renderTemplate(
+	templateName: string,
+	context: Record<string, unknown>,
+): Promise<string> {
 	const result = await engine.renderFile(`${templateName}.liquid`, context)
 	return result.toString()
 }

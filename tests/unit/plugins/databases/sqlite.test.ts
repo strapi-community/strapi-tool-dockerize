@@ -1,6 +1,6 @@
-import { describe, it, expect } from "bun:test"
-import { sqlitePlugin } from "../../../../src/plugins/databases/sqlite"
+import { describe, expect, it } from "bun:test"
 import type { ResolvedConfig } from "../../../../src/config"
+import { sqlitePlugin } from "../../../../src/plugins/databases/sqlite"
 
 const baseConfig: ResolvedConfig = {
 	strapiVersion: "v5",

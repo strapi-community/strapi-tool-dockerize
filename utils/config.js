@@ -1,4 +1,4 @@
-const path = require(`path`);
+const path = require(`path`)
 
 const _config = {
 	url: `https://github.com/strapi-community/strapi-tool-dockerize`,
@@ -17,9 +17,9 @@ const _config = {
 	dbuser: ``,
 	dbpassword: ``,
 	dbport: null,
-	quickStart: false
-};
-const setConfig = newConfig => Object.assign(_config, newConfig);
-const config = _config;
+	quickStart: false,
+}
+const setConfig = (newConfig) => Object.assign(_config, newConfig)
+const config = _config
 
-module.exports = { setConfig, config };
+module.exports = { setConfig, config }

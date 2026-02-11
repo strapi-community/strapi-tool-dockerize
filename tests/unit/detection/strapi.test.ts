@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test"
+import { afterEach, beforeEach, describe, expect, it } from "bun:test"
 import { detectStrapi } from "../../../src/detection/strapi"
-import { fixturePath, createTempDir, cleanupTempDir, createFixtureFiles } from "../../setup"
+import { cleanupTempDir, createFixtureFiles, createTempDir, fixturePath } from "../../setup"
 
 describe("detectStrapi", () => {
 	it("detects strapi v5 with typescript", async () => {

@@ -1,6 +1,6 @@
-import { describe, it, expect } from "bun:test"
-import { postgresPlugin } from "../../../../src/plugins/databases/postgres"
+import { describe, expect, it } from "bun:test"
 import type { ResolvedConfig } from "../../../../src/config"
+import { postgresPlugin } from "../../../../src/plugins/databases/postgres"
 
 const baseConfig: ResolvedConfig = {
 	strapiVersion: "v5",

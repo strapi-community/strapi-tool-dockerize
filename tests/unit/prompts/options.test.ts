@@ -1,4 +1,4 @@
-import { describe, it, expect, mock, beforeEach } from "bun:test"
+import { beforeEach, describe, expect, it, mock } from "bun:test"
 
 const mockSelect = mock(() => Promise.resolve("development"))
 const mockConfirm = mock(() => Promise.resolve(true))
@@ -14,7 +14,9 @@ mock.module("@clack/prompts", () => ({
 	isCancel: mockIsCancel,
 }))
 
-const { promptEnvironment, promptProjectName, promptUseCompose, promptUseAdminer } = await import("../../../src/prompts/options")
+const { promptEnvironment, promptProjectName, promptUseCompose, promptUseAdminer } = await import(
+	"../../../src/prompts/options"
+)
 
 describe("promptEnvironment", () => {
 	beforeEach(() => {

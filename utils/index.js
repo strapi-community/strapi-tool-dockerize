@@ -1,6 +1,6 @@
-const generateError = require(`./bugreport`);
-const goodbye = require(`./goodbye`);
-const { setConfig, config } = require(`./config`);
+const generateError = require(`./bugreport`)
+const goodbye = require(`./goodbye`)
+const { setConfig, config } = require(`./config`)
 const {
 	yarnLockToPackageLock,
 	checkForDataFolder,
@@ -10,16 +10,16 @@ const {
 	execa,
 	access,
 	constants,
-	copyFile
-} = require(`./utils`);
-const { createStrapiProject } = require(`./createStrapi`);
+	copyFile,
+} = require(`./utils`)
+const { createStrapiProject } = require(`./createStrapi`)
 const {
 	detectPackageManager,
 	detectProjectType,
 	detectDownloadsAndStars,
-	detectStrapiProject
-} = require(`./detection`);
-const { detectDockerFiles } = require(`./backup`);
+	detectStrapiProject,
+} = require(`./detection`)
+const { detectDockerFiles } = require(`./backup`)
 
 module.exports = {
 	yarnLockToPackageLock,
@@ -40,5 +40,5 @@ module.exports = {
 	config,
 	detectDownloadsAndStars,
 	createStrapiProject,
-	detectDockerFiles
-};
+	detectDockerFiles,
+}

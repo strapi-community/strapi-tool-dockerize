@@ -1,9 +1,9 @@
-const welcome = require(`cli-welcome`);
-const pkg = require(`../package.json`);
-const unhandled = require(`cli-handle-unhandled`);
+const welcome = require(`cli-welcome`)
+const pkg = require(`../package.json`)
+const unhandled = require(`cli-handle-unhandled`)
 
 module.exports = ({ clear = true }) => {
-	unhandled();
+	unhandled()
 	welcome({
 		title: `@strapi-community/dockerize`,
 		tagLine: `by Simen Daehlin`,
@@ -11,6 +11,6 @@ module.exports = ({ clear = true }) => {
 		version: pkg.version,
 		bgColor: `#8d76f9`,
 		bold: true,
-		clear
-	});
-};
+		clear,
+	})
+}

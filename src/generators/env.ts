@@ -17,38 +17,43 @@ function commentOutDuplicateKeys(content: string, managedKeys: Set<string>): str
 
 	const lines = content.split("\n")
 	let charOffset = 0
-	const managedRange = startIdx !== -1 && endIdx !== -1
-		? { start: startIdx, end: endIdx + MARKER_END.length }
-		: null
+	const managedRange =
+		startIdx !== -1 && endIdx !== -1 ? { start: startIdx, end: endIdx + MARKER_END.length } : null
 
-	return lines.map((line) => {
-		const lineStart = charOffset
-		charOffset += line.length + 1
+	return lines
+		.map((line) => {
+			const lineStart = charOffset
+			charOffset += line.length + 1
 
-		if (managedRange && lineStart >= managedRange.start && lineStart < managedRange.end) {
+			if (managedRange && lineStart >= managedRange.start && lineStart < managedRange.end) {
+				return line
+			}
+
+			const trimmed = line.trim()
+			if (!trimmed || trimmed.startsWith("#")) {
+				return line
+			}
+
+			const eqIndex = trimmed.indexOf("=")
+			if (eqIndex === -1) {
+				return line
+			}
+
+			const key = trimmed.slice(0, eqIndex).trim()
+			if (managedKeys.has(key)) {
+				return `# ${line}`
+			}
+
 			return line
-		}
-
-		const trimmed = line.trim()
-		if (!trimmed || trimmed.startsWith("#")) {
-			return line
-		}
-
-		const eqIndex = trimmed.indexOf("=")
-		if (eqIndex === -1) {
-			return line
-		}
-
-		const key = trimmed.slice(0, eqIndex).trim()
-		if (managedKeys.has(key)) {
-			return `# ${line}`
-		}
-
-		return line
-	}).join("\n")
+		})
+		.join("\n")
 }
 
-export async function generateEnv(config: ResolvedConfig, registry: PluginRegistry, cwd: string): Promise<void> {
+export async function generateEnv(
+	config: ResolvedConfig,
+	registry: PluginRegistry,
+	cwd: string,
+): Promise<void> {
 	const envPath = join(cwd, ".env")
 	const isSqlite = config.databaseClient === "sqlite"
 
@@ -75,7 +80,8 @@ export async function generateEnv(config: ResolvedConfig, registry: PluginRegist
 		const endIdx = content.indexOf(MARKER_END)
 
 		if (startIdx !== -1 && endIdx !== -1) {
-			content = content.slice(0, startIdx) + managedSection + content.slice(endIdx + MARKER_END.length)
+			content =
+				content.slice(0, startIdx) + managedSection + content.slice(endIdx + MARKER_END.length)
 		} else {
 			const trimmed = content.trimEnd()
 			content = trimmed ? trimmed + "\n\n" + managedSection + "\n" : managedSection + "\n"

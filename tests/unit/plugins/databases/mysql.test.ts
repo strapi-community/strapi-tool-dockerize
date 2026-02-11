@@ -1,6 +1,6 @@
-import { describe, it, expect } from "bun:test"
-import { mysqlPlugin } from "../../../../src/plugins/databases/mysql"
+import { describe, expect, it } from "bun:test"
 import type { ResolvedConfig } from "../../../../src/config"
+import { mysqlPlugin } from "../../../../src/plugins/databases/mysql"
 
 const baseConfig: ResolvedConfig = {
 	strapiVersion: "v5",

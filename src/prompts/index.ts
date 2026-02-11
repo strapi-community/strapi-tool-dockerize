@@ -1,5 +1,12 @@
 import * as p from "@clack/prompts"
-import type { DatabaseClient, DetectedConfig, PackageManager, ProjectType, ResolvedConfig, StrapiVersion } from "../config"
+import type {
+	DatabaseClient,
+	DetectedConfig,
+	PackageManager,
+	ProjectType,
+	ResolvedConfig,
+	StrapiVersion,
+} from "../config"
 import {
 	DEFAULT_DATABASE_HOST,
 	DEFAULT_DATABASE_NAME,
@@ -81,7 +88,11 @@ function fillDefaults(dbClient: DatabaseClient, detected: DetectedConfig) {
 export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConfig> {
 	p.intro("Configuring Docker for your Strapi project")
 
-	const hasDetections = detected.strapiVersion || detected.projectType || detected.databaseClient || detected.packageManager
+	const hasDetections =
+		detected.strapiVersion ||
+		detected.projectType ||
+		detected.databaseClient ||
+		detected.packageManager
 	if (hasDetections) {
 		logDetectedSummary(detected)
 	}
@@ -169,7 +180,9 @@ export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConf
 	]
 
 	if (databaseClient !== "sqlite") {
-		summaryLines.push(`Database: ${dbConnection.databaseHost}:${dbConnection.databasePort}/${dbConnection.databaseName}`)
+		summaryLines.push(
+			`Database: ${dbConnection.databaseHost}:${dbConnection.databasePort}/${dbConnection.databaseName}`,
+		)
 		summaryLines.push(`DB User: ${dbConnection.databaseUsername}`)
 	}
 
@@ -177,7 +190,10 @@ export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConf
 
 	p.note(summaryLines.join("\n"), "Configuration")
 
-	if ((environment === "production" || environment === "both") && dbConnection.databasePassword === DEFAULT_DATABASE_PASSWORD) {
+	if (
+		(environment === "production" || environment === "both") &&
+		dbConnection.databasePassword === DEFAULT_DATABASE_PASSWORD
+	) {
 		p.log.warn("Default database credentials are not recommended for production")
 	}
 
@@ -194,6 +210,12 @@ export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConf
 	return config
 }
 
-export { buildDetectionSummary, logDetectedSummary, DB_LABELS, PM_LABELS, LANG_LABELS } from "./confirm-detected"
+export {
+	buildDetectionSummary,
+	logDetectedSummary,
+	DB_LABELS,
+	PM_LABELS,
+	LANG_LABELS,
+} from "./confirm-detected"
 export { selectDatabase, promptDatabaseConnection } from "./database"
 export { promptEnvironment, promptProjectName, promptUseCompose, promptUseAdminer } from "./options"

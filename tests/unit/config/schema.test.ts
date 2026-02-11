@@ -1,12 +1,12 @@
-import { describe, it, expect } from "bun:test"
+import { describe, expect, it } from "bun:test"
 import {
 	databaseClientSchema,
-	packageManagerSchema,
-	environmentSchema,
-	projectTypeSchema,
-	strapiVersionSchema,
 	detectedConfigSchema,
+	environmentSchema,
+	packageManagerSchema,
+	projectTypeSchema,
 	resolvedConfigSchema,
+	strapiVersionSchema,
 } from "../../../src/config/schema"
 
 describe("databaseClientSchema", () => {
@@ -109,9 +109,7 @@ describe("detectedConfigSchema", () => {
 	})
 
 	it("rejects invalid enum value in optional field", () => {
-		expect(() =>
-			detectedConfigSchema.parse({ strapiVersion: "v3" }),
-		).toThrow()
+		expect(() => detectedConfigSchema.parse({ strapiVersion: "v3" })).toThrow()
 	})
 })
 
@@ -144,15 +142,11 @@ describe("resolvedConfigSchema", () => {
 	})
 
 	it("rejects empty project name", () => {
-		expect(() =>
-			resolvedConfigSchema.parse({ ...validConfig, projectName: "" }),
-		).toThrow()
+		expect(() => resolvedConfigSchema.parse({ ...validConfig, projectName: "" })).toThrow()
 	})
 
 	it("rejects negative port", () => {
-		expect(() =>
-			resolvedConfigSchema.parse({ ...validConfig, databasePort: -1 }),
-		).toThrow()
+		expect(() => resolvedConfigSchema.parse({ ...validConfig, databasePort: -1 })).toThrow()
 	})
 
 	it("accepts port 0 for sqlite", () => {

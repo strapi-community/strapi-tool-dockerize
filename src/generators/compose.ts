@@ -6,12 +6,14 @@ import { renderTemplate } from "../templates"
 import { writeFile } from "../utils/fs"
 
 function extractNamedVolumes(volumes: string[]): string[] {
-	return volumes
-		.map((v) => v.split(":")[0])
-		.filter((v) => !v.startsWith(".") && !v.startsWith("/"))
+	return volumes.map((v) => v.split(":")[0]).filter((v) => !v.startsWith(".") && !v.startsWith("/"))
 }
 
-export async function generateCompose(config: ResolvedConfig, registry: PluginRegistry, cwd: string): Promise<void> {
+export async function generateCompose(
+	config: ResolvedConfig,
+	registry: PluginRegistry,
+	cwd: string,
+): Promise<void> {
 	const pm = registry.getPackageManager(config.packageManager)
 	const isSqlite = config.databaseClient === "sqlite"
 
@@ -37,9 +39,7 @@ export async function generateCompose(config: ResolvedConfig, registry: PluginRe
 		namedVolumes = extractNamedVolumes(service.volumes)
 
 		const hc = service.healthcheck
-		dbHealthTest = [
-			`test: ${JSON.stringify(hc.test)}`,
-		]
+		dbHealthTest = [`test: ${JSON.stringify(hc.test)}`]
 		dbHealthInterval = hc.interval
 		dbHealthTimeout = hc.timeout
 		dbHealthRetries = hc.retries
@@ -67,13 +67,22 @@ export async function generateCompose(config: ResolvedConfig, registry: PluginRe
 	}
 
 	if (config.environment === "both") {
-		const devOutput = await renderTemplate("docker-compose", { ...baseContext, environment: "development" })
+		const devOutput = await renderTemplate("docker-compose", {
+			...baseContext,
+			environment: "development",
+		})
 		await writeFile(join(cwd, "docker-compose.yml"), devOutput)
 
-		const prodOutput = await renderTemplate("docker-compose", { ...baseContext, environment: "production" })
+		const prodOutput = await renderTemplate("docker-compose", {
+			...baseContext,
+			environment: "production",
+		})
 		await writeFile(join(cwd, "docker-compose.prod.yml"), prodOutput)
 	} else {
-		const output = await renderTemplate("docker-compose", { ...baseContext, environment: config.environment })
+		const output = await renderTemplate("docker-compose", {
+			...baseContext,
+			environment: config.environment,
+		})
 		await writeFile(join(cwd, "docker-compose.yml"), output)
 	}
 }

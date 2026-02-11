@@ -6,19 +6,12 @@ import { exec } from "../utils/process"
 
 const KNOWN_DRIVER_PACKAGES = ["pg", "mysql2", "better-sqlite3"]
 
-function getDriverForVersion(
-	registry: PluginRegistry,
-	config: ResolvedConfig,
-): string {
+function getDriverForVersion(registry: PluginRegistry, config: ResolvedConfig): string {
 	const dbPlugin = registry.getDatabase(config.databaseClient)
-	return config.strapiVersion === "v4"
-		? dbPlugin.v4DriverPackage
-		: dbPlugin.v5DriverPackage
+	return config.strapiVersion === "v4" ? dbPlugin.v4DriverPackage : dbPlugin.v5DriverPackage
 }
 
-function getInstalledDrivers(
-	dependencies: Record<string, string>,
-): Set<string> {
+function getInstalledDrivers(dependencies: Record<string, string>): Set<string> {
 	const installed = new Set<string>()
 	for (const pkg of KNOWN_DRIVER_PACKAGES) {
 		if (pkg in dependencies) {
@@ -28,9 +21,7 @@ function getInstalledDrivers(
 	return installed
 }
 
-async function readProjectDependencies(
-	cwd: string,
-): Promise<Record<string, string>> {
+async function readProjectDependencies(cwd: string): Promise<Record<string, string>> {
 	const raw = await readFile(join(cwd, "package.json"))
 	const pkg = JSON.parse(raw) as {
 		dependencies?: Record<string, string>

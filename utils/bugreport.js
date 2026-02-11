@@ -1,7 +1,7 @@
-const open = require(`open`);
-const newGithubIssueUrl = require(`new-github-issue-url`);
+const open = require(`open`)
+const newGithubIssueUrl = require(`new-github-issue-url`)
 
-const generateError = async error => {
+const generateError = async (error) => {
 	const url = newGithubIssueUrl({
 		repo: `strapi-tool-dockerize`,
 		user: `strapi-community`,
@@ -39,9 +39,9 @@ A clear and concise description of what you expected to happen (or code).
 
 ## 📺 Additional context/Screenshots
 <!-- Add any other context about the problem here. If applicable, add screenshots to help explain. -->
-`
-	});
-	await open(url);
-};
+`,
+	})
+	await open(url)
+}
 
-module.exports = generateError;
+module.exports = generateError

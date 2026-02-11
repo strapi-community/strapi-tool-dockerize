@@ -1,4 +1,4 @@
-import { describe, it, expect } from "bun:test"
+import { describe, expect, it } from "bun:test"
 import { renderTemplate } from "../../../src/templates"
 
 const baseContext = {
@@ -17,16 +17,10 @@ const baseContext = {
 
 function extractStage(dockerfile: string, stageName: string): string {
 	const lines = dockerfile.split("\n")
-	const stageStart = lines.findIndex((l) =>
-		l.match(new RegExp(`^FROM .+ AS ${stageName}$`)),
-	)
+	const stageStart = lines.findIndex((l) => l.match(new RegExp(`^FROM .+ AS ${stageName}$`)))
 	if (stageStart === -1) return ""
-	const stageEnd = lines.findIndex(
-		(l, i) => i > stageStart && l.startsWith("FROM "),
-	)
-	return lines
-		.slice(stageStart, stageEnd === -1 ? undefined : stageEnd)
-		.join("\n")
+	const stageEnd = lines.findIndex((l, i) => i > stageStart && l.startsWith("FROM "))
+	return lines.slice(stageStart, stageEnd === -1 ? undefined : stageEnd).join("\n")
 }
 
 describe("Dockerfile dev template", () => {
@@ -225,7 +219,9 @@ describe("Dockerfile prod template", () => {
 	it("runtime copies node_modules from production-deps", async () => {
 		const result = await renderTemplate("Dockerfile.prod", baseContext)
 		const runtime = extractStage(result, "runtime")
-		expect(runtime).toContain("COPY --chown=strapi:strapi --from=production-deps /opt/app/node_modules ./node_modules")
+		expect(runtime).toContain(
+			"COPY --chown=strapi:strapi --from=production-deps /opt/app/node_modules ./node_modules",
+		)
 	})
 
 	it("runtime copies built output from build stage", async () => {

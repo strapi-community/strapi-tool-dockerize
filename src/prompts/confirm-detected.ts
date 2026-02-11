@@ -27,8 +27,10 @@ export function buildDetectionSummary(detected: DetectedConfig): string {
 
 	if (detected.strapiVersion) parts.push(`Strapi ${detected.strapiVersion}`)
 	if (detected.projectType) parts.push(LANG_LABELS[detected.projectType] ?? detected.projectType)
-	if (detected.databaseClient) parts.push(DB_LABELS[detected.databaseClient] ?? detected.databaseClient)
-	if (detected.packageManager) parts.push(PM_LABELS[detected.packageManager] ?? detected.packageManager)
+	if (detected.databaseClient)
+		parts.push(DB_LABELS[detected.databaseClient] ?? detected.databaseClient)
+	if (detected.packageManager)
+		parts.push(PM_LABELS[detected.packageManager] ?? detected.packageManager)
 
 	return parts.join(" | ")
 }

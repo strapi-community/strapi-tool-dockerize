@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test"
+import { afterEach, beforeEach, describe, expect, it } from "bun:test"
 import { join } from "node:path"
-import { generateDatabaseConfig } from "../../../src/generators/database-config"
 import type { ResolvedConfig } from "../../../src/config"
-import { createTempDir, cleanupTempDir } from "../../setup"
+import { generateDatabaseConfig } from "../../../src/generators/database-config"
 import { readFile } from "../../../src/utils/fs"
+import { cleanupTempDir, createTempDir } from "../../setup"
 
 function makeConfig(overrides: Partial<ResolvedConfig> = {}): ResolvedConfig {
 	return {
@@ -54,7 +54,10 @@ describe("generateDatabaseConfig", () => {
 
 			const content = await readFile(join(tmpDir, "config", "env", "development", "database.ts"))
 			const lines = content.split("\n")
-			const dirnameLine = lines.find((l) => l.includes("__dirname") && !l.includes("path.dirname") && !l.includes("const __dirname"))
+			const dirnameLine = lines.find(
+				(l) =>
+					l.includes("__dirname") && !l.includes("path.dirname") && !l.includes("const __dirname"),
+			)
 			expect(dirnameLine).toContain("path.join(__dirname")
 		})
 

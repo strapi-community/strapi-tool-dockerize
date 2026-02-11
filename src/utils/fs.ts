@@ -1,4 +1,9 @@
-import { access, mkdir, readFile as nodeReadFile, writeFile as nodeWriteFile } from "node:fs/promises"
+import {
+	access,
+	mkdir,
+	readFile as nodeReadFile,
+	writeFile as nodeWriteFile,
+} from "node:fs/promises"
 
 export async function fileExists(filePath: string): Promise<boolean> {
 	try {

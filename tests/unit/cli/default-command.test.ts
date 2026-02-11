@@ -1,9 +1,13 @@
-import { describe, it, expect } from "bun:test"
+import { describe, expect, it } from "bun:test"
 import { ZodError } from "zod"
-import { formatZodErrors, buildDetectionSummary, shouldWarnDatabaseDefault } from "../../../src/cli/commands/default"
-import { resolvedConfigSchema } from "../../../src/config/schema"
+import {
+	buildDetectionSummary,
+	formatZodErrors,
+	shouldWarnDatabaseDefault,
+} from "../../../src/cli/commands/default"
 import { DEFAULT_PORTS } from "../../../src/config/defaults"
-import type { DetectedConfig, DatabaseClient } from "../../../src/config/schema"
+import { resolvedConfigSchema } from "../../../src/config/schema"
+import type { DatabaseClient, DetectedConfig } from "../../../src/config/schema"
 
 function buildYesModeConfig(detected: DetectedConfig) {
 	const resolvedClient = detected.databaseClient ?? "postgres"

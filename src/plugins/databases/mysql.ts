@@ -40,10 +40,7 @@ export const mysqlPlugin: DatabasePlugin = {
 
 	healthcheck(): HealthCheck {
 		return {
-			test: [
-				"CMD-SHELL",
-				"mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD}",
-			],
+			test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD}"],
 			interval: "10s",
 			timeout: "5s",
 			retries: 5,

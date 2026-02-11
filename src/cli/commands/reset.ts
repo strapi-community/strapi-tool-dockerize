@@ -1,6 +1,6 @@
+import { readFile, readdir, rmdir, unlink, writeFile } from "node:fs/promises"
+import { join, resolve } from "node:path"
 import { defineCommand } from "citty"
-import { resolve, join } from "node:path"
-import { unlink, readFile, writeFile, readdir, rmdir } from "node:fs/promises"
 import pc from "picocolors"
 
 const DOCKER_FILES = [
