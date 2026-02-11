@@ -35,7 +35,7 @@
 		"dev:scenario:sqlite": "bun run src/index.ts reset --path=tmp/fixtures/v5-bun-sqlite && bun run src/index.ts --path=tmp/fixtures/v5-bun-sqlite --yes --skip-deps && bun run scripts/dev-inspect.ts tmp/fixtures/v5-bun-sqlite",
 		"dev:scenario:v4": "bun run src/index.ts reset --path=tmp/fixtures/v4-npm-postgres && bun run src/index.ts --path=tmp/fixtures/v4-npm-postgres --yes --skip-deps && bun run scripts/dev-inspect.ts tmp/fixtures/v4-npm-postgres",
 		"dev:reset:all": "bun run src/index.ts reset --path=tmp/test-strapi && bun run src/index.ts reset --path=tmp/fixtures/v5-npm-postgres && bun run src/index.ts reset --path=tmp/fixtures/v5-pnpm-mysql && bun run src/index.ts reset --path=tmp/fixtures/v5-bun-sqlite && bun run src/index.ts reset --path=tmp/fixtures/v4-npm-postgres && bun run src/index.ts reset --path=tmp/fixtures/v5-npm-nodetect",
-		"build": "bun build src/index.ts --target=node --outfile dist/index.js && printf '#!/usr/bin/env node\\n' | cat - dist/index.js > dist/temp.js && mv dist/temp.js dist/index.js",
+		"build": "bun build src/index.ts --target=node --outfile dist/index.js && cp -r src/templates/files dist/files && printf '#!/usr/bin/env node\\n' | cat - dist/index.js > dist/temp.js && mv dist/temp.js dist/index.js",
 		"test": "bun test",
 		"lint": "bunx ultracite",
 		"lint:fix": "bunx ultracite --fix"
