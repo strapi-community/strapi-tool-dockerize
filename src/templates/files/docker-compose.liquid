@@ -66,9 +66,11 @@ services:
 {%- if dbHealthStartPeriod %}
       start_period: {{ dbHealthStartPeriod }}
 {%- endif %}
-{%- if environment == "production" %}
+{%- if hasSecrets %}
     secrets:
-      - db_password
+{%- for secret in serviceSecrets %}
+      - {{ secret }}
+{%- endfor %}
 {%- endif %}
     networks:
       - {{ projectName }}-network
@@ -109,9 +111,11 @@ networks:
   {{ projectName }}-network:
     driver: bridge
 {%- endif %}
-{%- if environment == "production" and databaseClient != "sqlite" %}
+{%- if hasSecrets %}
 
 secrets:
-  db_password:
-    file: ./secrets/db_password.txt
+{%- for secret in secrets %}
+  {{ secret.name }}:
+    file: {{ secret.file }}
+{%- endfor %}
 {%- endif %}

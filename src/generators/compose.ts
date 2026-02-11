@@ -46,6 +46,11 @@ export async function generateCompose(
 		dbHealthStartPeriod = hc.startPeriod || ""
 	}
 
+	const secretManager = registry.getSecretManager(config.secretBackend)
+	const composeSecrets = secretManager.composeSecrets(config)
+	const serviceSecrets = secretManager.serviceSecrets(config)
+	const hasSecrets = composeSecrets.length > 0
+
 	const baseContext = {
 		projectName: config.projectName,
 		strapiPort: STRAPI_DEFAULT_PORT,
@@ -64,6 +69,9 @@ export async function generateCompose(
 		dbHealthRetries,
 		dbHealthStartPeriod,
 		namedVolumes,
+		secrets: composeSecrets,
+		serviceSecrets,
+		hasSecrets,
 	}
 
 	if (config.environment === "both") {
