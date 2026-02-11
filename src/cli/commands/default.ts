@@ -1,7 +1,14 @@
 import { defineCommand } from "citty"
 import { resolve } from "node:path"
-import pc from "picocolors"
+import type { DetectedConfig } from "../../config"
+import { resolvedConfigSchema } from "../../config"
 import { detectAll } from "../../detection"
+import { generateCompose, generateDatabaseConfig, generateDockerfiles, generateDockerignore, generateEnv } from "../../generators"
+import { pluginRegistry } from "../../plugins"
+import { runPrompts } from "../../prompts"
+import { showBanner, createSpinner, log } from "../../ui"
+import { backupDockerFiles } from "../../utils"
+import { installDatabaseDriver } from "../../actions"
 import { sharedFlags } from "../flags"
 
 export const defaultCommand = defineCommand({
@@ -13,10 +20,18 @@ export const defaultCommand = defineCommand({
 	async run({ args }) {
 		const cwd = resolve(args.path)
 
-		console.log(pc.bold(pc.blue("\nStrapi Dockerize v2.5\n")))
-		console.log(pc.dim(`Scanning project at ${cwd}...\n`))
+		showBanner()
 
-		const detected = await detectAll(cwd)
+		const detectSpinner = createSpinner("Detecting project configuration...")
+		let detected: DetectedConfig
+		try {
+			detected = await detectAll(cwd)
+			detectSpinner.success("Project scanned")
+		} catch (err) {
+			detectSpinner.error("Failed to detect project configuration")
+			log.error(err instanceof Error ? err.message : String(err))
+			process.exit(1)
+		}
 
 		if (args.database) {
 			detected.databaseClient = args.database as DetectedConfig["databaseClient"]
@@ -25,20 +40,80 @@ export const defaultCommand = defineCommand({
 			detected.packageManager = args["package-manager"] as DetectedConfig["packageManager"]
 		}
 
-		console.log(pc.bold("Detected configuration:"))
-		console.log(`  Strapi version:   ${formatValue(detected.strapiVersion)}`)
-		console.log(`  Project type:     ${formatValue(detected.projectType)}`)
-		console.log(`  Database:         ${formatValue(detected.databaseClient)}`)
-		console.log(`  Package manager:  ${formatValue(detected.packageManager)}`)
-		console.log(`  Project name:     ${formatValue(detected.projectName)}`)
-		console.log(`  Environment:      ${formatValue(detected.environment)}`)
-		console.log()
+		const config = args.yes
+			? resolvedConfigSchema.parse({
+					strapiVersion: detected.strapiVersion ?? "v5",
+					projectType: detected.projectType ?? "ts",
+					databaseClient: detected.databaseClient ?? "postgres",
+					packageManager: detected.packageManager ?? "npm",
+					environment: detected.environment ?? "development",
+					projectName: detected.projectName ?? "strapi",
+					databaseHost: detected.databaseHost ?? "localhost",
+					databasePort: detected.databasePort ?? 5432,
+					databaseName: detected.databaseName ?? "strapi",
+					databaseUsername: detected.databaseUsername ?? "strapi",
+					databasePassword: detected.databasePassword ?? "strapi",
+					useCompose: detected.useCompose ?? true,
+					useAdminer: detected.useAdminer ?? false,
+					envVars: detected.envVars ?? {},
+				})
+			: await runPrompts(detected)
+
+		const backedUp = await backupDockerFiles(cwd)
+		if (backedUp.length > 0) {
+			log.warn(`Backed up existing files: ${backedUp.join(", ")}`)
+		}
+
+		const genSpinner = createSpinner("Generating Docker configuration...")
+
+		try {
+			await generateDockerfiles(config, pluginRegistry, cwd)
+			genSpinner.update("Generating .dockerignore...")
+			await generateDockerignore(cwd)
+
+			if (config.useCompose) {
+				genSpinner.update("Generating docker-compose.yml...")
+				await generateCompose(config, pluginRegistry, cwd)
+			}
+
+			genSpinner.update("Updating .env...")
+			await generateEnv(config, pluginRegistry, cwd)
+
+			genSpinner.update("Generating database config...")
+			await generateDatabaseConfig(config, cwd)
+
+			genSpinner.success("Files generated")
+		} catch (err) {
+			genSpinner.error("Generation failed")
+			log.error(err instanceof Error ? err.message : String(err))
+			process.exit(1)
+		}
+
+		if (config.databaseClient !== "sqlite") {
+			const depsSpinner = createSpinner("Installing database driver...")
+			try {
+				await installDatabaseDriver(config, pluginRegistry, cwd)
+				depsSpinner.success("Database driver installed")
+			} catch (err) {
+				depsSpinner.error("Failed to install database driver")
+				log.warn(err instanceof Error ? err.message : String(err))
+			}
+		}
+
+		const generated = ["Dockerfile", ".dockerignore"]
+		if (config.environment === "production" || config.environment === "both") {
+			generated.push("Dockerfile.prod")
+		}
+		if (config.useCompose) {
+			generated.push("docker-compose.yml")
+		}
+		generated.push(".env")
+		generated.push(`config/env/development/database.${config.projectType === "ts" ? "ts" : "js"}`)
+
+		log.success("Docker configuration complete!")
+		log.info("Generated files:")
+		for (const file of generated) {
+			log.info(`  ${file}`)
+		}
 	},
 })
-
-function formatValue(value: string | number | boolean | undefined): string {
-	if (value === undefined) return pc.yellow("not detected")
-	return pc.green(String(value))
-}
-
-type DetectedConfig = Awaited<ReturnType<typeof detectAll>>
