@@ -1,7 +1,5 @@
 import * as p from "@clack/prompts"
 import type { DetectedConfig } from "../config"
-import { DEFAULT_PORTS } from "../config"
-import { bold, dim, highlight, info } from "../ui/colors"
 
 const DB_LABELS: Record<string, string> = {
 	postgres: "PostgreSQL",
@@ -22,57 +20,22 @@ const LANG_LABELS: Record<string, string> = {
 	js: "JavaScript",
 }
 
-function formatDetectedSummary(detected: DetectedConfig): string {
-	const lines: string[] = []
+export { DB_LABELS, PM_LABELS, LANG_LABELS }
 
-	if (detected.strapiVersion || detected.projectType) {
-		const version = detected.strapiVersion ? `Strapi ${detected.strapiVersion}` : "Strapi"
-		const lang = detected.projectType ? ` (${LANG_LABELS[detected.projectType]})` : ""
-		lines.push(`${bold(version)}${lang}`)
-	}
+export function buildDetectionSummary(detected: DetectedConfig): string {
+	const parts: string[] = []
 
-	if (detected.packageManager) {
-		lines.push(`Package Manager: ${info(PM_LABELS[detected.packageManager])}`)
-	}
+	if (detected.strapiVersion) parts.push(`Strapi ${detected.strapiVersion}`)
+	if (detected.projectType) parts.push(LANG_LABELS[detected.projectType] ?? detected.projectType)
+	if (detected.databaseClient) parts.push(DB_LABELS[detected.databaseClient] ?? detected.databaseClient)
+	if (detected.packageManager) parts.push(PM_LABELS[detected.packageManager] ?? detected.packageManager)
 
-	if (detected.databaseClient) {
-		const dbName = DB_LABELS[detected.databaseClient]
-		if (detected.databaseClient === "sqlite") {
-			lines.push(`Database: ${info(dbName)}`)
-		} else {
-			const host = detected.databaseHost ?? "localhost"
-			const port = detected.databasePort ?? DEFAULT_PORTS[detected.databaseClient]
-			lines.push(`Database: ${info(dbName)} on ${dim(`${host}:${port}`)}`)
-		}
-	}
-
-	if (detected.projectName) {
-		lines.push(`Project: ${highlight(detected.projectName)}`)
-	}
-
-	if (detected.environment) {
-		lines.push(`Environment: ${info(detected.environment)}`)
-	}
-
-	return lines.map((line) => `  ${line}`).join("\n")
+	return parts.join(" | ")
 }
 
-export async function confirmDetected(detected: DetectedConfig): Promise<boolean> {
-	const summary = formatDetectedSummary(detected)
-
+export function logDetectedSummary(detected: DetectedConfig): void {
+	const summary = buildDetectionSummary(detected)
 	if (summary) {
-		p.note(summary, "Detected Configuration")
+		p.log.info(`Auto-detected: ${summary}`)
 	}
-
-	const confirmed = await p.confirm({
-		message: "Is this correct?",
-		initialValue: true,
-	})
-
-	if (p.isCancel(confirmed)) {
-		p.cancel("Setup cancelled.")
-		process.exit(0)
-	}
-
-	return confirmed
 }

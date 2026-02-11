@@ -209,10 +209,13 @@ export const defaultCommand = defineCommand({
 		}
 		console.log()
 		console.log(`  ${pc.dim("Your Strapi app will be available at")} ${pc.cyan("http://localhost:1337")}`)
+		if (config.useAdminer) {
+			console.log(`  ${pc.dim("Adminer database UI at")} ${pc.cyan("http://localhost:8080")}`)
+		}
 		console.log()
 		console.log(`  ${pc.dim("Docs & issues:")} ${pc.dim("https://github.com/strapi-community/strapi-tool-dockerize")}`)
 		console.log()
 
-		log.success("Your project is ready to containerize!")
+		log.success("Docker configuration generated successfully!")
 	},
 })

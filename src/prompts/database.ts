@@ -8,13 +8,14 @@ import {
 	DEFAULT_PORTS,
 } from "../config"
 
-export async function selectDatabase(): Promise<DatabaseClient> {
+export async function selectDatabase(detected?: DatabaseClient): Promise<DatabaseClient> {
 	const selected = await p.select({
 		message: "Which database do you want to use?",
+		initialValue: detected,
 		options: [
 			{ value: "postgres", label: "PostgreSQL", hint: "recommended" },
 			{ value: "mysql", label: "MySQL" },
-			{ value: "mariadb", label: "MariaDB" },
+			{ value: "mariadb", label: "MariaDB", hint: "MySQL-compatible" },
 			{ value: "sqlite", label: "SQLite", hint: "no external server needed" },
 		],
 	})

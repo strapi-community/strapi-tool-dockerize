@@ -11,13 +11,17 @@ export async function promptProjectName(detected?: string): Promise<string> {
 			if (!/^[a-z0-9][a-z0-9._-]*$/i.test(value)) return "Project name must start with alphanumeric and contain only letters, numbers, dots, hyphens, underscores"
 		},
 	})
-	if (p.isCancel(name)) process.exit(0)
+	if (p.isCancel(name)) {
+		p.cancel("Setup cancelled.")
+		process.exit(0)
+	}
 	return name as string
 }
 
-export async function promptEnvironment(): Promise<Environment> {
+export async function promptEnvironment(detected?: Environment): Promise<Environment> {
 	const selected = await p.select({
 		message: "Which environment(s) should the Dockerfile target?",
+		initialValue: detected,
 		options: [
 			{ value: "development", label: "Development", hint: "hot-reload, debug friendly" },
 			{ value: "production", label: "Production", hint: "optimized, multi-stage build" },

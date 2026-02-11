@@ -8,16 +8,17 @@ import {
 	DEFAULT_PORTS,
 } from "../config"
 import { resolvedConfigSchema } from "../config"
-import { confirmDetected } from "./confirm-detected"
+import { DB_LABELS, LANG_LABELS, PM_LABELS, logDetectedSummary } from "./confirm-detected"
 import { promptDatabaseConnection, selectDatabase } from "./database"
 import { promptEnvironment, promptProjectName, promptUseAdminer, promptUseCompose } from "./options"
 
-async function selectStrapiVersion(): Promise<StrapiVersion> {
+async function selectStrapiVersion(detected?: StrapiVersion): Promise<StrapiVersion> {
 	const selected = await p.select({
 		message: "Which Strapi version?",
+		initialValue: detected ?? "v5",
 		options: [
 			{ value: "v5", label: "Strapi v5", hint: "latest" },
-			{ value: "v4", label: "Strapi v4" },
+			{ value: "v4", label: "Strapi v4", hint: "legacy" },
 		],
 	})
 
@@ -29,9 +30,10 @@ async function selectStrapiVersion(): Promise<StrapiVersion> {
 	return selected as StrapiVersion
 }
 
-async function selectProjectType(): Promise<ProjectType> {
+async function selectProjectType(detected?: ProjectType): Promise<ProjectType> {
 	const selected = await p.select({
 		message: "JavaScript or TypeScript?",
+		initialValue: detected ?? "ts",
 		options: [
 			{ value: "ts", label: "TypeScript", hint: "recommended" },
 			{ value: "js", label: "JavaScript" },
@@ -46,14 +48,15 @@ async function selectProjectType(): Promise<ProjectType> {
 	return selected as ProjectType
 }
 
-async function selectPackageManager(): Promise<PackageManager> {
+async function selectPackageManager(detected?: PackageManager): Promise<PackageManager> {
 	const selected = await p.select({
 		message: "Which package manager?",
+		initialValue: detected ?? "npm",
 		options: [
 			{ value: "npm", label: "npm" },
 			{ value: "yarn", label: "Yarn" },
-			{ value: "pnpm", label: "pnpm" },
-			{ value: "bun", label: "Bun" },
+			{ value: "pnpm", label: "pnpm", hint: "fast, disk efficient" },
+			{ value: "bun", label: "Bun", hint: "fast, all-in-one toolkit" },
 		],
 	})
 
@@ -65,14 +68,13 @@ async function selectPackageManager(): Promise<PackageManager> {
 	return selected as PackageManager
 }
 
-function fillDefaults(detected: DetectedConfig, dbClient: DatabaseClient): Partial<ResolvedConfig> {
+function fillDefaults(dbClient: DatabaseClient, detected: DetectedConfig) {
 	return {
 		databaseHost: detected.databaseHost ?? DEFAULT_DATABASE_HOST,
 		databasePort: detected.databasePort ?? DEFAULT_PORTS[dbClient],
 		databaseName: detected.databaseName ?? DEFAULT_DATABASE_NAME,
 		databaseUsername: detected.databaseUsername ?? DEFAULT_DATABASE_USERNAME,
 		databasePassword: detected.databasePassword ?? DEFAULT_DATABASE_PASSWORD,
-		envVars: detected.envVars ?? {},
 	}
 }
 
@@ -80,21 +82,19 @@ export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConf
 	p.intro("Configuring Docker for your Strapi project")
 
 	const hasDetections = detected.strapiVersion || detected.projectType || detected.databaseClient || detected.packageManager
-
-	let useDetected = false
 	if (hasDetections) {
-		useDetected = await confirmDetected(detected)
+		logDetectedSummary(detected)
 	}
 
-	const strapiVersion = useDetected && detected.strapiVersion ? detected.strapiVersion : await selectStrapiVersion()
+	const projectName = await promptProjectName(detected.projectName)
 
-	const projectType = useDetected && detected.projectType ? detected.projectType : await selectProjectType()
+	const strapiVersion = await selectStrapiVersion(detected.strapiVersion)
 
-	const packageManager = useDetected && detected.packageManager ? detected.packageManager : await selectPackageManager()
+	const projectType = await selectProjectType(detected.projectType)
 
-	const databaseClient = useDetected && detected.databaseClient ? detected.databaseClient : await selectDatabase()
+	const packageManager = await selectPackageManager(detected.packageManager)
 
-	const defaults = fillDefaults(detected, databaseClient)
+	const databaseClient = await selectDatabase(detected.databaseClient)
 
 	let dbConnection: {
 		databaseHost: string
@@ -104,30 +104,47 @@ export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConf
 		databasePassword: string
 	}
 
-	if (useDetected && (detected.databaseHost || detected.databasePort)) {
-		dbConnection = {
-			databaseHost: detected.databaseHost ?? defaults.databaseHost!,
-			databasePort: detected.databasePort ?? defaults.databasePort!,
-			databaseName: detected.databaseName ?? defaults.databaseName!,
-			databaseUsername: detected.databaseUsername ?? defaults.databaseUsername!,
-			databasePassword: detected.databasePassword ?? defaults.databasePassword!,
+	if (databaseClient !== "sqlite") {
+		const defaults = fillDefaults(databaseClient, detected)
+
+		const customize = await p.confirm({
+			message: `Database: ${defaults.databaseHost}:${defaults.databasePort}/${defaults.databaseName} (user: ${defaults.databaseUsername}). Customize?`,
+			initialValue: false,
+		})
+		if (p.isCancel(customize)) {
+			p.cancel("Setup cancelled.")
+			process.exit(0)
+		}
+
+		if (customize) {
+			dbConnection = await promptDatabaseConnection(databaseClient, detected)
+		} else {
+			dbConnection = {
+				databaseHost: defaults.databaseHost,
+				databasePort: defaults.databasePort,
+				databaseName: defaults.databaseName,
+				databaseUsername: defaults.databaseUsername,
+				databasePassword: defaults.databasePassword,
+			}
 		}
 	} else {
-		dbConnection = await promptDatabaseConnection(databaseClient, detected)
+		dbConnection = {
+			databaseHost: DEFAULT_DATABASE_HOST,
+			databasePort: 0,
+			databaseName: DEFAULT_DATABASE_NAME,
+			databaseUsername: DEFAULT_DATABASE_USERNAME,
+			databasePassword: DEFAULT_DATABASE_PASSWORD,
+		}
 	}
 
-	const environment = useDetected && detected.environment ? detected.environment : await promptEnvironment()
+	const environment = await promptEnvironment(detected.environment)
 
-	const useCompose = (useDetected && detected.useCompose !== undefined) ? detected.useCompose : await promptUseCompose()
+	const useCompose = await promptUseCompose()
 
 	let useAdminer = false
 	if (useCompose && databaseClient !== "sqlite") {
-		useAdminer = (useDetected && detected.useAdminer !== undefined) ? detected.useAdminer : await promptUseAdminer()
+		useAdminer = await promptUseAdminer()
 	}
-
-	const projectName = useDetected && detected.projectName
-		? detected.projectName
-		: await promptProjectName(detected.projectName)
 
 	const raw: ResolvedConfig = {
 		strapiVersion,
@@ -146,19 +163,23 @@ export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConf
 	const config = resolvedConfigSchema.parse(raw)
 
 	const summaryLines = [
-		`Strapi ${strapiVersion} | ${projectType} | ${databaseClient} | ${packageManager}`,
+		`Strapi ${strapiVersion} | ${LANG_LABELS[projectType]} | ${DB_LABELS[databaseClient]} | ${PM_LABELS[packageManager]}`,
 		`Environment: ${environment}`,
 		`Project: ${projectName}`,
 	]
 
 	if (databaseClient !== "sqlite") {
 		summaryLines.push(`Database: ${dbConnection.databaseHost}:${dbConnection.databasePort}/${dbConnection.databaseName}`)
-		summaryLines.push(`User: ${dbConnection.databaseUsername}`)
+		summaryLines.push(`DB User: ${dbConnection.databaseUsername}`)
 	}
 
-	if (useCompose) summaryLines.push(`Compose: yes${useAdminer ? " + Adminer" : ""}`)
+	if (useCompose) summaryLines.push(`Compose: yes${useAdminer ? " + Adminer (port 8080)" : ""}`)
 
 	p.note(summaryLines.join("\n"), "Configuration")
+
+	if ((environment === "production" || environment === "both") && dbConnection.databasePassword === DEFAULT_DATABASE_PASSWORD) {
+		p.log.warn("Default database credentials are not recommended for production")
+	}
 
 	const confirmed = await p.confirm({
 		message: "Generate Docker files with this configuration?",
@@ -166,15 +187,13 @@ export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConf
 	})
 
 	if (p.isCancel(confirmed) || !confirmed) {
-		p.cancel("Generation cancelled")
+		p.cancel("Setup cancelled.")
 		process.exit(0)
 	}
-
-	p.outro("Configuration complete!")
 
 	return config
 }
 
-export { confirmDetected } from "./confirm-detected"
+export { buildDetectionSummary, logDetectedSummary, DB_LABELS, PM_LABELS, LANG_LABELS } from "./confirm-detected"
 export { selectDatabase, promptDatabaseConnection } from "./database"
 export { promptEnvironment, promptProjectName, promptUseCompose, promptUseAdminer } from "./options"
