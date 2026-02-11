@@ -1,6 +1,6 @@
 import { describe, it, expect } from "bun:test"
 import { ZodError } from "zod"
-import { formatZodErrors, buildDetectionSummary } from "../../../src/cli/commands/default"
+import { formatZodErrors, buildDetectionSummary, shouldWarnDatabaseDefault } from "../../../src/cli/commands/default"
 import { resolvedConfigSchema } from "../../../src/config/schema"
 import type { DetectedConfig } from "../../../src/config/schema"
 
@@ -76,6 +76,39 @@ describe("formatZodErrors", () => {
 		for (const msg of messages) {
 			expect(typeof msg).toBe("string")
 		}
+	})
+})
+
+describe("shouldWarnDatabaseDefault", () => {
+	it("returns true when databaseClient is undefined", () => {
+		const detected: DetectedConfig = {
+			strapiVersion: "v5",
+			projectType: "ts",
+			packageManager: "npm",
+		}
+		expect(shouldWarnDatabaseDefault(detected)).toBe(true)
+	})
+
+	it("returns false when databaseClient is set", () => {
+		const detected: DetectedConfig = {
+			strapiVersion: "v5",
+			projectType: "ts",
+			databaseClient: "postgres",
+			packageManager: "npm",
+		}
+		expect(shouldWarnDatabaseDefault(detected)).toBe(false)
+	})
+
+	it("returns false for sqlite", () => {
+		const detected: DetectedConfig = {
+			databaseClient: "sqlite",
+		}
+		expect(shouldWarnDatabaseDefault(detected)).toBe(false)
+	})
+
+	it("returns true for empty detected config", () => {
+		const detected: DetectedConfig = {}
+		expect(shouldWarnDatabaseDefault(detected)).toBe(true)
 	})
 })
 

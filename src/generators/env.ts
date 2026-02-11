@@ -77,7 +77,8 @@ export async function generateEnv(config: ResolvedConfig, registry: PluginRegist
 		if (startIdx !== -1 && endIdx !== -1) {
 			content = content.slice(0, startIdx) + managedSection + content.slice(endIdx + MARKER_END.length)
 		} else {
-			content = content.trimEnd() + "\n\n" + managedSection + "\n"
+			const trimmed = content.trimEnd()
+			content = trimmed ? trimmed + "\n\n" + managedSection + "\n" : managedSection + "\n"
 		}
 
 		content = commentOutDuplicateKeys(content, managedKeys)

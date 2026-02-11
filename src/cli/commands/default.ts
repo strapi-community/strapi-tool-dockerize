@@ -20,6 +20,10 @@ export function formatZodErrors(error: ZodError): string[] {
 	})
 }
 
+export function shouldWarnDatabaseDefault(detected: DetectedConfig): boolean {
+	return !detected.databaseClient
+}
+
 export function buildDetectionSummary(detected: DetectedConfig): string {
 	const parts: string[] = []
 	parts.push(`strapi ${detected.strapiVersion ?? "unknown"}`)
@@ -82,6 +86,9 @@ export const defaultCommand = defineCommand({
 
 		let config
 		if (args.yes) {
+			if (shouldWarnDatabaseDefault(detected)) {
+				log.warn("No database detected, defaulting to postgres")
+			}
 			try {
 				config = resolvedConfigSchema.parse({
 					strapiVersion: detected.strapiVersion ?? "v5",
@@ -155,10 +162,14 @@ export const defaultCommand = defineCommand({
 			}
 		}
 
-		const generated = ["Dockerfile", ".dockerignore"]
+		const generated: string[] = []
+		if (config.environment === "development" || config.environment === "both") {
+			generated.push("Dockerfile")
+		}
 		if (config.environment === "production" || config.environment === "both") {
 			generated.push("Dockerfile.prod")
 		}
+		generated.push(".dockerignore")
 		if (config.useCompose) {
 			generated.push("docker-compose.yml")
 		}
