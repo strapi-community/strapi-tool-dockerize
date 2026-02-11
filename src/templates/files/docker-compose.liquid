@@ -1,0 +1,87 @@
+services:
+  {{ projectName }}:
+    build:
+      context: .
+      dockerfile: {% if environment == "production" %}Dockerfile.prod{% else %}Dockerfile{% endif %}
+
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "{{ strapiPort }}:{{ strapiPort }}"
+    volumes:
+      - ./config:/opt/app/config
+      - ./src:/opt/app/src
+      - ./package.json:/opt/app/package.json
+{% if lockFile %}
+      - ./{{ lockFile }}:/opt/app/{{ lockFile }}
+{% endif %}
+      - ./.env:/opt/app/.env
+      - strapi-uploads:/opt/app/public/uploads
+{% if databaseClient == "sqlite" %}
+      - strapi-data:/opt/app/.tmp
+{% endif %}
+{% if databaseClient != "sqlite" %}
+    depends_on:
+      {{ projectName }}-db:
+        condition: service_healthy
+{% endif %}
+    networks:
+      - strapi-network
+{% if databaseClient != "sqlite" %}
+
+  {{ projectName }}-db:
+    image: {{ dbImage }}
+    restart: unless-stopped
+    environment:
+{% for entry in dbEnvironment %}
+      {{ entry.key }}: "{{ entry.value }}"
+{% endfor %}
+    ports:
+{% for port in dbPorts %}
+      - "{{ port }}"
+{% endfor %}
+    volumes:
+{% for volume in dbVolumes %}
+      - {{ volume }}
+{% endfor %}
+    healthcheck:
+{% for line in dbHealthTest %}
+      {{ line }}
+{% endfor %}
+      interval: {{ dbHealthInterval }}
+      timeout: {{ dbHealthTimeout }}
+      retries: {{ dbHealthRetries }}
+{% if dbHealthStartPeriod %}
+      start_period: {{ dbHealthStartPeriod }}
+{% endif %}
+    networks:
+      - strapi-network
+{% endif %}
+{% if useAdminer and databaseClient != "sqlite" %}
+
+  {{ projectName }}-adminer:
+    image: {{ adminerImage }}
+    restart: unless-stopped
+    ports:
+      - "{{ adminerPort }}:8080"
+    depends_on:
+      {{ projectName }}-db:
+        condition: service_healthy
+    networks:
+      - strapi-network
+{% endif %}
+
+volumes:
+  strapi-uploads:
+{% if databaseClient == "sqlite" %}
+  strapi-data:
+{% endif %}
+{% if databaseClient != "sqlite" %}
+{% for volume in namedVolumes %}
+  {{ volume }}:
+{% endfor %}
+{% endif %}
+
+networks:
+  strapi-network:
+    driver: bridge

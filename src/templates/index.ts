@@ -1,0 +1,1 @@
+export { renderTemplate } from "./renderer"

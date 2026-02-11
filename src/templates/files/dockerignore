@@ -1,0 +1,9 @@
+node_modules
+.tmp
+.cache
+.git
+build
+dist
+*.md
+.env.local
+.DS_Store
