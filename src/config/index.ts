@@ -36,6 +36,11 @@ export {
 	ADMINER_IMAGE,
 	ADMINER_PORT,
 	DEFAULT_SECRET_BACKEND,
+	RESOURCE_LIMITS,
 } from "./defaults"
 
 export type { StrapiHealthCheckOverrides } from "./health-check"
+export type { ResourceLimitOverrides } from "./resource-limits"
+
+export { getPreset, PRESET_NAMES } from "./presets"
+export type { PresetName } from "./presets"
