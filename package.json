@@ -51,6 +51,7 @@
 		"zod": "^3.24.2"
 	},
 	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
 		"@commitlint/cli": "^20.4.1",
 		"@commitlint/config-conventional": "^20.4.1",
 		"@semantic-release/changelog": "^6.0.3",
@@ -60,8 +61,7 @@
 		"@types/bun": "^1.2.2",
 		"commitlint-plugin-function-rules": "^4.3.1",
 		"conventional-changelog-conventionalcommits": "^9.1.0",
-		"semantic-release": "^24.2.1",
-		"ultracite": "^4.1.17"
+		"semantic-release": "^24.2.1"
 	},
 	"repository": {
 		"type": "git",
