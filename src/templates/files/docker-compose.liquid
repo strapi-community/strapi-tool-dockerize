@@ -31,9 +31,9 @@ services:
     depends_on:
       {{ projectName }}-db:
         condition: service_healthy
-{%- endif %}
     networks:
       - {{ projectName }}-network
+{%- endif %}
 {%- if databaseClient != "sqlite" %}
 
   {{ projectName }}-db:
@@ -103,9 +103,12 @@ volumes:
 {%- endfor %}
 {%- endif %}
 
+{%- if databaseClient != "sqlite" %}
+
 networks:
   {{ projectName }}-network:
     driver: bridge
+{%- endif %}
 {%- if environment == "production" and databaseClient != "sqlite" %}
 
 secrets:
