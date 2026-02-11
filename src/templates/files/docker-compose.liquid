@@ -4,18 +4,25 @@ services:
       context: .
       dockerfile: {% if environment == "production" %}Dockerfile.prod{% else %}Dockerfile{% endif %}
 
+    init: true
     restart: unless-stopped
     env_file: .env
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     ports:
       - "{{ strapiPort }}:{{ strapiPort }}"
     volumes:
+{% if environment != "production" %}
       - ./config:/opt/app/config
       - ./src:/opt/app/src
       - ./package.json:/opt/app/package.json
 {% if lockFile %}
       - ./{{ lockFile }}:/opt/app/{{ lockFile }}
 {% endif %}
-      - ./.env:/opt/app/.env
+{% endif %}
       - strapi-uploads:/opt/app/public/uploads
 {% if databaseClient == "sqlite" %}
       - strapi-data:/opt/app/.tmp
@@ -26,12 +33,17 @@ services:
         condition: service_healthy
 {% endif %}
     networks:
-      - strapi-network
+      - {{ projectName }}-network
 {% if databaseClient != "sqlite" %}
 
   {{ projectName }}-db:
     image: {{ dbImage }}
     restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     environment:
 {% for entry in dbEnvironment %}
       {{ entry.key }}: "{{ entry.value }}"
@@ -54,21 +66,30 @@ services:
 {% if dbHealthStartPeriod %}
       start_period: {{ dbHealthStartPeriod }}
 {% endif %}
+{% if environment == "production" %}
+    secrets:
+      - db_password
+{% endif %}
     networks:
-      - strapi-network
+      - {{ projectName }}-network
 {% endif %}
 {% if useAdminer and databaseClient != "sqlite" %}
 
   {{ projectName }}-adminer:
     image: {{ adminerImage }}
     restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     ports:
       - "{{ adminerPort }}:8080"
     depends_on:
       {{ projectName }}-db:
         condition: service_healthy
     networks:
-      - strapi-network
+      - {{ projectName }}-network
 {% endif %}
 
 volumes:
@@ -83,5 +104,11 @@ volumes:
 {% endif %}
 
 networks:
-  strapi-network:
+  {{ projectName }}-network:
     driver: bridge
+{% if environment == "production" and databaseClient != "sqlite" %}
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+{% endif %}

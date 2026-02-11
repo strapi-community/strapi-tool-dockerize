@@ -27,5 +27,5 @@ export const DEFAULT_DATABASE_HOST = "localhost"
 export const STRAPI_HEALTH_CHECK_START_PERIOD = "40s"
 export const STRAPI_DEFAULT_PORT = 1337
 
-export const ADMINER_IMAGE = "adminer:latest"
+export const ADMINER_IMAGE = "adminer:4.8.1"
 export const ADMINER_PORT = 8080

@@ -20,6 +20,10 @@ export async function generateEnv(config: ResolvedConfig, registry: PluginRegist
 	if (!isSqlite) {
 		const db = registry.getDatabase(config.databaseClient)
 		vars = { ...db.envVars(config) }
+
+		if (config.useCompose) {
+			vars.DATABASE_HOST = `${config.projectName}-db`
+		}
 	} else {
 		vars.DATABASE_CLIENT = "sqlite"
 		vars.DATABASE_FILENAME = ".tmp/data.db"

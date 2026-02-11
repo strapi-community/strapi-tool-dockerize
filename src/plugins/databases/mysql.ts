@@ -15,10 +15,10 @@ export const mysqlPlugin: DatabasePlugin = {
 		return {
 			image: DEFAULT_DATABASE_IMAGES.mysql,
 			environment: {
-				MYSQL_ROOT_PASSWORD: config.databasePassword,
-				MYSQL_DATABASE: config.databaseName,
-				MYSQL_USER: config.databaseUsername,
-				MYSQL_PASSWORD: config.databasePassword,
+				MYSQL_ROOT_PASSWORD: "${DATABASE_PASSWORD}",
+				MYSQL_DATABASE: "${DATABASE_NAME}",
+				MYSQL_USER: "${DATABASE_USERNAME}",
+				MYSQL_PASSWORD: "${DATABASE_PASSWORD}",
 			},
 			ports: [`${config.databasePort}:3306`],
 			volumes: [`${config.projectName}-data:/var/lib/mysql`],

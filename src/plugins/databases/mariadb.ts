@@ -15,10 +15,10 @@ export const mariadbPlugin: DatabasePlugin = {
 		return {
 			image: DEFAULT_DATABASE_IMAGES.mariadb,
 			environment: {
-				MARIADB_ROOT_PASSWORD: config.databasePassword,
-				MARIADB_DATABASE: config.databaseName,
-				MARIADB_USER: config.databaseUsername,
-				MARIADB_PASSWORD: config.databasePassword,
+				MARIADB_ROOT_PASSWORD: "${DATABASE_PASSWORD}",
+				MARIADB_DATABASE: "${DATABASE_NAME}",
+				MARIADB_USER: "${DATABASE_USERNAME}",
+				MARIADB_PASSWORD: "${DATABASE_PASSWORD}",
 			},
 			ports: [`${config.databasePort}:3306`],
 			volumes: [`${config.projectName}-data:/var/lib/mysql`],
