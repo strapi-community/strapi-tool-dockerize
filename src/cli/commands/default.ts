@@ -61,9 +61,6 @@ export const defaultCommand = defineCommand({
 		try {
 			detected = await detectAll(cwd)
 			detectSpinner.success("Project scanned")
-			if (args.yes) {
-				log.info(`Detected: ${buildDetectionSummary(detected)}`)
-			}
 		} catch (err) {
 			detectSpinner.error("Failed to detect project configuration")
 			log.error(err instanceof Error ? err.message : String(err))
@@ -82,6 +79,10 @@ export const defaultCommand = defineCommand({
 		}
 		if (args.compose !== undefined) {
 			detected.useCompose = args.compose
+		}
+
+		if (args.yes) {
+			log.info(`Detected: ${buildDetectionSummary(detected)}`)
 		}
 
 		let config

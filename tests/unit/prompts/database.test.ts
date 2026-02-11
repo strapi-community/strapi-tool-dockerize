@@ -180,6 +180,27 @@ describe("promptDatabaseConnection", () => {
 		expect(promptDefs).toHaveProperty("databasePassword")
 	})
 
+	it("password prompt message indicates press Enter for default", async () => {
+		mockGroup.mockResolvedValue({
+			databaseHost: "localhost",
+			databasePort: "5432",
+			databaseName: "strapi",
+			databaseUsername: "strapi",
+			databasePassword: "",
+		})
+
+		await promptDatabaseConnection("postgres")
+
+		const groupCall = mockGroup.mock.calls[0]
+		const promptDefs = groupCall[0] as Record<string, () => unknown>
+		promptDefs.databasePassword()
+
+		expect(mockPassword).toHaveBeenCalledTimes(1)
+		const passwordArgs = mockPassword.mock.calls[0][0] as { message: string; mask: string }
+		expect(passwordArgs.message).toContain("press Enter for")
+		expect(passwordArgs.mask).toBe("*")
+	})
+
 	it("group prompt includes onCancel handler", async () => {
 		mockGroup.mockResolvedValue({
 			databaseHost: "localhost",

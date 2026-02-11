@@ -145,6 +145,31 @@ export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConf
 
 	const config = resolvedConfigSchema.parse(raw)
 
+	const summaryLines = [
+		`Strapi ${strapiVersion} | ${projectType} | ${databaseClient} | ${packageManager}`,
+		`Environment: ${environment}`,
+		`Project: ${projectName}`,
+	]
+
+	if (databaseClient !== "sqlite") {
+		summaryLines.push(`Database: ${dbConnection.databaseHost}:${dbConnection.databasePort}/${dbConnection.databaseName}`)
+		summaryLines.push(`User: ${dbConnection.databaseUsername}`)
+	}
+
+	if (useCompose) summaryLines.push(`Compose: yes${useAdminer ? " + Adminer" : ""}`)
+
+	p.note(summaryLines.join("\n"), "Configuration")
+
+	const confirmed = await p.confirm({
+		message: "Generate Docker files with this configuration?",
+		initialValue: true,
+	})
+
+	if (p.isCancel(confirmed) || !confirmed) {
+		p.cancel("Generation cancelled")
+		process.exit(0)
+	}
+
 	p.outro("Configuration complete!")
 
 	return config

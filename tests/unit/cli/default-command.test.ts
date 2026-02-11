@@ -269,3 +269,45 @@ describe("yes mode port resolution", () => {
 		expect(config.databasePort).toBe(3306)
 	})
 })
+
+describe("detection summary reflects flag overrides", () => {
+	it("shows overridden database in summary", () => {
+		const detected: DetectedConfig = {
+			strapiVersion: "v5",
+			projectType: "ts",
+			databaseClient: "sqlite",
+			packageManager: "npm",
+		}
+		detected.databaseClient = "mysql" as DatabaseClient
+		detected.databasePort = DEFAULT_PORTS[detected.databaseClient]
+
+		const summary = buildDetectionSummary(detected)
+		expect(summary).toBe("strapi v5 | ts | mysql | npm")
+	})
+
+	it("shows overridden package manager in summary", () => {
+		const detected: DetectedConfig = {
+			strapiVersion: "v5",
+			projectType: "ts",
+			databaseClient: "postgres",
+			packageManager: "npm",
+		}
+		detected.packageManager = "yarn" as DetectedConfig["packageManager"]
+
+		const summary = buildDetectionSummary(detected)
+		expect(summary).toBe("strapi v5 | ts | postgres | yarn")
+	})
+
+	it("shows overridden database when originally undetected", () => {
+		const detected: DetectedConfig = {
+			strapiVersion: "v5",
+			projectType: "ts",
+			packageManager: "npm",
+		}
+		detected.databaseClient = "postgres" as DatabaseClient
+		detected.databasePort = DEFAULT_PORTS[detected.databaseClient]
+
+		const summary = buildDetectionSummary(detected)
+		expect(summary).toBe("strapi v5 | ts | postgres | npm")
+	})
+})

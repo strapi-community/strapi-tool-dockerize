@@ -80,7 +80,7 @@ describe("prompt flow: useCompose respects useDetected", () => {
 	})
 
 	it("prompts for useCompose when useDetected is false even if detected value exists", async () => {
-		setupConfirmResponses([false, false])
+		setupConfirmResponses([false, false, true])
 		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
 		mockGroup.mockResolvedValue({
 			databaseHost: "localhost",
@@ -145,7 +145,7 @@ describe("prompt flow: useAdminer respects useDetected", () => {
 	})
 
 	it("prompts for useAdminer when useDetected is false even if detected value exists", async () => {
-		setupConfirmResponses([false, true, false])
+		setupConfirmResponses([false, true, false, true])
 		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
 		mockGroup.mockResolvedValue({
 			databaseHost: "localhost",

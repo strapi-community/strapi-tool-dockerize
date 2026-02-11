@@ -82,7 +82,7 @@ export async function promptDatabaseConnection(dbClient: DatabaseClient): Promis
 				}),
 			databasePassword: () =>
 				p.password({
-					message: `Database password (default: ${DEFAULT_DATABASE_PASSWORD})`,
+					message: `Database password (press Enter for '${DEFAULT_DATABASE_PASSWORD}')`,
 					mask: "*",
 				}),
 		},

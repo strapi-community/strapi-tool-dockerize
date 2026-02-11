@@ -203,7 +203,7 @@ describe("runPrompts", () => {
 		expect(config.databaseClient).toBe("postgres")
 	})
 
-	it("skips confirmation when nothing is detected", async () => {
+	it("skips detected confirmation when nothing is detected", async () => {
 		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
 		setupConfirmResponses([true])
 		mockGroup.mockResolvedValue({
@@ -217,7 +217,10 @@ describe("runPrompts", () => {
 		const detected: DetectedConfig = {}
 		await runPrompts(detected)
 
-		expect(mockNote).not.toHaveBeenCalled()
+		const detectedNoteCall = mockNote.mock.calls.find(
+			(call: unknown[]) => call[1] === "Detected Configuration",
+		)
+		expect(detectedNoteCall).toBeUndefined()
 	})
 
 	it("passes isESM through from detected config", async () => {
@@ -362,7 +365,7 @@ describe("runPrompts", () => {
 
 	it("does not prompt for adminer when useCompose is false", async () => {
 		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
-		setupConfirmResponses([false])
+		setupConfirmResponses([false, true])
 		mockGroup.mockResolvedValue({
 			databaseHost: "localhost",
 			databasePort: "5432",
@@ -387,5 +390,115 @@ describe("runPrompts", () => {
 
 		expect(config.databaseClient).toBe("sqlite")
 		expect(config.useAdminer).toBe(false)
+	})
+
+	it("shows configuration summary before generating", async () => {
+		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
+		setupConfirmResponses([true])
+		mockGroup.mockResolvedValue({
+			databaseHost: "localhost",
+			databasePort: "5432",
+			databaseName: "strapi",
+			databaseUsername: "strapi",
+			databasePassword: "strapi",
+		})
+
+		await runPrompts({})
+
+		const summaryCall = mockNote.mock.calls.find(
+			(call: unknown[]) => call[1] === "Configuration",
+		)
+		expect(summaryCall).toBeDefined()
+		expect(summaryCall![0]).toContain("Strapi v5")
+		expect(summaryCall![0]).toContain("postgres")
+	})
+
+	it("includes database details in summary for non-sqlite", async () => {
+		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
+		setupConfirmResponses([true])
+		mockGroup.mockResolvedValue({
+			databaseHost: "localhost",
+			databasePort: "5432",
+			databaseName: "strapi",
+			databaseUsername: "strapi",
+			databasePassword: "strapi",
+		})
+
+		await runPrompts({})
+
+		const summaryCall = mockNote.mock.calls.find(
+			(call: unknown[]) => call[1] === "Configuration",
+		)
+		expect(summaryCall![0]).toContain("localhost:5432/strapi")
+		expect(summaryCall![0]).toContain("User: strapi")
+	})
+
+	it("excludes database details in summary for sqlite", async () => {
+		setupSelectResponses(["v5", "ts", "npm", "sqlite", "development"])
+		setupConfirmResponses([true])
+
+		await runPrompts({})
+
+		const summaryCall = mockNote.mock.calls.find(
+			(call: unknown[]) => call[1] === "Configuration",
+		)
+		expect(summaryCall![0]).not.toContain("Database:")
+		expect(summaryCall![0]).not.toContain("User:")
+	})
+
+	it("includes compose info in summary when enabled", async () => {
+		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
+		setupConfirmResponses([true, true, true])
+		mockGroup.mockResolvedValue({
+			databaseHost: "localhost",
+			databasePort: "5432",
+			databaseName: "strapi",
+			databaseUsername: "strapi",
+			databasePassword: "strapi",
+		})
+
+		await runPrompts({})
+
+		const summaryCall = mockNote.mock.calls.find(
+			(call: unknown[]) => call[1] === "Configuration",
+		)
+		expect(summaryCall![0]).toContain("Compose: yes")
+	})
+
+	it("exits when user rejects final confirmation", async () => {
+		setupSelectResponses(["v5", "ts", "npm", "sqlite", "development"])
+		let confirmCallIndex = 0
+		mockConfirm.mockImplementation(() => {
+			confirmCallIndex++
+			if (confirmCallIndex === 1) return Promise.resolve(true)
+			return Promise.resolve(false)
+		})
+
+		const exitSpy = spyOn(process, "exit").mockImplementation(() => undefined as never)
+
+		await runPrompts({})
+
+		expect(exitSpy).toHaveBeenCalledWith(0)
+		expect(mockCancel).toHaveBeenCalledWith("Generation cancelled")
+		exitSpy.mockRestore()
+	})
+
+	it("exits when user cancels final confirmation", async () => {
+		setupSelectResponses(["v5", "ts", "npm", "sqlite", "development"])
+		let confirmCallIndex = 0
+		mockConfirm.mockImplementation(() => {
+			confirmCallIndex++
+			if (confirmCallIndex === 1) return Promise.resolve(true)
+			return Promise.resolve(Symbol("cancel"))
+		})
+		mockIsCancel.mockReturnValue(true)
+
+		const exitSpy = spyOn(process, "exit").mockImplementation(() => undefined as never)
+
+		await runPrompts({})
+
+		expect(exitSpy).toHaveBeenCalledWith(0)
+		expect(mockCancel).toHaveBeenCalledWith("Generation cancelled")
+		exitSpy.mockRestore()
 	})
 })
