@@ -19,20 +19,33 @@ _Feel free to buy [@Eventyret](https://www.github.com/Eventyret) a coffee if thi
 </p>
 </div>
 
-## What's New in v2.5
+## What's New in v2
 
-Complete rewrite in TypeScript with [Bun](https://bun.sh). Plugin-based architecture for databases and package managers. Smart auto-detection from your existing project, multi-stage production Dockerfiles, health checks everywhere, and support for all four major package managers. Zero questions when your project already has the answers.
+Complete rewrite in TypeScript with [Bun](https://bun.sh). Plugin-based architecture, smart auto-detection, multi-stage production Dockerfiles, health checks everywhere, and support for all four major package managers. Zero questions when your project already has the answers.
 
-Highlights:
+**Core:**
 
-- **Plugin architecture** for database and package manager support
-- **[LiquidJS](https://liquidjs.com/) templates** for all Dockerfile and Compose generation
-- **[@clack/prompts](https://github.com/bombshell-dev/clack)** for a polished interactive CLI experience
-- **Auto-detection** of Strapi version (v4/v5), database, package manager, ESM/CJS, and existing `.env` values
-- **`--env=both`** generates dual Dockerfiles AND dual Compose files in a single run
-- **4-stage production build** (deps, build, production-deps, runtime) for minimal images
-- **Docker secrets** wired into production Compose files
-- **Reset command** to cleanly remove all generated files, including config and env markers
+- Plugin architecture for databases, package managers, and secret backends
+- [LiquidJS](https://liquidjs.com/) templates for all Dockerfile and Compose generation
+- [@clack/prompts](https://github.com/bombshell-dev/clack) for a polished interactive CLI
+- Auto-detection of Strapi version, database, package manager, ESM/CJS, installed plugins, and existing `.env` values
+- `--env=both` generates dual Dockerfiles and Compose files in a single run
+- 4-stage production build (deps, build, production-deps, runtime) for minimal images
+
+**Production-Ready:**
+
+- Secret manager plugin system (`--secrets docker-secrets`) with extensible backends
+- Container resource limits (memory, CPU) with environment-aware defaults
+- Database backup sidecar for automated production backups
+- Health check customization for both Strapi and database services
+- Database driver version pinning to Strapi-compatible versions
+
+**Developer Experience:**
+
+- Named presets (`--preset local-dev`, `--preset production`, `--preset ci`)
+- Dry-run preview mode (`--dry-run`) to see generated files without writing to disk
+- Strapi plugin detection for upload providers and email services
+- Reset command to cleanly remove all generated files
 
 ## Quick Start
 
@@ -42,6 +55,12 @@ npx @strapi-community/dockerize
 
 # Non-interactive, accept all detected defaults
 npx @strapi-community/dockerize --yes
+
+# Production-ready with secrets and backups
+npx @strapi-community/dockerize --preset production --backups
+
+# Preview what would be generated
+npx @strapi-community/dockerize --dry-run
 
 # Override database and package manager
 npx @strapi-community/dockerize --yes -d postgres --pm pnpm
@@ -57,6 +76,8 @@ npx @strapi-community/dockerize --yes -d postgres --pm pnpm
 | **Languages** | TypeScript, JavaScript |
 | **Module Systems** | ESM, CommonJS |
 | **Environments** | development, production, both |
+| **Secret Backends** | none, docker-secrets |
+| **Presets** | local-dev, production, ci |
 
 ## CLI Flags
 
@@ -65,42 +86,78 @@ npx @strapi-community/dockerize --yes -d postgres --pm pnpm
 | `--path` | `-p` | Path to Strapi project | `.` |
 | `--database` | `-d` | Database client (`postgres`, `mysql`, `mariadb`, `sqlite`) | auto-detected |
 | `--package-manager` | `--pm` | Package manager (`npm`, `yarn`, `pnpm`, `bun`) | auto-detected |
-| `--env` | `-e` | Environment (`development`, `production`, `both`) | prompted or `development` |
-| `--compose` / `--no-compose` | | Generate docker-compose.yml (or skip it) | prompted or `true` |
+| `--env` | `-e` | Environment (`development`, `production`, `both`) | prompted |
+| `--compose` / `--no-compose` | | Generate docker-compose.yml (or skip it) | prompted |
+| `--secrets` | `-s` | Secret backend (`none`, `docker-secrets`) | `none` |
+| `--preset` | | Named preset (`local-dev`, `production`, `ci`) | none |
+| `--backups` | | Include database backup sidecar in production compose | `false` |
+| `--memory` | | Container memory limit (e.g., `2g`, `512m`) | env-based |
+| `--cpus` | | Container CPU limit (e.g., `2`, `0.5`) | env-based |
+| `--health-interval` | | Health check interval (e.g., `30s`) | `30s` |
+| `--health-timeout` | | Health check timeout (e.g., `10s`) | `10s` |
+| `--health-start-period` | | Health check start period (e.g., `40s`, `2m`) | `40s` |
+| `--health-retries` | | Health check retry count | `3` |
+| `--dry-run` | | Preview generated files without writing to disk | `false` |
 | `--skip-deps` | | Skip installing database driver | `false` |
 | `--yes` | `-y` | Skip all prompts, use detected/default values | `false` |
 
 ### Usage Examples
 
 ```bash
-# Interactive mode (auto-detects and asks)
+# Interactive mode
 npx @strapi-community/dockerize
 
 # Non-interactive with defaults
 npx @strapi-community/dockerize --yes
 
-# Override database
-npx @strapi-community/dockerize --yes -d postgres
+# Production preset with backups and secrets
+npx @strapi-community/dockerize --preset production --backups --secrets docker-secrets
 
-# Production only
-npx @strapi-community/dockerize --yes --env=production
+# CI-friendly with custom resource limits
+npx @strapi-community/dockerize --preset ci --memory 4g --cpus 4
 
-# Both environments (generates dev + prod Dockerfiles and Compose files)
+# Local dev with postgres and pnpm
+npx @strapi-community/dockerize --preset local-dev -d postgres --pm pnpm
+
+# Preview before committing
+npx @strapi-community/dockerize --dry-run --preset production
+
+# Both environments
 npx @strapi-community/dockerize --yes --env=both
 
-# Skip database driver install
-npx @strapi-community/dockerize --yes --skip-deps
-
-# Custom path
-npx @strapi-community/dockerize --path ./my-strapi-project
+# Custom health check timing for large projects
+npx @strapi-community/dockerize --yes --health-start-period=120s --health-retries=10
 
 # Reset (remove all generated files)
 npx @strapi-community/dockerize reset
 ```
 
+## Presets
+
+Presets bundle opinionated defaults for common scenarios. They merge with auto-detection and can be overridden by CLI flags.
+
+| Preset | Environment | Compose | Adminer | Secrets |
+|--------|-------------|---------|---------|---------|
+| `local-dev` | development | yes | yes | none |
+| `production` | production | yes | no | docker-secrets |
+| `ci` | production | yes | no | none |
+
+Priority order: **CLI flags > preset > auto-detection > defaults**
+
+```bash
+# Start local development fast
+npx @strapi-community/dockerize --preset local-dev
+
+# Production-ready with one flag
+npx @strapi-community/dockerize --preset production
+
+# Production preset but override the database
+npx @strapi-community/dockerize --preset production -d mysql
+```
+
 ## Auto-Detection
 
-When the tool runs, it scans your project and resolves as much as possible before asking any questions. With `--yes`, detected values are used directly. Missing values fall back to sensible defaults (`postgres`, `npm`, `development`).
+The tool scans your project and resolves as much as possible before asking any questions. With `--yes`, detected values are used directly. Missing values fall back to sensible defaults (`postgres`, `npm`, `development`).
 
 | What | Where It Looks |
 |------|---------------|
@@ -112,8 +169,23 @@ When the tool runs, it scans your project and resolves as much as possible befor
 | Database connection | `.env`, `.env.development`, `.env.local` for `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USERNAME`, `DATABASE_PASSWORD` |
 | Environment | `NODE_ENV` in `.env` |
 | Project name | `name` field in `package.json` |
+| Strapi plugins | Upload providers (S3, Cloudinary) and email providers (SendGrid, Mailgun, SES) in dependencies |
 
 Existing `.env` values for database host, port, name, username, and password are read and used to pre-populate prompts (or applied directly in `--yes` mode).
+
+### Strapi Plugin Detection
+
+The tool detects installed Strapi plugins and automatically adds their required environment variables to the generated `.env` file with empty placeholders.
+
+| Plugin | Environment Variables |
+|--------|----------------------|
+| `@strapi/provider-upload-aws-s3` | `AWS_ACCESS_KEY_ID`, `AWS_ACCESS_SECRET`, `AWS_REGION`, `AWS_BUCKET` |
+| `@strapi/provider-upload-cloudinary` | `CLOUDINARY_NAME`, `CLOUDINARY_KEY`, `CLOUDINARY_SECRET` |
+| `@strapi/provider-email-sendgrid` | `SENDGRID_API_KEY` |
+| `@strapi/provider-email-mailgun` | `MAILGUN_API_KEY`, `MAILGUN_DOMAIN` |
+| `@strapi/provider-email-amazon-ses` | `AWS_SES_ACCESS_KEY_ID`, `AWS_SES_SECRET_ACCESS_KEY`, `AWS_SES_REGION` |
+
+Detected plugins show up in the CLI summary and their env vars are grouped in the generated `.env` file under labeled sections.
 
 ## Generated Files
 
@@ -122,14 +194,15 @@ Existing `.env` values for database host, port, name, username, and password are
 | `Dockerfile` | `--env=development` or `--env=both` | Development image with hot-reload support |
 | `Dockerfile.prod` | `--env=production` or `--env=both` | Production multi-stage image (4-stage build) |
 | `docker-compose.yml` | `--env=development` or `--env=both` | Development Compose with database service and health checks |
-| `docker-compose.prod.yml` | `--env=both` | Production Compose with Docker secrets |
+| `docker-compose.prod.yml` | `--env=both` | Production Compose with secrets and resource limits |
 | `.dockerignore` | Always | Comprehensive exclusion list |
-| `.env` | Always | Environment variables (appended with markers, preserves existing content) |
+| `.env` | Always | Environment variables with detected plugin vars (appended with markers, preserves existing content) |
 | `config/env/{dev,prod}/database.{ts,js}` | Always | Strapi database config wired to environment variables |
+| `secrets/db_password.txt` | When `--secrets docker-secrets` | Docker secret file for database password |
 
 ## Production Dockerfile
 
-The production Dockerfile (`Dockerfile.prod`) uses a 4-stage multi-stage build:
+The production Dockerfile (`Dockerfile.prod`) uses a multi-stage build:
 
 1. **base** - System dependencies, non-root user setup
 2. **deps** - Install all dependencies (including devDependencies for the build step)
@@ -137,7 +210,7 @@ The production Dockerfile (`Dockerfile.prod`) uses a 4-stage multi-stage build:
 4. **production-deps** - Install only production dependencies
 5. **runtime** - Minimal Alpine image with only built output and production node_modules
 
-All images run as a non-root `strapi` user with a health check on `/_health`.
+All images run as a non-root `strapi` user with a configurable health check on `/_health`.
 
 ## Package Manager Support
 
@@ -152,18 +225,18 @@ Node version is selected based on Strapi version: v5 uses Node 22, v4 uses Node 
 
 ## Database Support
 
-| Database | Docker Image | Health Check | Driver Package |
-|----------|-------------|-------------|----------------|
-| PostgreSQL | `postgres:16-alpine` | `pg_isready` | `pg` |
-| MySQL | `mysql:8.4` | `mysqladmin ping` | `mysql2` |
-| MariaDB | `mariadb:11` | `healthcheck.sh --connect --innodb_initialized` | `mysql2` |
-| SQLite | N/A (no container) | N/A | `better-sqlite3` |
+| Database | Docker Image | Health Check | Driver |
+|----------|-------------|-------------|--------|
+| PostgreSQL | `postgres:16-alpine` | `pg_isready` | `pg@^8.8.0` |
+| MySQL | `mysql:8.4` | `mysqladmin ping` | `mysql2@^3.9.8` (v5) / `mysql2@^3.10.0` (v4) |
+| MariaDB | `mariadb:11` | `healthcheck.sh --connect --innodb_initialized` | `mysql2@^3.9.8` (v5) / `mysql2@^3.10.0` (v4) |
+| SQLite | N/A (no container) | N/A | `better-sqlite3@^12.4.1` (v5) / `better-sqlite3@^8.6.0` (v4) |
 
 SQLite runs inside the Strapi container with a volume mount for the `.tmp` data directory. No separate database service is needed.
 
-For SQLite with ESM projects, a `__dirname` polyfill is included in the generated database config to ensure compatibility.
+For SQLite with ESM projects, a `__dirname` polyfill is included in the generated database config.
 
-Database drivers are installed automatically unless `--skip-deps` is passed.
+Database drivers are pinned to Strapi-compatible versions and installed automatically unless `--skip-deps` is passed.
 
 ## Docker Compose
 
@@ -173,11 +246,28 @@ Compose files include:
 - **Named volumes** for database persistence and uploads
 - **Bridge networking** between Strapi and the database
 - **Log rotation** (`json-file` driver, 10MB max, 3 files)
-- **Optional [Adminer](https://www.adminer.org/)** for database management in development (prompted interactively)
+- **Container resource limits** with environment-aware defaults (configurable via `--memory` and `--cpus`)
+- **Optional [Adminer](https://www.adminer.org/)** for database management in development
+- **Optional backup sidecar** for automated database backups in production
 
-### Docker Secrets (Production)
+### Resource Limits
 
-Production compose files use Docker secrets for database passwords instead of plain `.env` values.
+Compose services include `deploy.resources.limits` with sensible defaults per environment:
+
+| Environment | Strapi | Database |
+|-------------|--------|----------|
+| development | 2g memory, 2 CPUs | 1g memory, 1 CPU |
+| production | 1g memory, 1 CPU | 512m memory, 0.5 CPUs |
+
+Override with `--memory` and `--cpus` for the Strapi service (database gets half).
+
+### Secret Manager
+
+The `--secrets` flag controls how sensitive values (database passwords) are handled in production compose files.
+
+**`--secrets none`** (default): Database password lives in `.env` as a plain value.
+
+**`--secrets docker-secrets`**: Password is stored in `secrets/db_password.txt` and mounted into containers via Docker secrets. The tool generates the secrets directory and file for you.
 
 ```yaml
 secrets:
@@ -185,28 +275,40 @@ secrets:
     file: ./secrets/db_password.txt
 
 services:
-  strapi:
-    secrets:
-      - db_password
-    environment:
-      DATABASE_PASSWORD: /run/secrets/db_password
-
   strapi-db:
     secrets:
       - db_password
-    environment:
-      POSTGRES_PASSWORD: /run/secrets/db_password
 ```
 
-Create the secrets directory and file:
+The secret manager is a plugin system. Adding new backends (Vault, AWS Secrets Manager) only requires creating a new plugin file. See [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
+
+### Database Backups
+
+Enable with `--backups` to add an automated backup sidecar to production compose files.
+
+| Database | Backup Image | Schedule | Retention |
+|----------|-------------|----------|-----------|
+| PostgreSQL | `prodrigestivill/postgres-backup-local:16` | Daily at 2am | 7 days |
+| MySQL | `databack/mysql-backup:latest` | Daily at 2am | 7 days |
+| MariaDB | `databack/mysql-backup:latest` | Daily at 2am | 7 days |
+
+Backups are stored in a `{project}-backups` named volume.
 
 ```bash
-mkdir -p secrets
-echo "your-secure-password" > secrets/db_password.txt
-chmod 600 secrets/db_password.txt
+# Production with automated backups
+npx @strapi-community/dockerize --preset production --backups
 ```
 
-See the [Docker Secrets documentation](https://docs.docker.com/compose/how-tos/use-secrets/) for more details.
+## Dry-Run Mode
+
+Preview all generated files without writing anything to disk:
+
+```bash
+npx @strapi-community/dockerize --dry-run
+npx @strapi-community/dockerize --dry-run --preset production --backups
+```
+
+Outputs each file with a header separator, useful for reviewing output before committing or piping to other tools.
 
 ## Reset
 
@@ -243,9 +345,15 @@ This removes:
 - Production Dockerfile (`Dockerfile.prod`) with 4-stage build.
 - Database health checks in docker-compose with `depends_on: condition: service_healthy`.
 - Optional Adminer for database management.
-- Automatic database driver installation.
+- Automatic database driver installation with version pinning.
 - Existing Docker files are backed up before overwriting.
-- Docker secrets in production compose.
+- Docker secrets via `--secrets docker-secrets`.
+- Named presets for common scenarios.
+- Dry-run preview mode.
+- Strapi plugin detection and env var generation.
+- Container resource limits.
+- Automated database backups.
+- Configurable health checks.
 - Reset command with full cleanup (files, config, env markers).
 
 **What's removed:**
@@ -261,14 +369,15 @@ Built with [Bun](https://bun.sh) and TypeScript. To get started:
 ```bash
 bun install
 bun run dev        # run locally
-bun test           # run tests
-bun run lint       # lint with ultracite (biome)
+bun test           # run tests (417 tests, 912 assertions)
+bun run lint       # lint with biome
 bun run lint:fix   # auto-fix lint issues
+bun run format     # format with biome
 ```
 
-Found a bug or have a feature request? [Open an issue](https://github.com/strapi-community/strapi-tool-dockerize/issues) on GitHub.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the full guide, including how to write plugins, templates, and tests.
 
-If interested in contributing or maintaining, email simen@dehlin.dev or ping on [Discord](https://discord.strapi.io/).
+Found a bug or have a feature request? [Open an issue](https://github.com/strapi-community/strapi-tool-dockerize/issues) on GitHub.
 
 ## Show Your Support
 
