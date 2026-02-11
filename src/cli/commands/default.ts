@@ -155,7 +155,7 @@ export const defaultCommand = defineCommand({
 
 		if (args["dry-run"]) {
 			try {
-				const files = await previewGeneration(config, pluginRegistry)
+				const files = await previewGeneration(config, pluginRegistry, healthCheckOverrides)
 				console.log(formatPreviewOutput(files))
 			} catch (err) {
 				log.error(err instanceof Error ? err.message : String(err))
