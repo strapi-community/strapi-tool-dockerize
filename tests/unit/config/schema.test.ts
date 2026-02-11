@@ -153,4 +153,14 @@ describe("resolvedConfigSchema", () => {
 			resolvedConfigSchema.parse({ ...validConfig, databasePort: -1 }),
 		).toThrow()
 	})
+
+	it("accepts port 0 for sqlite", () => {
+		const sqliteConfig = {
+			...validConfig,
+			databaseClient: "sqlite",
+			databasePort: 0,
+		}
+		const result = resolvedConfigSchema.parse(sqliteConfig)
+		expect(result.databasePort).toBe(0)
+	})
 })

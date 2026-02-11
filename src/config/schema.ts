@@ -42,7 +42,7 @@ export const resolvedConfigSchema = z.object({
 	environment: environmentSchema,
 	projectName: z.string().min(1),
 	databaseHost: z.string().min(1),
-	databasePort: z.number().positive(),
+	databasePort: z.number().nonnegative(),
 	databaseName: z.string().min(1),
 	databaseUsername: z.string().min(1),
 	databasePassword: z.string().min(1),
