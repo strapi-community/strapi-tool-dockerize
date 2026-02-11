@@ -66,6 +66,22 @@ describe("selectDatabase", () => {
 		const pgOption = callArgs.options.find((o) => o.value === "postgres")
 		expect(pgOption?.hint).toBe("recommended")
 	})
+
+	it("uses detected value as initialValue", async () => {
+		mockSelect.mockResolvedValue("mysql")
+		await selectDatabase("mysql")
+
+		const callArgs = mockSelect.mock.calls[0][0] as { initialValue?: string }
+		expect(callArgs.initialValue).toBe("mysql")
+	})
+
+	it("does not set initialValue when no detected value", async () => {
+		mockSelect.mockResolvedValue("postgres")
+		await selectDatabase()
+
+		const callArgs = mockSelect.mock.calls[0][0] as { initialValue?: string }
+		expect(callArgs.initialValue).toBeUndefined()
+	})
 })
 
 describe("promptDatabaseConnection", () => {

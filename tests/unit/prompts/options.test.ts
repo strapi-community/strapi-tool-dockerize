@@ -45,6 +45,22 @@ describe("promptEnvironment", () => {
 		const result = await promptEnvironment()
 		expect(result).toBe("both")
 	})
+
+	it("uses detected value as initialValue", async () => {
+		mockSelect.mockResolvedValue("production")
+		await promptEnvironment("production")
+
+		const callArgs = mockSelect.mock.calls[0][0] as { initialValue?: string }
+		expect(callArgs.initialValue).toBe("production")
+	})
+
+	it("does not set initialValue when no detected value", async () => {
+		mockSelect.mockResolvedValue("development")
+		await promptEnvironment()
+
+		const callArgs = mockSelect.mock.calls[0][0] as { initialValue?: string }
+		expect(callArgs.initialValue).toBeUndefined()
+	})
 })
 
 describe("promptUseCompose", () => {

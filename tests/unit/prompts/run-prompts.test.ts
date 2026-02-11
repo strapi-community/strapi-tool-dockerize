@@ -10,10 +10,11 @@ import {
 } from "../../../src/config/defaults"
 
 const mockIntro = mock(() => {})
-const mockOutro = mock(() => {})
 const mockCancel = mock(() => {})
 const mockNote = mock(() => {})
 const mockIsCancel = mock(() => false)
+const mockLogInfo = mock(() => {})
+const mockLogWarn = mock(() => {})
 
 const mockSelect = mock(() => Promise.resolve("v5"))
 const mockConfirm = mock(() => Promise.resolve(true))
@@ -31,7 +32,6 @@ const mockGroup = mock(() =>
 
 mock.module("@clack/prompts", () => ({
 	intro: mockIntro,
-	outro: mockOutro,
 	cancel: mockCancel,
 	note: mockNote,
 	isCancel: mockIsCancel,
@@ -40,16 +40,18 @@ mock.module("@clack/prompts", () => ({
 	text: mockText,
 	password: mockPassword,
 	group: mockGroup,
+	log: { info: mockLogInfo, warn: mockLogWarn },
 }))
 
 const { runPrompts } = await import("../../../src/prompts/index")
 
 function resetMocks() {
 	mockIntro.mockClear()
-	mockOutro.mockClear()
 	mockCancel.mockClear()
 	mockNote.mockClear()
 	mockIsCancel.mockReturnValue(false)
+	mockLogInfo.mockClear()
+	mockLogWarn.mockClear()
 	mockSelect.mockClear()
 	mockConfirm.mockClear()
 	mockText.mockClear()
@@ -66,7 +68,7 @@ function setupSelectResponses(responses: string[]) {
 	})
 }
 
-function setupConfirmResponses(responses: boolean[]) {
+function setupConfirmResponses(responses: (boolean | symbol)[]) {
 	let callIndex = 0
 	mockConfirm.mockImplementation(() => {
 		const value = responses[callIndex] ?? responses[responses.length - 1]
@@ -86,7 +88,7 @@ describe("runPrompts", () => {
 
 	it("returns a config that passes resolvedConfigSchema", async () => {
 		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
-		setupConfirmResponses([true])
+		setupConfirmResponses([false, true, true])
 		mockGroup.mockResolvedValue({
 			databaseHost: "localhost",
 			databasePort: "5432",
@@ -103,7 +105,7 @@ describe("runPrompts", () => {
 
 	it("includes all required fields in output", async () => {
 		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
-		setupConfirmResponses([true])
+		setupConfirmResponses([false, true, true])
 		mockGroup.mockResolvedValue({
 			databaseHost: "localhost",
 			databasePort: "5432",
@@ -132,9 +134,9 @@ describe("runPrompts", () => {
 		expect(config).toHaveProperty("envVars")
 	})
 
-	it("calls intro and outro", async () => {
+	it("calls intro", async () => {
 		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
-		setupConfirmResponses([true])
+		setupConfirmResponses([false, true, true])
 		mockGroup.mockResolvedValue({
 			databaseHost: "localhost",
 			databasePort: "5432",
@@ -146,93 +148,39 @@ describe("runPrompts", () => {
 		await runPrompts({})
 
 		expect(mockIntro).toHaveBeenCalledTimes(1)
-		expect(mockOutro).toHaveBeenCalledTimes(1)
 	})
 
-	it("uses detected values when user confirms detected config", async () => {
-		setupConfirmResponses([true, true])
-		setupSelectResponses(["development"])
+	it("logs detected summary when detections exist", async () => {
+		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
+		setupConfirmResponses([false, true, true])
 
 		const detected: DetectedConfig = {
-			strapiVersion: "v4",
-			projectType: "js",
-			databaseClient: "mysql",
-			packageManager: "yarn",
-			databaseHost: "dbhost",
-			databasePort: 3307,
-			databaseName: "mydb",
-			databaseUsername: "myuser",
-			databasePassword: "mypass",
-			environment: "production",
+			strapiVersion: "v5",
+			projectType: "ts",
 		}
 
-		const config = await runPrompts(detected)
-
-		expect(config.strapiVersion).toBe("v4")
-		expect(config.projectType).toBe("js")
-		expect(config.databaseClient).toBe("mysql")
-		expect(config.packageManager).toBe("yarn")
-		expect(config.databaseHost).toBe("dbhost")
-		expect(config.databasePort).toBe(3307)
-		expect(config.environment).toBe("production")
-	})
-
-	it("prompts for all values when user rejects detected config", async () => {
-		setupConfirmResponses([false, true])
-		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
-		mockGroup.mockResolvedValue({
-			databaseHost: "localhost",
-			databasePort: "5432",
-			databaseName: "strapi",
-			databaseUsername: "strapi",
-			databasePassword: "strapi",
-		})
-
-		const detected: DetectedConfig = {
-			strapiVersion: "v4",
-			projectType: "js",
-			databaseClient: "mysql",
-			packageManager: "yarn",
-		}
-
-		const config = await runPrompts(detected)
-
-		expect(config.strapiVersion).toBe("v5")
-		expect(config.projectType).toBe("ts")
-		expect(config.packageManager).toBe("npm")
-		expect(config.databaseClient).toBe("postgres")
-	})
-
-	it("skips detected confirmation when nothing is detected", async () => {
-		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
-		setupConfirmResponses([true])
-		mockGroup.mockResolvedValue({
-			databaseHost: "localhost",
-			databasePort: "5432",
-			databaseName: "strapi",
-			databaseUsername: "strapi",
-			databasePassword: "strapi",
-		})
-
-		const detected: DetectedConfig = {}
 		await runPrompts(detected)
 
-		const detectedNoteCall = mockNote.mock.calls.find(
-			(call: unknown[]) => call[1] === "Detected Configuration",
+		expect(mockLogInfo).toHaveBeenCalled()
+		const msg = mockLogInfo.mock.calls[0][0] as string
+		expect(msg).toContain("Auto-detected")
+	})
+
+	it("skips detected summary when nothing is detected", async () => {
+		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
+		setupConfirmResponses([false, true, true])
+
+		await runPrompts({})
+
+		const autoDetectCall = mockLogInfo.mock.calls.find(
+			(call: unknown[]) => typeof call[0] === "string" && (call[0] as string).includes("Auto-detected"),
 		)
-		expect(detectedNoteCall).toBeUndefined()
+		expect(autoDetectCall).toBeUndefined()
 	})
 
 	it("passes isESM through from detected config", async () => {
 		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
-		setupConfirmResponses([true])
-		mockGroup.mockResolvedValue({
-			databaseHost: "localhost",
-			databasePort: "5432",
-			databaseName: "strapi",
-			databaseUsername: "strapi",
-			databasePassword: "strapi",
-		})
+		setupConfirmResponses([false, true, true])
 
 		const detected: DetectedConfig = { isESM: true }
 		const config = await runPrompts(detected)
@@ -242,14 +190,7 @@ describe("runPrompts", () => {
 
 	it("defaults isESM to false when not detected", async () => {
 		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
-		setupConfirmResponses([true])
-		mockGroup.mockResolvedValue({
-			databaseHost: "localhost",
-			databasePort: "5432",
-			databaseName: "strapi",
-			databaseUsername: "strapi",
-			databasePassword: "strapi",
-		})
+		setupConfirmResponses([false, true, true])
 
 		const detected: DetectedConfig = {}
 		const config = await runPrompts(detected)
@@ -259,14 +200,7 @@ describe("runPrompts", () => {
 
 	it("passes envVars through from detected config", async () => {
 		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
-		setupConfirmResponses([true])
-		mockGroup.mockResolvedValue({
-			databaseHost: "localhost",
-			databasePort: "5432",
-			databaseName: "strapi",
-			databaseUsername: "strapi",
-			databasePassword: "strapi",
-		})
+		setupConfirmResponses([false, true, true])
 
 		const detected: DetectedConfig = { envVars: { APP_KEYS: "key1,key2" } }
 		const config = await runPrompts(detected)
@@ -276,14 +210,7 @@ describe("runPrompts", () => {
 
 	it("defaults envVars to empty object when not detected", async () => {
 		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
-		setupConfirmResponses([true])
-		mockGroup.mockResolvedValue({
-			databaseHost: "localhost",
-			databasePort: "5432",
-			databaseName: "strapi",
-			databaseUsername: "strapi",
-			databasePassword: "strapi",
-		})
+		setupConfirmResponses([false, true, true])
 
 		const detected: DetectedConfig = {}
 		const config = await runPrompts(detected)
@@ -293,14 +220,7 @@ describe("runPrompts", () => {
 
 	it("defaults projectName to strapi when not detected", async () => {
 		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
-		setupConfirmResponses([true])
-		mockGroup.mockResolvedValue({
-			databaseHost: "localhost",
-			databasePort: "5432",
-			databaseName: "strapi",
-			databaseUsername: "strapi",
-			databasePassword: "strapi",
-		})
+		setupConfirmResponses([false, true, true])
 
 		const detected: DetectedConfig = {}
 		const config = await runPrompts(detected)
@@ -308,17 +228,10 @@ describe("runPrompts", () => {
 		expect(config.projectName).toBe("strapi")
 	})
 
-	it("prompts for projectName when useDetected is false", async () => {
+	it("prompts for projectName", async () => {
 		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
-		setupConfirmResponses([true])
+		setupConfirmResponses([false, true, true])
 		mockText.mockResolvedValue("custom-name")
-		mockGroup.mockResolvedValue({
-			databaseHost: "localhost",
-			databasePort: "5432",
-			databaseName: "strapi",
-			databaseUsername: "strapi",
-			databasePassword: "strapi",
-		})
 
 		const detected: DetectedConfig = {}
 		const config = await runPrompts(detected)
@@ -326,35 +239,9 @@ describe("runPrompts", () => {
 		expect(config.projectName).toBe("custom-name")
 	})
 
-	it("uses detected projectName when useDetected is true", async () => {
-		setupConfirmResponses([true])
-		setupSelectResponses(["development"])
-
-		const detected: DetectedConfig = {
-			strapiVersion: "v5",
-			projectType: "ts",
-			packageManager: "npm",
-			databaseClient: "postgres",
-			databaseHost: "localhost",
-			databasePort: 5432,
-			projectName: "my-cool-app",
-		}
-
-		const config = await runPrompts(detected)
-
-		expect(config.projectName).toBe("my-cool-app")
-	})
-
 	it("handles environment=both correctly", async () => {
 		setupSelectResponses(["v5", "ts", "npm", "postgres", "both"])
-		setupConfirmResponses([true])
-		mockGroup.mockResolvedValue({
-			databaseHost: "localhost",
-			databasePort: "5432",
-			databaseName: "strapi",
-			databaseUsername: "strapi",
-			databasePassword: "strapi",
-		})
+		setupConfirmResponses([false, true, true])
 
 		const detected: DetectedConfig = {}
 		const config = await runPrompts(detected)
@@ -365,14 +252,7 @@ describe("runPrompts", () => {
 
 	it("does not prompt for adminer when useCompose is false", async () => {
 		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
-		setupConfirmResponses([false, true])
-		mockGroup.mockResolvedValue({
-			databaseHost: "localhost",
-			databasePort: "5432",
-			databaseName: "strapi",
-			databaseUsername: "strapi",
-			databasePassword: "strapi",
-		})
+		setupConfirmResponses([false, false, true])
 
 		const detected: DetectedConfig = {}
 		const config = await runPrompts(detected)
@@ -383,7 +263,7 @@ describe("runPrompts", () => {
 
 	it("does not prompt for adminer when database is sqlite", async () => {
 		setupSelectResponses(["v5", "ts", "npm", "sqlite", "development"])
-		setupConfirmResponses([true])
+		setupConfirmResponses([true, true])
 
 		const detected: DetectedConfig = {}
 		const config = await runPrompts(detected)
@@ -394,14 +274,7 @@ describe("runPrompts", () => {
 
 	it("shows configuration summary before generating", async () => {
 		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
-		setupConfirmResponses([true])
-		mockGroup.mockResolvedValue({
-			databaseHost: "localhost",
-			databasePort: "5432",
-			databaseName: "strapi",
-			databaseUsername: "strapi",
-			databasePassword: "strapi",
-		})
+		setupConfirmResponses([false, true, true])
 
 		await runPrompts({})
 
@@ -410,19 +283,11 @@ describe("runPrompts", () => {
 		)
 		expect(summaryCall).toBeDefined()
 		expect(summaryCall![0]).toContain("Strapi v5")
-		expect(summaryCall![0]).toContain("postgres")
 	})
 
 	it("includes database details in summary for non-sqlite", async () => {
 		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
-		setupConfirmResponses([true])
-		mockGroup.mockResolvedValue({
-			databaseHost: "localhost",
-			databasePort: "5432",
-			databaseName: "strapi",
-			databaseUsername: "strapi",
-			databasePassword: "strapi",
-		})
+		setupConfirmResponses([false, true, true])
 
 		await runPrompts({})
 
@@ -430,12 +295,12 @@ describe("runPrompts", () => {
 			(call: unknown[]) => call[1] === "Configuration",
 		)
 		expect(summaryCall![0]).toContain("localhost:5432/strapi")
-		expect(summaryCall![0]).toContain("User: strapi")
+		expect(summaryCall![0]).toContain("DB User: strapi")
 	})
 
 	it("excludes database details in summary for sqlite", async () => {
 		setupSelectResponses(["v5", "ts", "npm", "sqlite", "development"])
-		setupConfirmResponses([true])
+		setupConfirmResponses([true, true])
 
 		await runPrompts({})
 
@@ -443,19 +308,12 @@ describe("runPrompts", () => {
 			(call: unknown[]) => call[1] === "Configuration",
 		)
 		expect(summaryCall![0]).not.toContain("Database:")
-		expect(summaryCall![0]).not.toContain("User:")
+		expect(summaryCall![0]).not.toContain("DB User:")
 	})
 
 	it("includes compose info in summary when enabled", async () => {
 		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
-		setupConfirmResponses([true, true, true])
-		mockGroup.mockResolvedValue({
-			databaseHost: "localhost",
-			databasePort: "5432",
-			databaseName: "strapi",
-			databaseUsername: "strapi",
-			databasePassword: "strapi",
-		})
+		setupConfirmResponses([false, true, true, true])
 
 		await runPrompts({})
 
@@ -467,19 +325,14 @@ describe("runPrompts", () => {
 
 	it("exits when user rejects final confirmation", async () => {
 		setupSelectResponses(["v5", "ts", "npm", "sqlite", "development"])
-		let confirmCallIndex = 0
-		mockConfirm.mockImplementation(() => {
-			confirmCallIndex++
-			if (confirmCallIndex === 1) return Promise.resolve(true)
-			return Promise.resolve(false)
-		})
+		setupConfirmResponses([true, false])
 
 		const exitSpy = spyOn(process, "exit").mockImplementation(() => undefined as never)
 
 		await runPrompts({})
 
 		expect(exitSpy).toHaveBeenCalledWith(0)
-		expect(mockCancel).toHaveBeenCalledWith("Generation cancelled")
+		expect(mockCancel).toHaveBeenCalledWith("Setup cancelled.")
 		exitSpy.mockRestore()
 	})
 
@@ -498,7 +351,115 @@ describe("runPrompts", () => {
 		await runPrompts({})
 
 		expect(exitSpy).toHaveBeenCalledWith(0)
-		expect(mockCancel).toHaveBeenCalledWith("Generation cancelled")
+		expect(mockCancel).toHaveBeenCalledWith("Setup cancelled.")
 		exitSpy.mockRestore()
+	})
+
+	it("summary uses human-readable labels", async () => {
+		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
+		setupConfirmResponses([false, true, true])
+
+		await runPrompts({})
+
+		const summaryCall = mockNote.mock.calls.find(
+			(call: unknown[]) => call[1] === "Configuration",
+		)
+		expect(summaryCall![0]).toContain("TypeScript")
+		expect(summaryCall![0]).toContain("PostgreSQL")
+		expect(summaryCall![0]).toContain("npm")
+		expect(summaryCall![0]).not.toContain("| ts |")
+		expect(summaryCall![0]).not.toContain("| postgres |")
+	})
+
+	it("project name is the first prompt after intro", async () => {
+		const callOrder: string[] = []
+		mockText.mockImplementation(() => {
+			callOrder.push("text")
+			return Promise.resolve("strapi")
+		})
+		const selectValues = ["v5", "ts", "npm", "postgres", "development"]
+		let selectIndex = 0
+		mockSelect.mockImplementation(() => {
+			callOrder.push("select")
+			const val = selectValues[selectIndex] ?? selectValues[selectValues.length - 1]
+			selectIndex++
+			return Promise.resolve(val)
+		})
+		setupConfirmResponses([false, true, true])
+
+		await runPrompts({})
+
+		expect(callOrder[0]).toBe("text")
+	})
+
+	it("warns about default credentials for production environment", async () => {
+		setupSelectResponses(["v5", "ts", "npm", "postgres", "production"])
+		setupConfirmResponses([false, true, true])
+
+		await runPrompts({})
+
+		const warnCalls = mockLogWarn.mock.calls.filter(
+			(call: unknown[]) => typeof call[0] === "string" && (call[0] as string).includes("credentials"),
+		)
+		expect(warnCalls.length).toBeGreaterThan(0)
+	})
+
+	it("warns about default credentials for both environment", async () => {
+		setupSelectResponses(["v5", "ts", "npm", "postgres", "both"])
+		setupConfirmResponses([false, true, true])
+
+		await runPrompts({})
+
+		const warnCalls = mockLogWarn.mock.calls.filter(
+			(call: unknown[]) => typeof call[0] === "string" && (call[0] as string).includes("credentials"),
+		)
+		expect(warnCalls.length).toBeGreaterThan(0)
+	})
+
+	it("does not warn about credentials for development environment", async () => {
+		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
+		setupConfirmResponses([false, true, true])
+
+		await runPrompts({})
+
+		const warnCalls = mockLogWarn.mock.calls.filter(
+			(call: unknown[]) => typeof call[0] === "string" && (call[0] as string).includes("credentials"),
+		)
+		expect(warnCalls).toHaveLength(0)
+	})
+
+	it("database Customize defaults to No and uses defaults", async () => {
+		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
+		setupConfirmResponses([false, true, true])
+
+		const config = await runPrompts({})
+
+		expect(config.databaseHost).toBe(DEFAULT_DATABASE_HOST)
+		expect(config.databasePort).toBe(DEFAULT_PORTS.postgres)
+		expect(config.databaseName).toBe(DEFAULT_DATABASE_NAME)
+		expect(config.databaseUsername).toBe(DEFAULT_DATABASE_USERNAME)
+		expect(config.databasePassword).toBe(DEFAULT_DATABASE_PASSWORD)
+		expect(mockGroup).not.toHaveBeenCalled()
+	})
+
+	it("database Customize Yes expands to full prompts", async () => {
+		setupSelectResponses(["v5", "ts", "npm", "postgres", "development"])
+		setupConfirmResponses([true, true, true])
+		mockGroup.mockResolvedValue({
+			databaseHost: "custom-host",
+			databasePort: "9999",
+			databaseName: "custom-db",
+			databaseUsername: "custom-user",
+			databasePassword: "custom-pass",
+		})
+
+		const config = await runPrompts({})
+
+		expect(mockGroup).toHaveBeenCalledTimes(1)
+		expect(config.databaseHost).toBe("custom-host")
+		expect(config.databasePort).toBe(9999)
+		expect(config.databaseName).toBe("custom-db")
+		expect(config.databaseUsername).toBe("custom-user")
+		expect(config.databasePassword).toBe("custom-pass")
 	})
 })
