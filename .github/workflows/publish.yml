@@ -2,10 +2,11 @@ name: Publish
 
 on:
   push:
-    branches: [main]
+    branches: [main, v2.5]
 
 jobs:
   publish:
+    name: Release
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -14,6 +15,8 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: oven-sh/setup-bun@v2
       - run: bun install
       - run: bun run lint

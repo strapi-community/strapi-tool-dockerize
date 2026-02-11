@@ -5,7 +5,17 @@ on:
     branches: [main, v2.5]
 
 jobs:
+  lint-pr-title:
+    name: Validate PR Title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+      - run: echo "${{ github.event.pull_request.title }}" | bunx commitlint --verbose
+
   test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

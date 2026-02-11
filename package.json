@@ -48,9 +48,12 @@
 		"zod": "^3.24.2"
 	},
 	"devDependencies": {
+		"@commitlint/cli": "^20.4.1",
+		"@commitlint/config-conventional": "^20.4.1",
 		"@semantic-release/changelog": "^6.0.3",
 		"@semantic-release/git": "^10.0.1",
 		"@types/bun": "^1.2.2",
+		"commitlint-plugin-function-rules": "^4.3.1",
 		"conventional-changelog-conventionalcommits": "^9.1.0",
 		"semantic-release": "^24.2.1",
 		"ultracite": "^4.1.17"
