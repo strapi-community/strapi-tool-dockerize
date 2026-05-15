@@ -23,7 +23,11 @@ RUN npm run build
 
 # Creating final production image
 FROM node:22-alpine
-RUN apk add --no-cache vips-dev
+# Only the runtime library is needed in the final image; vips-dev pulls in
+# the header files that were used to compile sharp at build time and is
+# ~30 MB larger. The runtime stage never compiles native code, so vips
+# alone is sufficient.
+RUN apk add --no-cache vips
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 WORKDIR /opt/
