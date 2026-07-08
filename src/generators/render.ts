@@ -15,7 +15,6 @@ import {
 } from "../config"
 import type { PluginRegistry } from "../plugins/types"
 import { readTemplateFile, renderTemplate } from "../templates"
-import { getConfigContent } from "./database-config"
 
 export interface GeneratedFile {
 	filename: string
@@ -182,16 +181,4 @@ export async function renderComposeFiles(
 
 	const env = config.environment as "development" | "production"
 	return [{ filename: "docker-compose.yml", content: await renderFor(env) }]
-}
-
-export function renderDatabaseConfigFiles(config: ResolvedConfig): GeneratedFile[] {
-	const ext = config.projectType === "ts" ? "ts" : "js"
-	const content = getConfigContent(config)
-	const envDirs =
-		config.environment === "both" ? ["development", "production"] : [config.environment]
-
-	return envDirs.map((envDir) => ({
-		filename: `config/env/${envDir}/database.${ext}`,
-		content,
-	}))
 }

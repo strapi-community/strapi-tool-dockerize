@@ -39,7 +39,6 @@ describe("previewGeneration", () => {
 		expect(filenames).toContain(".dockerignore")
 		expect(filenames).toContain("docker-compose.yml")
 		expect(filenames).toContain(".env")
-		expect(filenames).toContain("config/env/development/database.ts")
 		expect(filenames).not.toContain("Dockerfile.prod")
 	})
 
@@ -51,7 +50,6 @@ describe("previewGeneration", () => {
 		expect(filenames).toContain(".dockerignore")
 		expect(filenames).toContain("docker-compose.yml")
 		expect(filenames).toContain(".env")
-		expect(filenames).toContain("config/env/production/database.ts")
 		expect(filenames).not.toContain("Dockerfile")
 	})
 
@@ -63,8 +61,6 @@ describe("previewGeneration", () => {
 		expect(filenames).toContain("Dockerfile.prod")
 		expect(filenames).toContain("docker-compose.yml")
 		expect(filenames).toContain("docker-compose.prod.yml")
-		expect(filenames).toContain("config/env/development/database.ts")
-		expect(filenames).toContain("config/env/production/database.ts")
 	})
 
 	it("skips compose files when useCompose is false", async () => {
@@ -102,14 +98,6 @@ describe("previewGeneration", () => {
 		expect(envFile).toBeDefined()
 		expect(envFile?.content).toContain("DATABASE_CLIENT=sqlite")
 		expect(envFile?.content).toContain("DATABASE_FILENAME=.tmp/data.db")
-	})
-
-	it("generates js extension for js project type", async () => {
-		const files = await previewGeneration(makeConfig({ projectType: "js" }), pluginRegistry)
-		const filenames = files.map((f) => f.filename)
-
-		expect(filenames).toContain("config/env/development/database.js")
-		expect(filenames).not.toContain("config/env/development/database.ts")
 	})
 
 	it("includes plugin env vars in .env preview", async () => {

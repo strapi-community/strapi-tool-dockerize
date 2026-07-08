@@ -37,68 +37,19 @@ async function dirExists(path: string): Promise<boolean> {
 }
 
 describe("reset command", () => {
-	describe("config/env database file removal", () => {
-		it("removes only database config files it created", async () => {
-			await createFixtureFiles(tempDir, {
-				"config/env/development/database.ts": "export default {}",
-				"config/env/development/server.ts": "export default {}",
-				"config/env/production/database.ts": "export default {}",
-			})
-
-			await runReset(tempDir)
-
-			expect(await exists(join(tempDir, "config/env/development/database.ts"))).toBe(false)
-			expect(await exists(join(tempDir, "config/env/production/database.ts"))).toBe(false)
-			expect(await exists(join(tempDir, "config/env/development/server.ts"))).toBe(true)
-		})
-
-		it("preserves config/env directory when other files exist", async () => {
-			await createFixtureFiles(tempDir, {
-				"config/env/development/database.ts": "export default {}",
-				"config/env/development/server.ts": "export default {}",
-			})
-
-			await runReset(tempDir)
-
-			expect(await dirExists(join(tempDir, "config/env/development"))).toBe(true)
-			expect(await dirExists(join(tempDir, "config/env"))).toBe(true)
-		})
-
-		it("removes empty directories after database file cleanup", async () => {
+	describe("config file preservation", () => {
+		it("never deletes database config or any config/env files", async () => {
 			await createFixtureFiles(tempDir, {
 				"config/env/development/database.ts": "export default {}",
 				"config/env/production/database.ts": "export default {}",
-			})
-
-			await runReset(tempDir)
-
-			expect(await dirExists(join(tempDir, "config/env/development"))).toBe(false)
-			expect(await dirExists(join(tempDir, "config/env/production"))).toBe(false)
-			expect(await dirExists(join(tempDir, "config/env"))).toBe(false)
-		})
-
-		it("removes js database config files", async () => {
-			await createFixtureFiles(tempDir, {
-				"config/env/development/database.js": "module.exports = {}",
-				"config/env/production/database.js": "module.exports = {}",
-			})
-
-			await runReset(tempDir)
-
-			expect(await exists(join(tempDir, "config/env/development/database.js"))).toBe(false)
-			expect(await exists(join(tempDir, "config/env/production/database.js"))).toBe(false)
-		})
-
-		it("does not touch config/env when no database files exist", async () => {
-			await createFixtureFiles(tempDir, {
 				"config/env/development/server.ts": "export default {}",
-				"config/env/production/plugins.ts": "export default {}",
 			})
 
 			await runReset(tempDir)
 
+			expect(await exists(join(tempDir, "config/env/development/database.ts"))).toBe(true)
+			expect(await exists(join(tempDir, "config/env/production/database.ts"))).toBe(true)
 			expect(await exists(join(tempDir, "config/env/development/server.ts"))).toBe(true)
-			expect(await exists(join(tempDir, "config/env/production/plugins.ts"))).toBe(true)
 			expect(await dirExists(join(tempDir, "config/env"))).toBe(true)
 		})
 	})

@@ -198,8 +198,9 @@ Detected plugins show up in the CLI summary and their env vars are grouped in th
 | `docker-compose.prod.yml` | `--env=both` | Production Compose with secrets and resource limits |
 | `.dockerignore` | Always | Comprehensive exclusion list |
 | `.env` | Always | Database vars, detected plugin vars, and Strapi app secrets (appended with markers, preserves existing content) |
-| `config/env/{dev,prod}/database.{ts,js}` | Always | Strapi database config wired to environment variables |
 | `secrets/db_password.txt` | When `--secrets docker-secrets` | Docker secret file for database password |
+
+The tool never writes or overwrites your `config/database.ts`. Strapi's own config already reads the connection details (including `DATABASE_URL`) from environment variables, so the tool only sets those values in `.env` and leaves your config untouched.
 
 ### App Secrets
 
@@ -238,8 +239,6 @@ Node version is selected based on Strapi version: v5 uses Node 22, v4 uses Node 
 | SQLite | N/A (no container) | N/A | `better-sqlite3@^12.4.1` (v5) / `better-sqlite3@^8.6.0` (v4) |
 
 SQLite runs inside the Strapi container with a volume mount for the `.tmp` data directory. No separate database service is needed.
-
-For SQLite with ESM projects, a `__dirname` polyfill is included in the generated database config.
 
 Database drivers are pinned to Strapi-compatible versions and installed automatically unless `--skip-deps` is passed.
 
@@ -327,9 +326,9 @@ This removes:
 - `Dockerfile`, `Dockerfile.prod`, and their `.bak` backups
 - `docker-compose.yml`, `docker-compose.yaml`, `docker-compose.dev.yml`, `docker-compose.prod.yml`
 - `.dockerignore`
-- `config/env/development/database.{ts,js}` and `config/env/production/database.{ts,js}`
 - Dockerize markers from `.env` (restores original content)
-- Empty `config/env` directories left behind
+
+It never touches your Strapi config files.
 
 ## Migration from v1
 
@@ -345,7 +344,7 @@ This removes:
 - `-y` flag for fully non-interactive mode.
 - `--env` flag for choosing development, production, or both.
 - pnpm and bun support.
-- SQLite support with ESM-safe `__dirname` polyfill.
+- SQLite support with a volume-mounted data directory.
 - Multi-stage Dockerfiles with health checks and non-root user.
 - Production Dockerfile (`Dockerfile.prod`) with 4-stage build.
 - Database health checks in docker-compose with `depends_on: condition: service_healthy`.

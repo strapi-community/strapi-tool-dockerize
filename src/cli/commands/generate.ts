@@ -8,7 +8,6 @@ import type {
 } from "../../config"
 import {
 	generateCompose,
-	generateDatabaseConfig,
 	generateDockerfiles,
 	generateDockerignore,
 	generateEnv,
@@ -57,9 +56,6 @@ export async function writeGeneratedFiles(
 		spinner.update("Updating .env...")
 		await generateEnv(config, pluginRegistry, cwd)
 
-		spinner.update("Generating database config...")
-		await generateDatabaseConfig(config, cwd)
-
 		const secretManager = pluginRegistry.getSecretManager(config.secretBackend)
 		const secretFiles = await secretManager.generateFiles(config, cwd)
 
@@ -103,13 +99,6 @@ function composeNames(config: ResolvedConfig): string[] {
 		: ["docker-compose.yml"]
 }
 
-function databaseConfigNames(config: ResolvedConfig): string[] {
-	const ext = config.projectType === "ts" ? "ts" : "js"
-	const envDirs =
-		config.environment === "both" ? ["development", "production"] : [config.environment]
-	return envDirs.map((envDir) => `config/env/${envDir}/database.${ext}`)
-}
-
 export function listGeneratedFiles(config: ResolvedConfig, secretFiles: string[]): string[] {
 	return [
 		...dockerfileNames(config),
@@ -117,7 +106,6 @@ export function listGeneratedFiles(config: ResolvedConfig, secretFiles: string[]
 		...composeNames(config),
 		".env",
 		...secretFiles,
-		...databaseConfigNames(config),
 	]
 }
 

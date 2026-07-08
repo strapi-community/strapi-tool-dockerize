@@ -1,32 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test"
-import { join } from "node:path"
-import type { ResolvedConfig } from "../../../src/config"
 import { detectDatabase } from "../../../src/detection/database"
 import { detectStrapi } from "../../../src/detection/strapi"
-import { generateDatabaseConfig } from "../../../src/generators/database-config"
-import { readFile } from "../../../src/utils/fs"
 import { cleanupTempDir, createFixtureFiles, createTempDir } from "../../setup"
-
-function makeConfig(overrides: Partial<ResolvedConfig> = {}): ResolvedConfig {
-	return {
-		strapiVersion: "v5",
-		projectType: "ts",
-		databaseClient: "sqlite",
-		packageManager: "npm",
-		environment: "development",
-		projectName: "test-project",
-		databaseHost: "localhost",
-		databasePort: 5432,
-		databaseName: "strapi",
-		databaseUsername: "strapi",
-		databasePassword: "strapi",
-		useCompose: false,
-		useAdminer: false,
-		isESM: false,
-		envVars: {},
-		...overrides,
-	}
-}
 
 describe("ESM and MariaDB integration", () => {
 	let tempDir: string
@@ -78,26 +53,6 @@ describe("ESM and MariaDB integration", () => {
 			const result = await detectDatabase(tempDir)
 			expect(result.databaseClient).toBe("mariadb")
 			expect(result.databasePort).toBe(3306)
-		})
-	})
-
-	describe("ESM database config generation", () => {
-		it("generates fileURLToPath pattern for ESM TS sqlite", async () => {
-			const config = makeConfig({ isESM: true, projectType: "ts", databaseClient: "sqlite" })
-			await generateDatabaseConfig(config, tempDir)
-
-			const content = await readFile(join(tempDir, "config", "env", "development", "database.ts"))
-			expect(content).toContain("fileURLToPath")
-			expect(content).toContain("import.meta.url")
-		})
-
-		it("generates fileURLToPath pattern for ESM JS sqlite", async () => {
-			const config = makeConfig({ isESM: true, projectType: "js", databaseClient: "sqlite" })
-			await generateDatabaseConfig(config, tempDir)
-
-			const content = await readFile(join(tempDir, "config", "env", "development", "database.js"))
-			expect(content).toContain("fileURLToPath")
-			expect(content).toContain("import.meta.url")
 		})
 	})
 })

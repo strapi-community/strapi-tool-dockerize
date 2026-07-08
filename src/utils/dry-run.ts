@@ -3,7 +3,6 @@ import { buildEnvVars, buildManagedSection, placeholderAppSecrets } from "../gen
 import {
 	type GeneratedFile,
 	renderComposeFiles,
-	renderDatabaseConfigFiles,
 	renderDockerfiles,
 	renderDockerignore,
 } from "../generators/render"
@@ -29,7 +28,6 @@ export async function previewGeneration(
 	files.push(await renderDockerignore())
 	files.push(...(await renderComposeFiles(config, registry, resourceLimits)))
 	files.push(renderEnvPreview(config, registry))
-	files.push(...renderDatabaseConfigFiles(config))
 
 	return files
 }

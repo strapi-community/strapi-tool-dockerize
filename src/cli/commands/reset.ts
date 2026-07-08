@@ -1,4 +1,4 @@
-import { readFile, readdir, rmdir, unlink, writeFile } from "node:fs/promises"
+import { readFile, unlink, writeFile } from "node:fs/promises"
 import { join, resolve } from "node:path"
 import { defineCommand } from "citty"
 import pc from "picocolors"
@@ -14,13 +14,6 @@ const DOCKER_FILES = [
 ]
 
 const BAK_FILES = DOCKER_FILES.map((f) => `${f}.bak`)
-
-const CONFIG_ENV_DATABASE_FILES = [
-	join("config", "env", "development", "database.ts"),
-	join("config", "env", "development", "database.js"),
-	join("config", "env", "production", "database.ts"),
-	join("config", "env", "production", "database.js"),
-]
 
 const MARKER_START = "# --- Dockerize Start ---"
 const MARKER_END = "# --- Dockerize End ---"
@@ -46,55 +39,6 @@ async function cleanEnvMarkers(cwd: string): Promise<boolean> {
 	} catch {
 		return false
 	}
-}
-
-async function isDirEmpty(dirPath: string): Promise<boolean> {
-	try {
-		const entries = await readdir(dirPath)
-		return entries.length === 0
-	} catch {
-		return false
-	}
-}
-
-async function removeEmptyDirChain(dirPath: string, stopAt: string): Promise<void> {
-	let current = dirPath
-	while (current !== stopAt && current.startsWith(stopAt)) {
-		if (await isDirEmpty(current)) {
-			try {
-				await rmdir(current)
-			} catch {
-				break
-			}
-			current = join(current, "..")
-			current = resolve(current)
-		} else {
-			break
-		}
-	}
-}
-
-async function removeConfigEnvDatabaseFiles(cwd: string): Promise<number> {
-	let removed = 0
-	for (const file of CONFIG_ENV_DATABASE_FILES) {
-		try {
-			await unlink(join(cwd, file))
-			console.log(pc.red(`  Removed ${file}`))
-			removed++
-		} catch {}
-	}
-
-	if (removed > 0) {
-		const devDir = join(cwd, "config", "env", "development")
-		const prodDir = join(cwd, "config", "env", "production")
-		const envDir = join(cwd, "config", "env")
-
-		await removeEmptyDirChain(devDir, join(cwd, "config"))
-		await removeEmptyDirChain(prodDir, join(cwd, "config"))
-		await removeEmptyDirChain(envDir, join(cwd, "config"))
-	}
-
-	return removed
 }
 
 export const resetCommand = defineCommand({
@@ -142,8 +86,6 @@ export const resetCommand = defineCommand({
 			console.log(pc.red("  Cleaned dockerize markers from .env"))
 			removed++
 		}
-
-		removed += await removeConfigEnvDatabaseFiles(cwd)
 
 		if (removed === 0) {
 			console.log(pc.dim("  No Docker files found to remove."))
