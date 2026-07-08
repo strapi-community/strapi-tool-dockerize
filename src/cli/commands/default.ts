@@ -177,7 +177,7 @@ function parseConfigOrExit(candidate: unknown): ResolvedConfig {
 	}
 }
 
-function resolveYesConfig(detected: DetectedConfig): ResolvedConfig {
+export function resolveYesConfig(detected: DetectedConfig): ResolvedConfig {
 	if (shouldWarnDatabaseDefault(detected)) {
 		log.warn("No database detected, defaulting to postgres")
 	}

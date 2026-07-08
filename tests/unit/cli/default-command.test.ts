@@ -5,32 +5,12 @@ import {
 	buildHealthCheckOverrides,
 	buildResourceLimitOverrides,
 	formatZodErrors,
+	resolveYesConfig,
 	shouldWarnDatabaseDefault,
 } from "../../../src/cli/commands/default"
 import { DEFAULT_PORTS } from "../../../src/config/defaults"
 import { resolvedConfigSchema } from "../../../src/config/schema"
 import type { DatabaseClient, DetectedConfig } from "../../../src/config/schema"
-
-function buildYesModeConfig(detected: DetectedConfig) {
-	const resolvedClient = detected.databaseClient ?? "postgres"
-	return resolvedConfigSchema.parse({
-		strapiVersion: detected.strapiVersion ?? "v5",
-		projectType: detected.projectType ?? "ts",
-		databaseClient: resolvedClient,
-		packageManager: detected.packageManager ?? "npm",
-		environment: detected.environment ?? "development",
-		projectName: detected.projectName ?? "strapi",
-		databaseHost: detected.databaseHost ?? "localhost",
-		databasePort: detected.databasePort ?? DEFAULT_PORTS[resolvedClient],
-		databaseName: detected.databaseName ?? "strapi",
-		databaseUsername: detected.databaseUsername ?? "strapi",
-		databasePassword: detected.databasePassword ?? "strapi",
-		useCompose: detected.useCompose ?? true,
-		useAdminer: detected.useAdminer ?? false,
-		isESM: detected.isESM ?? false,
-		envVars: detected.envVars ?? {},
-	})
-}
 
 describe("formatZodErrors", () => {
 	it("formats a single field error with path", () => {
@@ -232,7 +212,7 @@ describe("yes mode port resolution", () => {
 			databaseClient: "mysql",
 			databasePort: 3306,
 		}
-		const config = buildYesModeConfig(detected)
+		const config = resolveYesConfig(detected)
 		expect(config.databaseClient).toBe("mysql")
 		expect(config.databasePort).toBe(3306)
 	})
@@ -242,7 +222,7 @@ describe("yes mode port resolution", () => {
 			databaseClient: "mariadb",
 			databasePort: 3306,
 		}
-		const config = buildYesModeConfig(detected)
+		const config = resolveYesConfig(detected)
 		expect(config.databaseClient).toBe("mariadb")
 		expect(config.databasePort).toBe(3306)
 	})
@@ -252,7 +232,7 @@ describe("yes mode port resolution", () => {
 			databaseClient: "postgres",
 			databasePort: 5432,
 		}
-		const config = buildYesModeConfig(detected)
+		const config = resolveYesConfig(detected)
 		expect(config.databaseClient).toBe("postgres")
 		expect(config.databasePort).toBe(5432)
 	})
@@ -261,7 +241,7 @@ describe("yes mode port resolution", () => {
 		const detected: DetectedConfig = {
 			databaseClient: "mysql",
 		}
-		const config = buildYesModeConfig(detected)
+		const config = resolveYesConfig(detected)
 		expect(config.databaseClient).toBe("mysql")
 		expect(config.databasePort).toBe(3306)
 	})
@@ -270,7 +250,7 @@ describe("yes mode port resolution", () => {
 		const detected: DetectedConfig = {
 			databaseClient: "mariadb",
 		}
-		const config = buildYesModeConfig(detected)
+		const config = resolveYesConfig(detected)
 		expect(config.databaseClient).toBe("mariadb")
 		expect(config.databasePort).toBe(3306)
 	})
@@ -279,14 +259,14 @@ describe("yes mode port resolution", () => {
 		const detected: DetectedConfig = {
 			databaseClient: "postgres",
 		}
-		const config = buildYesModeConfig(detected)
+		const config = resolveYesConfig(detected)
 		expect(config.databaseClient).toBe("postgres")
 		expect(config.databasePort).toBe(5432)
 	})
 
 	it("defaults to postgres port 5432 when nothing is detected", () => {
 		const detected: DetectedConfig = {}
-		const config = buildYesModeConfig(detected)
+		const config = resolveYesConfig(detected)
 		expect(config.databaseClient).toBe("postgres")
 		expect(config.databasePort).toBe(5432)
 	})
@@ -297,7 +277,7 @@ describe("yes mode port resolution", () => {
 		}
 		detected.databasePort = DEFAULT_PORTS[detected.databaseClient!]
 
-		const config = buildYesModeConfig(detected)
+		const config = resolveYesConfig(detected)
 		expect(config.databaseClient).toBe("mysql")
 		expect(config.databasePort).toBe(3306)
 	})
