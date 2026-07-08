@@ -45,6 +45,15 @@ describe("postgresPlugin", () => {
 			expect(service.environment.POSTGRES_DB).toBe("${DATABASE_NAME}")
 		})
 
+		it("uses POSTGRES_PASSWORD_FILE under docker-secrets", () => {
+			const service = postgresPlugin.composeService({
+				...baseConfig,
+				secretBackend: "docker-secrets",
+			})
+			expect(service.environment.POSTGRES_PASSWORD_FILE).toBe("/run/secrets/db_password")
+			expect(service.environment.POSTGRES_PASSWORD).toBeUndefined()
+		})
+
 		it("maps port correctly", () => {
 			const service = postgresPlugin.composeService(baseConfig)
 			expect(service.ports).toEqual(["5432:5432"])

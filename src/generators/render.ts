@@ -21,6 +21,15 @@ export interface GeneratedFile {
 	content: string
 }
 
+function resolveHealthCheck(overrides: StrapiHealthCheckOverrides = {}) {
+	return {
+		healthInterval: overrides.interval ?? STRAPI_HEALTH_CHECK_INTERVAL,
+		healthTimeout: overrides.timeout ?? STRAPI_HEALTH_CHECK_TIMEOUT,
+		healthStartPeriod: overrides.startPeriod ?? STRAPI_HEALTH_CHECK_START_PERIOD,
+		healthRetries: overrides.retries ?? STRAPI_HEALTH_CHECK_RETRIES,
+	}
+}
+
 function buildDockerfileContext(
 	config: ResolvedConfig,
 	registry: PluginRegistry,
@@ -43,10 +52,8 @@ function buildDockerfileContext(
 		pmDevStep: pm.dockerStartStep(true),
 		projectName: config.projectName,
 		strapiPort: STRAPI_DEFAULT_PORT,
-		healthInterval: healthCheckOverrides?.interval ?? STRAPI_HEALTH_CHECK_INTERVAL,
-		healthTimeout: healthCheckOverrides?.timeout ?? STRAPI_HEALTH_CHECK_TIMEOUT,
-		healthStartPeriod: healthCheckOverrides?.startPeriod ?? STRAPI_HEALTH_CHECK_START_PERIOD,
-		healthRetries: healthCheckOverrides?.retries ?? STRAPI_HEALTH_CHECK_RETRIES,
+		useSecrets: config.secretBackend === "docker-secrets" && config.databaseClient !== "sqlite",
+		...resolveHealthCheck(healthCheckOverrides),
 	}
 }
 

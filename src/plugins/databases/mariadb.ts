@@ -2,9 +2,11 @@ import type { ResolvedConfig } from "../../config"
 import { DEFAULT_DATABASE_IMAGES, DEFAULT_PORTS } from "../../config"
 import type { ComposeService, DatabasePlugin, HealthCheck } from "../types"
 import {
+	DB_PASSWORD_SECRET_PATH,
 	standardDatabaseComposeService,
 	standardDatabaseEnvVars,
 	standardDatabaseHealthcheck,
+	usesDockerSecrets,
 } from "./shared"
 
 export const mariadbPlugin: DatabasePlugin = {
@@ -19,12 +21,19 @@ export const mariadbPlugin: DatabasePlugin = {
 	composeService(config: ResolvedConfig): ComposeService {
 		return standardDatabaseComposeService(config, {
 			image: DEFAULT_DATABASE_IMAGES.mariadb,
-			environment: {
-				MARIADB_ROOT_PASSWORD: "${DATABASE_PASSWORD}",
-				MARIADB_DATABASE: "${DATABASE_NAME}",
-				MARIADB_USER: "${DATABASE_USERNAME}",
-				MARIADB_PASSWORD: "${DATABASE_PASSWORD}",
-			},
+			environment: usesDockerSecrets(config)
+				? {
+						MARIADB_ROOT_PASSWORD_FILE: DB_PASSWORD_SECRET_PATH,
+						MARIADB_DATABASE: "${DATABASE_NAME}",
+						MARIADB_USER: "${DATABASE_USERNAME}",
+						MARIADB_PASSWORD_FILE: DB_PASSWORD_SECRET_PATH,
+					}
+				: {
+						MARIADB_ROOT_PASSWORD: "${DATABASE_PASSWORD}",
+						MARIADB_DATABASE: "${DATABASE_NAME}",
+						MARIADB_USER: "${DATABASE_USERNAME}",
+						MARIADB_PASSWORD: "${DATABASE_PASSWORD}",
+					},
 			containerPort: 3306,
 			volumePath: "/var/lib/mysql",
 			healthcheck: this.healthcheck(),

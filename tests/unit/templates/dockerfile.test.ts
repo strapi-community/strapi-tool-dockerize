@@ -298,3 +298,19 @@ describe("Dockerfile prod template", () => {
 		expect(build).toContain("ENV NODE_ENV=production")
 	})
 })
+
+describe("docker-secrets entrypoint bridge", () => {
+	for (const template of ["Dockerfile", "Dockerfile.prod"]) {
+		it(`${template} adds the secret entrypoint when useSecrets is true`, async () => {
+			const result = await renderTemplate(template, { ...baseContext, useSecrets: true })
+			expect(result).toContain('ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]')
+			expect(result).toContain("DATABASE_PASSWORD_FILE")
+			expect(result).toContain('DATABASE_PASSWORD="$(cat "$DATABASE_PASSWORD_FILE")"')
+		})
+
+		it(`${template} omits the entrypoint when useSecrets is false`, async () => {
+			const result = await renderTemplate(template, { ...baseContext, useSecrets: false })
+			expect(result).not.toContain("docker-entrypoint.sh")
+		})
+	}
+})

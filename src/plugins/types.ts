@@ -59,6 +59,7 @@ export interface SecretManagerPlugin {
 	composeSecrets(config: ResolvedConfig): ComposeSecret[]
 	serviceSecrets(config: ResolvedConfig): string[]
 	envOverrides(config: ResolvedConfig): Record<string, string>
+	envRemovals(config: ResolvedConfig): string[]
 	generateFiles(config: ResolvedConfig, cwd: string): Promise<string[]>
 }
 

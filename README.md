@@ -271,7 +271,10 @@ The `--secrets` flag controls how sensitive values (database passwords) are hand
 
 **`--secrets none`** (default): Database password lives in `.env` as a plain value.
 
-**`--secrets docker-secrets`**: Password is stored in `secrets/db_password.txt` and mounted into containers via Docker secrets. The tool generates the secrets directory and file for you.
+**`--secrets docker-secrets`**: The password is written to `secrets/db_password.txt`, mounted into both containers as a Docker secret, and kept out of `.env` entirely (no plaintext). The two sides read it differently:
+
+- **Database** uses the image's native support (`POSTGRES_PASSWORD_FILE`, `MYSQL_ROOT_PASSWORD_FILE`, `MARIADB_*_FILE`).
+- **Strapi** reads the file via an entrypoint that exports `DATABASE_PASSWORD` before startup, so Strapi's own config (`env('DATABASE_PASSWORD')`) works unchanged.
 
 ```yaml
 secrets:
@@ -279,7 +282,12 @@ secrets:
     file: ./secrets/db_password.txt
 
 services:
-  strapi-db:
+  my-app:
+    secrets:
+      - db_password        # bridged to DATABASE_PASSWORD by the entrypoint
+  my-app-db:
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
     secrets:
       - db_password
 ```

@@ -22,6 +22,11 @@ export const dockerSecretsManager: SecretManagerPlugin = {
 		return { DATABASE_PASSWORD_FILE: "/run/secrets/db_password" }
 	},
 
+	envRemovals(config: ResolvedConfig): string[] {
+		if (config.databaseClient === "sqlite") return []
+		return ["DATABASE_PASSWORD"]
+	},
+
 	async generateFiles(config: ResolvedConfig, cwd: string): Promise<string[]> {
 		if (config.databaseClient === "sqlite") return []
 

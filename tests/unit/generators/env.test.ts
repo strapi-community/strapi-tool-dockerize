@@ -133,6 +133,30 @@ describe("generateEnv", () => {
 		expect(content).not.toContain("# SendGrid Email")
 	})
 
+	describe("docker-secrets env handling", () => {
+		const secretsConfig: ResolvedConfig = {
+			...baseConfig,
+			databaseClient: "postgres",
+			databasePort: 5432,
+			useCompose: true,
+			secretBackend: "docker-secrets",
+		}
+
+		it("omits plaintext DATABASE_PASSWORD and points at the secret file", async () => {
+			await generateEnv(secretsConfig, pluginRegistry, tmpDir)
+			const parsed = parseEnvContent(await readFile(join(tmpDir, ".env")))
+			expect(parsed.DATABASE_PASSWORD).toBeUndefined()
+			expect(parsed.DATABASE_PASSWORD_FILE).toBe("/run/secrets/db_password")
+		})
+
+		it("keeps plaintext DATABASE_PASSWORD when secrets are off", async () => {
+			await generateEnv({ ...secretsConfig, secretBackend: "none" }, pluginRegistry, tmpDir)
+			const parsed = parseEnvContent(await readFile(join(tmpDir, ".env")))
+			expect(parsed.DATABASE_PASSWORD).toBeDefined()
+			expect(parsed.DATABASE_PASSWORD_FILE).toBeUndefined()
+		})
+	})
+
 	describe("strapi app secrets", () => {
 		it("generates all required app secrets when none exist", async () => {
 			await generateEnv(baseConfig, pluginRegistry, tmpDir)

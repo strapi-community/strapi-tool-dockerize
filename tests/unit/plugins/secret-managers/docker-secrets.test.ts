@@ -69,6 +69,16 @@ describe("dockerSecretsManager", () => {
 		})
 	})
 
+	describe("envRemovals", () => {
+		it("removes the plaintext DATABASE_PASSWORD for postgres", () => {
+			expect(dockerSecretsManager.envRemovals(postgresConfig)).toEqual(["DATABASE_PASSWORD"])
+		})
+
+		it("returns empty for sqlite", () => {
+			expect(dockerSecretsManager.envRemovals(sqliteConfig)).toEqual([])
+		})
+	})
+
 	describe("generateFiles", () => {
 		let tmpDir: string
 

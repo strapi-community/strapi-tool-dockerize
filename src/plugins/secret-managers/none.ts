@@ -17,6 +17,10 @@ export const noneSecretManager: SecretManagerPlugin = {
 		return {}
 	},
 
+	envRemovals(_config: ResolvedConfig): string[] {
+		return []
+	},
+
 	async generateFiles(_config: ResolvedConfig, _cwd: string): Promise<string[]> {
 		return []
 	},

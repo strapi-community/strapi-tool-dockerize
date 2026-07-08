@@ -182,6 +182,24 @@ describe("docker-compose template", () => {
 			expect(output).toContain("- db_password")
 		})
 
+		it("mounts the secret on the strapi app service", async () => {
+			const output = await renderTemplate(
+				"docker-compose",
+				postgresContext({
+					environment: "production",
+					hasSecrets: true,
+					secrets: [{ name: "db_password", file: "./secrets/db_password.txt" }],
+					serviceSecrets: ["db_password"],
+				}),
+			)
+			const appBlock = output.slice(
+				output.indexOf("  my-project:"),
+				output.indexOf("\n  my-project-db:"),
+			)
+			expect(appBlock).toContain("secrets:")
+			expect(appBlock).toContain("- db_password")
+		})
+
 		it("does not include secrets section when hasSecrets is false", async () => {
 			const output = await renderTemplate(
 				"docker-compose",

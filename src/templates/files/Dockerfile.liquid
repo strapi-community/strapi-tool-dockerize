@@ -26,10 +26,16 @@ RUN apk update && apk add --no-cache vips
 ARG NODE_ENV=development
 ENV NODE_ENV=${NODE_ENV}
 RUN addgroup -S strapi && adduser -S strapi -G strapi
+{%- if useSecrets %}
+RUN printf '#!/bin/sh\nset -e\nif [ -n "${DATABASE_PASSWORD_FILE:-}" ] && [ -f "$DATABASE_PASSWORD_FILE" ]; then\n  DATABASE_PASSWORD="$(cat "$DATABASE_PASSWORD_FILE")"\n  export DATABASE_PASSWORD\nfi\nexec "$@"\n' > /usr/local/bin/docker-entrypoint.sh && chmod +x /usr/local/bin/docker-entrypoint.sh
+{%- endif %}
 WORKDIR /opt/app
 COPY --chown=strapi:strapi --from=build /opt/app .
 USER strapi
 EXPOSE {{ strapiPort }}
 HEALTHCHECK --interval={{ healthInterval }} --timeout={{ healthTimeout }} --start-period={{ healthStartPeriod }} --retries={{ healthRetries }} \
   CMD wget --no-verbose --tries=1 --spider http://localhost:{{ strapiPort }}/_health || exit 1
+{%- if useSecrets %}
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+{%- endif %}
 CMD {{ pmDevStep }}
