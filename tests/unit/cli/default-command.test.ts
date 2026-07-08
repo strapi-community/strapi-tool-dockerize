@@ -7,7 +7,7 @@ import {
 	formatZodErrors,
 	resolveYesConfig,
 	shouldWarnDatabaseDefault,
-} from "../../../src/cli/commands/default"
+} from "../../../src/cli/commands/resolve"
 import { DEFAULT_PORTS } from "../../../src/config/defaults"
 import { resolvedConfigSchema } from "../../../src/config/schema"
 import type { DatabaseClient, DetectedConfig } from "../../../src/config/schema"

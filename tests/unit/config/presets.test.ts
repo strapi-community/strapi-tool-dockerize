@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import { applyPreset } from "../../../src/cli/commands/default"
+import { applyPreset } from "../../../src/cli/commands/resolve"
 import { DEFAULT_PORTS } from "../../../src/config/defaults"
 import { PRESET_NAMES, getPreset } from "../../../src/config/presets"
 import type { DetectedConfig } from "../../../src/config/schema"

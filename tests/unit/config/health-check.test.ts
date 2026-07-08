@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import { buildHealthCheckOverrides } from "../../../src/cli/commands/default"
+import { buildHealthCheckOverrides } from "../../../src/cli/commands/resolve"
 import {
 	STRAPI_HEALTH_CHECK_INTERVAL,
 	STRAPI_HEALTH_CHECK_RETRIES,
