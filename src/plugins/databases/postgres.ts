@@ -1,6 +1,11 @@
 import type { ResolvedConfig } from "../../config"
 import { DEFAULT_DATABASE_IMAGES, DEFAULT_PORTS } from "../../config"
 import type { ComposeService, DatabasePlugin, HealthCheck } from "../types"
+import {
+	standardDatabaseComposeService,
+	standardDatabaseEnvVars,
+	standardDatabaseHealthcheck,
+} from "./shared"
 
 export const postgresPlugin: DatabasePlugin = {
 	id: "postgres",
@@ -12,38 +17,27 @@ export const postgresPlugin: DatabasePlugin = {
 	strapiClient: "postgres",
 
 	composeService(config: ResolvedConfig): ComposeService {
-		return {
+		return standardDatabaseComposeService(config, {
 			image: DEFAULT_DATABASE_IMAGES.postgres,
 			environment: {
 				POSTGRES_USER: "${DATABASE_USERNAME}",
 				POSTGRES_PASSWORD: "${DATABASE_PASSWORD}",
 				POSTGRES_DB: "${DATABASE_NAME}",
 			},
-			ports: [`${config.databasePort}:5432`],
-			volumes: [`${config.projectName}-data:/var/lib/postgresql/data`],
+			containerPort: 5432,
+			volumePath: "/var/lib/postgresql/data",
 			healthcheck: this.healthcheck(),
-			restart: "unless-stopped",
-		}
+		})
 	},
 
 	envVars(config: ResolvedConfig): Record<string, string> {
-		return {
-			DATABASE_CLIENT: this.strapiClient,
-			DATABASE_HOST: config.databaseHost,
-			DATABASE_PORT: String(config.databasePort),
-			DATABASE_NAME: config.databaseName,
-			DATABASE_USERNAME: config.databaseUsername,
-			DATABASE_PASSWORD: config.databasePassword,
-		}
+		return standardDatabaseEnvVars(config, this.strapiClient)
 	},
 
 	healthcheck(): HealthCheck {
-		return {
-			test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"],
-			interval: "10s",
-			timeout: "5s",
-			retries: 5,
-			startPeriod: "30s",
-		}
+		return standardDatabaseHealthcheck([
+			"CMD-SHELL",
+			"pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}",
+		])
 	},
 }

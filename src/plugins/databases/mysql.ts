@@ -1,6 +1,11 @@
 import type { ResolvedConfig } from "../../config"
 import { DEFAULT_DATABASE_IMAGES, DEFAULT_PORTS } from "../../config"
 import type { ComposeService, DatabasePlugin, HealthCheck } from "../types"
+import {
+	standardDatabaseComposeService,
+	standardDatabaseEnvVars,
+	standardDatabaseHealthcheck,
+} from "./shared"
 
 export const mysqlPlugin: DatabasePlugin = {
 	id: "mysql",
@@ -12,7 +17,7 @@ export const mysqlPlugin: DatabasePlugin = {
 	strapiClient: "mysql",
 
 	composeService(config: ResolvedConfig): ComposeService {
-		return {
+		return standardDatabaseComposeService(config, {
 			image: DEFAULT_DATABASE_IMAGES.mysql,
 			environment: {
 				MYSQL_ROOT_PASSWORD: "${DATABASE_PASSWORD}",
@@ -20,31 +25,20 @@ export const mysqlPlugin: DatabasePlugin = {
 				MYSQL_USER: "${DATABASE_USERNAME}",
 				MYSQL_PASSWORD: "${DATABASE_PASSWORD}",
 			},
-			ports: [`${config.databasePort}:3306`],
-			volumes: [`${config.projectName}-data:/var/lib/mysql`],
+			containerPort: 3306,
+			volumePath: "/var/lib/mysql",
 			healthcheck: this.healthcheck(),
-			restart: "unless-stopped",
-		}
+		})
 	},
 
 	envVars(config: ResolvedConfig): Record<string, string> {
-		return {
-			DATABASE_CLIENT: this.strapiClient,
-			DATABASE_HOST: config.databaseHost,
-			DATABASE_PORT: String(config.databasePort),
-			DATABASE_NAME: config.databaseName,
-			DATABASE_USERNAME: config.databaseUsername,
-			DATABASE_PASSWORD: config.databasePassword,
-		}
+		return standardDatabaseEnvVars(config, this.strapiClient)
 	},
 
 	healthcheck(): HealthCheck {
-		return {
-			test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD}"],
-			interval: "10s",
-			timeout: "5s",
-			retries: 5,
-			startPeriod: "30s",
-		}
+		return standardDatabaseHealthcheck([
+			"CMD-SHELL",
+			"mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD}",
+		])
 	},
 }
