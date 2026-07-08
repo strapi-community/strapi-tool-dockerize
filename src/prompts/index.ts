@@ -266,7 +266,6 @@ export {
 	LANG_LABELS,
 	SECRET_BACKEND_LABELS,
 } from "./confirm-detected"
-export { selectDatabase, promptDatabaseConnection } from "./database"
 export {
 	promptEnvironment,
 	promptProjectName,

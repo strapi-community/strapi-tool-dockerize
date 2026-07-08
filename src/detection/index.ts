@@ -22,9 +22,3 @@ export async function detectAll(cwd: string): Promise<DetectedConfig> {
 		detectedPlugins,
 	} as DetectedConfig
 }
-
-export { detectStrapi } from "./strapi"
-export { detectDatabase } from "./database"
-export { detectPackageManager } from "./package-manager"
-export { detectEnvironment } from "./environment"
-export { detectStrapiPlugins } from "./plugins"

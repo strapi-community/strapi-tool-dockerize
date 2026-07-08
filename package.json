@@ -40,7 +40,12 @@
 		"lint": "biome check .",
 		"lint:fix": "biome check --write .",
 		"format": "biome format --write .",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit",
+		"analyze": "fallow health",
+		"analyze:dead-code": "fallow dead-code",
+		"analyze:dupes": "fallow dupes",
+		"analyze:audit": "fallow audit",
+		"prepare": "fallow hooks install --target git --branch HEAD 2>/dev/null || true"
 	},
 	"dependencies": {
 		"@clack/prompts": "^0.9.1",
@@ -61,6 +66,7 @@
 		"@types/bun": "^1.2.2",
 		"commitlint-plugin-function-rules": "^4.3.1",
 		"conventional-changelog-conventionalcommits": "^9.1.0",
+		"fallow": "^3.2.0",
 		"semantic-release": "^24.2.1"
 	},
 	"repository": {

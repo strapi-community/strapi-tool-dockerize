@@ -1,0 +1,15 @@
+{
+	"$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
+	"entry": ["src/index.ts"],
+	"ignorePatterns": ["tmp/**", "dist/**", ".fallow/**", "coverage/**"],
+	"ignoreExportsUsedInFile": true,
+	"ignoreDependencies": ["conventional-changelog-conventionalcommits"],
+	"duplicates": {
+		"minOccurrences": 2,
+		"ignore": ["tmp/**", "dist/**"]
+	},
+	"health": {
+		"ignore": ["tmp/**", "dist/**"]
+	},
+	"rules": {}
+}

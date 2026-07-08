@@ -46,6 +46,3 @@ export type {
 	SecretManagerPlugin,
 } from "./types"
 export type { ComposeSecret, ComposeService, HealthCheck } from "./types"
-export { databasePlugins } from "./databases"
-export { packageManagerPlugins } from "./package-managers"
-export { secretManagerPlugins } from "./secret-managers"
