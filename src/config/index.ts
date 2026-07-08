@@ -1,14 +1,4 @@
-export {
-	databaseClientSchema,
-	packageManagerSchema,
-	environmentSchema,
-	projectTypeSchema,
-	strapiVersionSchema,
-	secretBackendSchema,
-	detectedPluginSchema,
-	detectedConfigSchema,
-	resolvedConfigSchema,
-} from "./schema"
+export { resolvedConfigSchema } from "./schema"
 
 export type {
 	DatabaseClient,

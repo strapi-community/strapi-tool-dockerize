@@ -1,5 +1,3 @@
 export { parseEnvFile } from "./env-parser"
 export { backupDockerFiles } from "./backup"
-export type { ExecOptions, ExecResult } from "./process"
 export { previewGeneration, formatPreviewOutput } from "./dry-run"
-export type { PreviewFile } from "./dry-run"

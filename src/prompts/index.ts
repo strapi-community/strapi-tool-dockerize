@@ -257,20 +257,3 @@ export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConf
 
 	return config
 }
-
-export {
-	buildDetectionSummary,
-	logDetectedSummary,
-	DB_LABELS,
-	PM_LABELS,
-	LANG_LABELS,
-	SECRET_BACKEND_LABELS,
-} from "./confirm-detected"
-export {
-	promptEnvironment,
-	promptProjectName,
-	promptSecretBackend,
-	promptUseCompose,
-	promptUseAdminer,
-	promptUseBackups,
-} from "./options"
