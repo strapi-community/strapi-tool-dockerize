@@ -20,6 +20,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install
       - run: bun run lint
+      - run: bun run typecheck
       - run: bun test
       - run: bun run build
       - run: npx semantic-release
