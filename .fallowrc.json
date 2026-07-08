@@ -9,7 +9,8 @@
 		"ignore": ["tmp/**", "dist/**"]
 	},
 	"health": {
-		"ignore": ["tmp/**", "dist/**"]
+		"ignore": ["tmp/**", "dist/**"],
+		"thresholdOverrides": [{ "files": ["tests/**"], "maxUnitSize": 400 }]
 	},
 	"rules": {}
 }
