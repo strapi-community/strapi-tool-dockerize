@@ -2,35 +2,42 @@
 
 A rough plan for where `@strapi-community/dockerize` is headed. Priorities shift based on community feedback, so nothing here is set in stone. Items marked with *(speculative)* are ideas under consideration, not commitments.
 
-## v2.0 - TypeScript Rewrite *(current, in beta)*
+## v2.5 - TypeScript Rewrite *(current, in development)*
 
 Complete ground-up rewrite in TypeScript with Bun. The v1 codebase is gone.
 
 **What's done:**
 
 - Plugin architecture for databases (PostgreSQL, MySQL, MariaDB, SQLite) and package managers (npm, yarn, pnpm, bun)
+- Secret manager plugin system (`--secrets docker-secrets`) with `none` and `docker-secrets` backends
 - LiquidJS template engine for all Dockerfile and Compose generation
-- Smart auto-detection of Strapi version, database, package manager, ESM/CJS, and existing `.env` values
+- Smart auto-detection of Strapi version, database, package manager, ESM/CJS, installed Strapi plugins, and existing `.env` values
+- Strapi v4 and v5 support with database drivers pinned to compatible versions
 - Multi-stage production Dockerfiles (4-stage build for minimal images)
 - Docker secrets wired into production Compose files
 - Dual environment support (`--env=both` generates dev + prod Dockerfiles and Compose files)
+- Named presets (`--preset local-dev|production|ci`)
+- Container resource limits (memory, CPU) with environment-aware defaults
+- Configurable health checks for both Strapi and database services
+- Database backup sidecar for automated production backups
+- Dry-run preview mode (`--dry-run`) to inspect output without writing to disk
+- Verbose diagnostics (`--verbose`) for detection, config resolution, and file writes
 - Interactive CLI with @clack/prompts, per-field pre-fill from detected values
 - Reset command for clean removal of all generated files
-- 324 tests across 25 test files, 670 expect() calls
+- 417 tests across 31 test files, 912 expect() calls
 
-**Status:** Testing on `v2.5` branch. Beta/prerelease builds published to npm. Collecting feedback before stable release. All tracked bugs on the [project board](https://github.com/orgs/strapi-community/projects/8) are resolved (40+ issues closed).
+**Status:** In development on the `v2.5` branch. Not yet published to npm. Collecting feedback before the first release. All tracked bugs on the [project board](https://github.com/orgs/strapi-community/projects/8) are resolved (40+ issues closed).
 
 ---
 
 ## v2.1 - Quality of Life
 
-Polish and power-user features after v2.0 stabilizes.
+Polish and power-user features after v2.5 stabilizes.
 
-- **Secret manager plugin** ([#149](https://github.com/strapi-community/strapi-tool-dockerize/issues/149)) - Pluggable secret backends for production deployments (Docker secrets, Vault, AWS Secrets Manager)
+- **Additional secret backends** ([#149](https://github.com/strapi-community/strapi-tool-dockerize/issues/149)) - The `docker-secrets` backend shipped in v2.5. Vault and AWS Secrets Manager are the next candidates on the same plugin interface.
 - **Reverse proxy templates** - Optional Traefik or nginx configs for SSL termination and routing *(speculative)*
 - **Custom template overrides** - Drop a `dockerize/templates/` directory in your project to override built-in Liquid templates *(speculative)*
 - **Config file support** - `.dockerizerc` or `dockerize` key in `package.json` for persisting preferences across runs *(speculative)*
-- **Verbose/debug mode** - `--verbose` flag to print detection details, template resolution, and file write operations
 
 ---
 

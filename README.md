@@ -34,7 +34,7 @@ Complete rewrite in TypeScript with [Bun](https://bun.sh). Plugin-based architec
 
 **Production-Ready:**
 
-- Secret manager plugin system (`--secrets docker-secrets`) with extensible backends
+- Secret manager plugin system (`--secrets docker-secrets`); new backends are a single plugin file (see [CONTRIBUTING.md](./CONTRIBUTING.md))
 - Container resource limits (memory, CPU) with environment-aware defaults
 - Database backup sidecar for automated production backups
 - Health check customization for both Strapi and database services
@@ -99,6 +99,7 @@ npx @strapi-community/dockerize --yes -d postgres --pm pnpm
 | `--health-retries` | | Health check retry count | `3` |
 | `--dry-run` | | Preview generated files without writing to disk | `false` |
 | `--skip-deps` | | Skip installing database driver | `false` |
+| `--verbose` | | Print detection, resolution, and file write diagnostics | `false` |
 | `--yes` | `-y` | Skip all prompts, use detected/default values | `false` |
 
 ### Usage Examples
