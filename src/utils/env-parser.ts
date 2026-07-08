@@ -9,6 +9,41 @@ export async function parseEnvFile(filePath: string): Promise<Record<string, str
 	}
 }
 
+function readQuotedValue(
+	firstChunk: string,
+	quoteChar: string,
+	lines: string[],
+	startIndex: number,
+): { value: string; nextIndex: number } {
+	let value = firstChunk.slice(1)
+	let i = startIndex
+
+	if (value.endsWith(quoteChar)) {
+		value = value.slice(0, -1)
+	} else {
+		while (i < lines.length) {
+			const nextLine = lines[i]
+			i++
+			if (nextLine.trimEnd().endsWith(quoteChar)) {
+				value += `\n${nextLine.trimEnd().slice(0, -1)}`
+				break
+			}
+			value += `\n${nextLine}`
+		}
+	}
+
+	if (quoteChar === '"') {
+		value = value.replace(/\\n/g, "\n").replace(/\\r/g, "\r").replace(/\\t/g, "\t")
+	}
+
+	return { value, nextIndex: i }
+}
+
+function stripInlineComment(value: string): string {
+	const commentIndex = value.indexOf(" #")
+	return commentIndex !== -1 ? value.slice(0, commentIndex).trim() : value
+}
+
 export function parseEnvContent(content: string): Record<string, string> {
 	const result: Record<string, string> = {}
 	const lines = content.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n")
@@ -24,37 +59,18 @@ export function parseEnvContent(content: string): Record<string, string> {
 		if (eqIndex === -1) continue
 
 		const key = line.slice(0, eqIndex).trim()
-		let value = line.slice(eqIndex + 1).trim()
-
 		if (!key) continue
 
-		const quoteChar = value[0]
-		if (quoteChar === '"' || quoteChar === "'") {
-			value = value.slice(1)
-			if (value.endsWith(quoteChar)) {
-				value = value.slice(0, -1)
-			} else {
-				while (i < lines.length) {
-					const nextLine = lines[i]
-					i++
-					if (nextLine.trimEnd().endsWith(quoteChar)) {
-						value += `\n${nextLine.trimEnd().slice(0, -1)}`
-						break
-					}
-					value += `\n${nextLine}`
-				}
-			}
-			if (quoteChar === '"') {
-				value = value.replace(/\\n/g, "\n").replace(/\\r/g, "\r").replace(/\\t/g, "\t")
-			}
-		} else {
-			const commentIndex = value.indexOf(" #")
-			if (commentIndex !== -1) {
-				value = value.slice(0, commentIndex).trim()
-			}
-		}
+		const rawValue = line.slice(eqIndex + 1).trim()
+		const quoteChar = rawValue[0]
 
-		result[key] = value
+		if (quoteChar === '"' || quoteChar === "'") {
+			const parsed = readQuotedValue(rawValue, quoteChar, lines, i)
+			result[key] = parsed.value
+			i = parsed.nextIndex
+		} else {
+			result[key] = stripInlineComment(rawValue)
+		}
 	}
 
 	return result

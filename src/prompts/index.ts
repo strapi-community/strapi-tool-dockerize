@@ -2,6 +2,7 @@ import * as p from "@clack/prompts"
 import type {
 	DatabaseClient,
 	DetectedConfig,
+	Environment,
 	PackageManager,
 	ProjectType,
 	ResolvedConfig,
@@ -90,13 +91,115 @@ async function selectPackageManager(detected?: PackageManager): Promise<PackageM
 	return selected as PackageManager
 }
 
-function fillDefaults(dbClient: DatabaseClient, detected: DetectedConfig) {
+interface DbConnection {
+	databaseHost: string
+	databasePort: number
+	databaseName: string
+	databaseUsername: string
+	databasePassword: string
+}
+
+function fillDefaults(dbClient: DatabaseClient, detected: DetectedConfig): DbConnection {
 	return {
 		databaseHost: detected.databaseHost ?? DEFAULT_DATABASE_HOST,
 		databasePort: detected.databasePort ?? DEFAULT_PORTS[dbClient],
 		databaseName: detected.databaseName ?? DEFAULT_DATABASE_NAME,
 		databaseUsername: detected.databaseUsername ?? DEFAULT_DATABASE_USERNAME,
 		databasePassword: detected.databasePassword ?? DEFAULT_DATABASE_PASSWORD,
+	}
+}
+
+async function collectDatabaseConnection(
+	databaseClient: DatabaseClient,
+	detected: DetectedConfig,
+): Promise<DbConnection> {
+	if (databaseClient === "sqlite") {
+		return {
+			databaseHost: DEFAULT_DATABASE_HOST,
+			databasePort: 0,
+			databaseName: DEFAULT_DATABASE_NAME,
+			databaseUsername: DEFAULT_DATABASE_USERNAME,
+			databasePassword: DEFAULT_DATABASE_PASSWORD,
+		}
+	}
+
+	const defaults = fillDefaults(databaseClient, detected)
+	const customize = await p.confirm({
+		message: `Database: ${defaults.databaseHost}:${defaults.databasePort}/${defaults.databaseName} (user: ${defaults.databaseUsername}). Customize?`,
+		initialValue: false,
+	})
+	if (p.isCancel(customize)) {
+		p.cancel("Setup cancelled.")
+		process.exit(0)
+	}
+
+	return customize ? promptDatabaseConnection(databaseClient, detected) : defaults
+}
+
+interface DeploymentOptions {
+	environment: Environment
+	secretBackend: SecretBackend
+	useCompose: boolean
+	useAdminer: boolean
+	useBackups: boolean
+}
+
+async function collectDeploymentOptions(
+	detected: DetectedConfig,
+	databaseClient: DatabaseClient,
+): Promise<DeploymentOptions> {
+	const environment = await promptEnvironment(detected.environment)
+	const isProduction = environment === "production" || environment === "both"
+	const notSqlite = databaseClient !== "sqlite"
+
+	const secretBackend =
+		isProduction && notSqlite
+			? await promptSecretBackend(detected.secretBackend)
+			: DEFAULT_SECRET_BACKEND
+
+	const useCompose = await promptUseCompose()
+	const useAdminer = useCompose && notSqlite ? await promptUseAdminer() : false
+	const useBackups =
+		useCompose && notSqlite && isProduction ? await promptUseBackups(detected.useBackups) : false
+
+	return { environment, secretBackend, useCompose, useAdminer, useBackups }
+}
+
+function buildSummaryLines(config: ResolvedConfig): string[] {
+	const lines = [
+		`Strapi ${config.strapiVersion} | ${LANG_LABELS[config.projectType]} | ${DB_LABELS[config.databaseClient]} | ${PM_LABELS[config.packageManager]}`,
+		`Environment: ${config.environment}`,
+		`Project: ${config.projectName}`,
+	]
+
+	if (config.databaseClient !== "sqlite") {
+		lines.push(`Database: ${config.databaseHost}:${config.databasePort}/${config.databaseName}`)
+		lines.push(`DB User: ${config.databaseUsername}`)
+	}
+	if (config.secretBackend !== "none") {
+		lines.push(`Secrets: ${SECRET_BACKEND_LABELS[config.secretBackend]}`)
+	}
+	if (config.useCompose) {
+		const extras: string[] = []
+		if (config.useAdminer) extras.push("Adminer (port 8080)")
+		if (config.useBackups) extras.push("database backups")
+		lines.push(`Compose: yes${extras.length > 0 ? ` + ${extras.join(", ")}` : ""}`)
+	}
+	if (config.detectedPlugins.length > 0) {
+		lines.push(`Plugins: ${config.detectedPlugins.map((plugin) => plugin.name).join(", ")}`)
+	}
+
+	return lines
+}
+
+async function confirmGeneration(): Promise<void> {
+	const confirmed = await p.confirm({
+		message: "Generate Docker files with this configuration?",
+		initialValue: true,
+	})
+	if (p.isCancel(confirmed) || !confirmed) {
+		p.cancel("Setup cancelled.")
+		process.exit(0)
 	}
 }
 
@@ -121,139 +224,32 @@ export async function runPrompts(detected: DetectedConfig): Promise<ResolvedConf
 	const packageManager = await selectPackageManager(detected.packageManager)
 
 	const databaseClient = await selectDatabase(detected.databaseClient)
+	const dbConnection = await collectDatabaseConnection(databaseClient, detected)
+	const options = await collectDeploymentOptions(detected, databaseClient)
 
-	let dbConnection: {
-		databaseHost: string
-		databasePort: number
-		databaseName: string
-		databaseUsername: string
-		databasePassword: string
-	}
-
-	if (databaseClient !== "sqlite") {
-		const defaults = fillDefaults(databaseClient, detected)
-
-		const customize = await p.confirm({
-			message: `Database: ${defaults.databaseHost}:${defaults.databasePort}/${defaults.databaseName} (user: ${defaults.databaseUsername}). Customize?`,
-			initialValue: false,
-		})
-		if (p.isCancel(customize)) {
-			p.cancel("Setup cancelled.")
-			process.exit(0)
-		}
-
-		if (customize) {
-			dbConnection = await promptDatabaseConnection(databaseClient, detected)
-		} else {
-			dbConnection = {
-				databaseHost: defaults.databaseHost,
-				databasePort: defaults.databasePort,
-				databaseName: defaults.databaseName,
-				databaseUsername: defaults.databaseUsername,
-				databasePassword: defaults.databasePassword,
-			}
-		}
-	} else {
-		dbConnection = {
-			databaseHost: DEFAULT_DATABASE_HOST,
-			databasePort: 0,
-			databaseName: DEFAULT_DATABASE_NAME,
-			databaseUsername: DEFAULT_DATABASE_USERNAME,
-			databasePassword: DEFAULT_DATABASE_PASSWORD,
-		}
-	}
-
-	const environment = await promptEnvironment(detected.environment)
-
-	let secretBackend: SecretBackend = DEFAULT_SECRET_BACKEND
-	const showSecretPrompt =
-		(environment === "production" || environment === "both") && databaseClient !== "sqlite"
-	if (showSecretPrompt) {
-		secretBackend = await promptSecretBackend(detected.secretBackend)
-	}
-
-	const useCompose = await promptUseCompose()
-
-	let useAdminer = false
-	if (useCompose && databaseClient !== "sqlite") {
-		useAdminer = await promptUseAdminer()
-	}
-
-	let useBackups = false
-	const showBackupPrompt =
-		useCompose &&
-		databaseClient !== "sqlite" &&
-		(environment === "production" || environment === "both")
-	if (showBackupPrompt) {
-		useBackups = await promptUseBackups(detected.useBackups)
-	}
-
-	const raw: ResolvedConfig = {
+	const config = resolvedConfigSchema.parse({
 		strapiVersion,
 		projectType,
 		databaseClient,
 		packageManager,
-		environment,
 		projectName,
 		...dbConnection,
-		useCompose,
-		useAdminer,
-		useBackups,
-		secretBackend,
+		...options,
 		isESM: detected.isESM ?? false,
 		envVars: detected.envVars ?? {},
 		detectedPlugins: detected.detectedPlugins ?? [],
-	}
+	})
 
-	const config = resolvedConfigSchema.parse(raw)
-
-	const summaryLines = [
-		`Strapi ${strapiVersion} | ${LANG_LABELS[projectType]} | ${DB_LABELS[databaseClient]} | ${PM_LABELS[packageManager]}`,
-		`Environment: ${environment}`,
-		`Project: ${projectName}`,
-	]
-
-	if (databaseClient !== "sqlite") {
-		summaryLines.push(
-			`Database: ${dbConnection.databaseHost}:${dbConnection.databasePort}/${dbConnection.databaseName}`,
-		)
-		summaryLines.push(`DB User: ${dbConnection.databaseUsername}`)
-	}
-
-	if (secretBackend !== "none") {
-		summaryLines.push(`Secrets: ${SECRET_BACKEND_LABELS[secretBackend]}`)
-	}
-
-	if (useCompose) {
-		const extras: string[] = []
-		if (useAdminer) extras.push("Adminer (port 8080)")
-		if (useBackups) extras.push("database backups")
-		summaryLines.push(`Compose: yes${extras.length > 0 ? ` + ${extras.join(", ")}` : ""}`)
-	}
-
-	const plugins = detected.detectedPlugins ?? []
-	if (plugins.length > 0) {
-		summaryLines.push(`Plugins: ${plugins.map((p) => p.name).join(", ")}`)
-	}
-
-	p.note(summaryLines.join("\n"), "Configuration")
+	p.note(buildSummaryLines(config).join("\n"), "Configuration")
 
 	if (
-		(environment === "production" || environment === "both") &&
-		dbConnection.databasePassword === DEFAULT_DATABASE_PASSWORD
+		(config.environment === "production" || config.environment === "both") &&
+		config.databasePassword === DEFAULT_DATABASE_PASSWORD
 	) {
 		p.log.warn("Default database credentials are not recommended for production")
 	}
 
-	const confirmed = await p.confirm({
-		message: "Generate Docker files with this configuration?",
-		initialValue: true,
-	})
-
-	if (p.isCancel(confirmed) || !confirmed) {
-		p.cancel("Setup cancelled.")
-		process.exit(0)
-	}
+	await confirmGeneration()
 
 	return config
 }
