@@ -24,7 +24,7 @@ Complete ground-up rewrite in TypeScript with Bun. The v1 codebase is gone.
 - Verbose diagnostics (`--verbose`) for detection, config resolution, and file writes
 - Interactive CLI with @clack/prompts, per-field pre-fill from detected values
 - Reset command for clean removal of all generated files
-- 458 tests across 36 test files, 987 expect() calls
+- 464 tests across 36 test files, 994 expect() calls
 
 **Status:** In development on the `v2.5` branch. Not yet published to npm. Collecting feedback before the first release. All tracked bugs on the [project board](https://github.com/orgs/strapi-community/projects/8) are resolved (40+ issues closed).
 
