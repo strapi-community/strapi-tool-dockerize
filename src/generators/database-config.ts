@@ -175,22 +175,36 @@ export default ({ env }) => ({
 })
 `
 
-function getConfigContent(config: ResolvedConfig): string {
-	const isSqlite = config.databaseClient === "sqlite"
-	const isTs = config.projectType === "ts"
-	const isESM = config.isESM
+const CONFIG_TEMPLATES: Record<string, string> = {
+	"v4|db|ts": V4_TS_CONFIG,
+	"v4|db|js": V4_JS_CONFIG,
+	"v4|sqlite|ts": V4_SQLITE_TS_CONFIG,
+	"v4|sqlite|js": V4_SQLITE_JS_CONFIG,
+	"v5|db|ts": V5_TS_CONFIG,
+	"v5|db|js|cjs": V5_JS_CONFIG,
+	"v5|db|js|esm": V5_ESM_JS_CONFIG,
+	"v5|sqlite|ts|cjs": V5_SQLITE_TS_CONFIG,
+	"v5|sqlite|ts|esm": V5_ESM_SQLITE_TS_CONFIG,
+	"v5|sqlite|js|cjs": V5_SQLITE_JS_CONFIG,
+	"v5|sqlite|js|esm": V5_ESM_SQLITE_JS_CONFIG,
+}
+
+export function getConfigContent(config: ResolvedConfig): string {
+	const store = config.databaseClient === "sqlite" ? "sqlite" : "db"
+	const lang = config.projectType === "ts" ? "ts" : "js"
 
 	if (config.strapiVersion === "v4") {
-		if (isSqlite) return isTs ? V4_SQLITE_TS_CONFIG : V4_SQLITE_JS_CONFIG
-		return isTs ? V4_TS_CONFIG : V4_JS_CONFIG
+		return CONFIG_TEMPLATES[`v4|${store}|${lang}`]
 	}
 
-	if (isSqlite) {
-		if (isESM) return isTs ? V5_ESM_SQLITE_TS_CONFIG : V5_ESM_SQLITE_JS_CONFIG
-		return isTs ? V5_SQLITE_TS_CONFIG : V5_SQLITE_JS_CONFIG
+	// v5 TypeScript uses `export default` for both module systems, so ESM is only
+	// a distinct template for JavaScript and SQLite configs.
+	if (store === "db" && lang === "ts") {
+		return CONFIG_TEMPLATES["v5|db|ts"]
 	}
-	if (isTs) return V5_TS_CONFIG
-	return isESM ? V5_ESM_JS_CONFIG : V5_JS_CONFIG
+
+	const moduleSystem = config.isESM ? "esm" : "cjs"
+	return CONFIG_TEMPLATES[`v5|${store}|${lang}|${moduleSystem}`]
 }
 
 function getEnvironmentDirs(environment: string): string[] {

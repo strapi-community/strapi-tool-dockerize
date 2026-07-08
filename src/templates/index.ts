@@ -1,1 +1,1 @@
-export { renderTemplate } from "./renderer"
+export { readTemplateFile, renderTemplate } from "./renderer"

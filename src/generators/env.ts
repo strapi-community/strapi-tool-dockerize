@@ -18,10 +18,38 @@ function buildPluginSection(plugins: DetectedPlugin[]): string {
 	return sections.join("")
 }
 
-function buildManagedSection(vars: Record<string, string>, plugins: DetectedPlugin[]): string {
+export function buildManagedSection(
+	vars: Record<string, string>,
+	plugins: DetectedPlugin[],
+): string {
 	const lines = Object.entries(vars).map(([key, value]) => `${key}=${value}`)
 	const pluginSection = buildPluginSection(plugins)
 	return `${MARKER_START}\n${lines.join("\n")}${pluginSection}\n${MARKER_END}`
+}
+
+export function buildEnvVars(
+	config: ResolvedConfig,
+	registry: PluginRegistry,
+): Record<string, string> {
+	const isSqlite = config.databaseClient === "sqlite"
+	let vars: Record<string, string> = {}
+
+	if (isSqlite) {
+		vars.DATABASE_CLIENT = "sqlite"
+		vars.DATABASE_FILENAME = ".tmp/data.db"
+	} else {
+		const db = registry.getDatabase(config.databaseClient)
+		vars = { ...db.envVars(config) }
+
+		if (config.useCompose) {
+			vars.DATABASE_HOST = `${config.projectName}-db`
+		}
+	}
+
+	const secretManager = registry.getSecretManager(config.secretBackend)
+	Object.assign(vars, secretManager.envOverrides(config))
+
+	return vars
 }
 
 function commentOutDuplicateKeys(content: string, managedKeys: Set<string>): string {
@@ -68,25 +96,8 @@ export async function generateEnv(
 	cwd: string,
 ): Promise<void> {
 	const envPath = join(cwd, ".env")
-	const isSqlite = config.databaseClient === "sqlite"
 
-	let vars: Record<string, string> = {}
-
-	if (!isSqlite) {
-		const db = registry.getDatabase(config.databaseClient)
-		vars = { ...db.envVars(config) }
-
-		if (config.useCompose) {
-			vars.DATABASE_HOST = `${config.projectName}-db`
-		}
-	} else {
-		vars.DATABASE_CLIENT = "sqlite"
-		vars.DATABASE_FILENAME = ".tmp/data.db"
-	}
-
-	const secretManager = registry.getSecretManager(config.secretBackend)
-	const secretOverrides = secretManager.envOverrides(config)
-	Object.assign(vars, secretOverrides)
+	const vars = buildEnvVars(config, registry)
 
 	const plugins = config.detectedPlugins ?? []
 	const managedSection = buildManagedSection(vars, plugins)

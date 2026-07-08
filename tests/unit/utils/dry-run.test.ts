@@ -21,8 +21,11 @@ function makeConfig(overrides: Partial<ResolvedConfig> = {}): ResolvedConfig {
 		databasePassword: "strapi",
 		useCompose: true,
 		useAdminer: false,
+		useBackups: false,
+		secretBackend: "none",
 		isESM: false,
 		envVars: {},
+		detectedPlugins: [],
 		...overrides,
 	}
 }

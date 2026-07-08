@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { Liquid } from "liquidjs"
@@ -17,4 +18,8 @@ export async function renderTemplate(
 ): Promise<string> {
 	const result = await engine.renderFile(`${templateName}.liquid`, context)
 	return result.toString()
+}
+
+export async function readTemplateFile(fileName: string): Promise<string> {
+	return readFile(join(TEMPLATES_DIR, fileName), "utf-8")
 }
