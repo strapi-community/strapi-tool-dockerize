@@ -5,6 +5,7 @@ import pc from "picocolors"
 import { ZodError } from "zod"
 import { installDatabaseDriver } from "../../actions"
 import type {
+	DatabaseClient,
 	DetectedConfig,
 	Environment,
 	PresetName,
@@ -128,7 +129,7 @@ export const defaultCommand = defineCommand({
 		}
 
 		if (args.database) {
-			detected.databaseClient = args.database as DetectedConfig["databaseClient"]
+			detected.databaseClient = args.database as DatabaseClient
 			detected.databasePort = DEFAULT_PORTS[detected.databaseClient]
 			log.debug(`Flag override database=${detected.databaseClient}`)
 		}
