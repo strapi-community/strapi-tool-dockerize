@@ -84,6 +84,7 @@ export const defaultCommand = defineCommand({
 	},
 	args: sharedFlags,
 	async run({ args }) {
+		log.setVerbose(Boolean(args.verbose))
 		const cwd = resolve(args.path)
 
 		try {
@@ -99,12 +100,18 @@ export const defaultCommand = defineCommand({
 		}
 
 		showBanner()
+		log.debug(`Project path: ${cwd}`)
 
 		const detectSpinner = createSpinner("Detecting project configuration...")
 		let detected: DetectedConfig
 		try {
 			detected = await detectAll(cwd)
 			detectSpinner.success("Project scanned")
+			log.debug(`Detected: ${buildDetectionSummary(detected)}`)
+			for (const plugin of detected.detectedPlugins ?? []) {
+				const keys = Object.keys(plugin.envVars)
+				log.debug(`  plugin ${plugin.name}: ${keys.length > 0 ? keys.join(", ") : "no env vars"}`)
+			}
 		} catch (err) {
 			detectSpinner.error("Failed to detect project configuration")
 			log.error(err instanceof Error ? err.message : String(err))
@@ -117,26 +124,33 @@ export const defaultCommand = defineCommand({
 				process.exit(1)
 			}
 			detected = applyPreset(detected, args.preset as PresetName)
+			log.debug(`Applied preset "${args.preset}"`)
 		}
 
 		if (args.database) {
 			detected.databaseClient = args.database as DetectedConfig["databaseClient"]
 			detected.databasePort = DEFAULT_PORTS[detected.databaseClient]
+			log.debug(`Flag override database=${detected.databaseClient}`)
 		}
 		if (args["package-manager"]) {
 			detected.packageManager = args["package-manager"] as DetectedConfig["packageManager"]
+			log.debug(`Flag override package-manager=${detected.packageManager}`)
 		}
 		if (args.env) {
 			detected.environment = args.env as Environment
+			log.debug(`Flag override env=${detected.environment}`)
 		}
 		if (args.compose !== undefined) {
 			detected.useCompose = args.compose
+			log.debug(`Flag override compose=${detected.useCompose}`)
 		}
 		if (args.secrets) {
 			detected.secretBackend = args.secrets as SecretBackend
+			log.debug(`Flag override secrets=${detected.secretBackend}`)
 		}
 		if (args.backups !== undefined) {
 			detected.useBackups = args.backups
+			log.debug(`Flag override backups=${detected.useBackups}`)
 		}
 
 		if (args.yes) {
@@ -184,8 +198,18 @@ export const defaultCommand = defineCommand({
 			config = await runPrompts(detected)
 		}
 
+		log.debug(
+			`Resolved: strapi ${config.strapiVersion} | ${config.projectType} | ${config.databaseClient} | ${config.packageManager} | env=${config.environment} | secrets=${config.secretBackend} | compose=${config.useCompose} | backups=${config.useBackups}`,
+		)
+
 		const healthCheckOverrides = buildHealthCheckOverrides(args)
 		const resourceLimits = buildResourceLimitOverrides(args)
+		if (healthCheckOverrides) {
+			log.debug(`Health check overrides: ${JSON.stringify(healthCheckOverrides)}`)
+		}
+		if (resourceLimits) {
+			log.debug(`Resource limit overrides: ${JSON.stringify(resourceLimits)}`)
+		}
 
 		if (args["dry-run"]) {
 			try {
@@ -195,6 +219,7 @@ export const defaultCommand = defineCommand({
 					healthCheckOverrides,
 					resourceLimits,
 				)
+				log.debug(`Dry-run previewed ${files.length} file(s)`)
 				console.log(formatPreviewOutput(files))
 			} catch (err) {
 				log.error(err instanceof Error ? err.message : String(err))
@@ -235,6 +260,10 @@ export const defaultCommand = defineCommand({
 			genSpinner.error("Generation failed")
 			log.error(err instanceof Error ? err.message : String(err))
 			process.exit(1)
+		}
+
+		if (secretFiles.length > 0) {
+			log.debug(`Generated secret files: ${secretFiles.join(", ")}`)
 		}
 
 		if (config.databaseClient !== "sqlite" && !args["skip-deps"]) {

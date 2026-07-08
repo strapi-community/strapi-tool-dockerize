@@ -37,6 +37,11 @@ export const sharedFlags = {
 		default: false,
 		alias: "y",
 	},
+	verbose: {
+		type: "boolean",
+		description: "Print detection, resolution, and file write diagnostics",
+		default: false,
+	},
 	secrets: {
 		type: "string",
 		description: "Secret backend (none, docker-secrets)",

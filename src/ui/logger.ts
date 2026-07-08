@@ -1,6 +1,14 @@
-import { error, info, success, warn } from "./colors"
+import { dim, error, info, success, warn } from "./colors"
+
+let verbose = false
 
 export const log = {
+	setVerbose(value: boolean) {
+		verbose = value
+	},
+	isVerbose() {
+		return verbose
+	},
 	info(message: string) {
 		console.log(`${info("ℹ")} ${message}`)
 	},
@@ -12,5 +20,9 @@ export const log = {
 	},
 	error(message: string) {
 		console.log(`${error("✖")} ${message}`)
+	},
+	debug(message: string) {
+		if (!verbose) return
+		console.log(`${dim("○")} ${dim(message)}`)
 	},
 }
