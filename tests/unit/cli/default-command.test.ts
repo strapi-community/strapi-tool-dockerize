@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test"
 import { ZodError } from "zod"
 import {
 	buildDetectionSummary,
+	buildHealthCheckOverrides,
 	buildResourceLimitOverrides,
 	formatZodErrors,
 	shouldWarnDatabaseDefault,
@@ -363,5 +364,46 @@ describe("buildResourceLimitOverrides", () => {
 	it("returns overrides with both when both provided", () => {
 		const result = buildResourceLimitOverrides({ memory: "512m", cpus: "1" })
 		expect(result).toEqual({ memory: "512m", cpus: "1" })
+	})
+})
+
+describe("buildHealthCheckOverrides", () => {
+	it("returns undefined when no health args provided", () => {
+		expect(buildHealthCheckOverrides({})).toBeUndefined()
+	})
+
+	it("returns interval when --health-interval provided", () => {
+		expect(buildHealthCheckOverrides({ "health-interval": "30s" })).toEqual({ interval: "30s" })
+	})
+
+	it("returns timeout when --health-timeout provided", () => {
+		expect(buildHealthCheckOverrides({ "health-timeout": "10s" })).toEqual({ timeout: "10s" })
+	})
+
+	it("returns startPeriod when --health-start-period provided", () => {
+		expect(buildHealthCheckOverrides({ "health-start-period": "2m" })).toEqual({
+			startPeriod: "2m",
+		})
+	})
+
+	it("coerces retries to a number", () => {
+		const result = buildHealthCheckOverrides({ "health-retries": "10" })
+		expect(result).toEqual({ retries: 10 })
+		expect(typeof result?.retries).toBe("number")
+	})
+
+	it("returns all overrides when every flag is provided", () => {
+		const result = buildHealthCheckOverrides({
+			"health-interval": "15s",
+			"health-timeout": "5s",
+			"health-start-period": "40s",
+			"health-retries": "3",
+		})
+		expect(result).toEqual({
+			interval: "15s",
+			timeout: "5s",
+			startPeriod: "40s",
+			retries: 3,
+		})
 	})
 })
