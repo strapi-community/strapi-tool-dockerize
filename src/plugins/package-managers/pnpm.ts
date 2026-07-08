@@ -1,6 +1,6 @@
-import type { PackageManagerPlugin } from "../types"
+import { createPackageManagerPlugin, nodeAlpineImage } from "./shared"
 
-export const pnpmPlugin: PackageManagerPlugin = {
+export const pnpmPlugin = createPackageManagerPlugin({
 	id: "pnpm",
 	displayName: "pnpm",
 	lockFile: "pnpm-lock.yaml",
@@ -8,36 +8,13 @@ export const pnpmPlugin: PackageManagerPlugin = {
 	buildCommand: "pnpm build",
 	startCommand: "pnpm start",
 	devCommand: "pnpm develop",
-
-	addPackageCommand(pkg: string): string {
-		return `pnpm add ${pkg}`
-	},
-
-	removePackageCommand(pkg: string): string {
-		return `pnpm remove ${pkg}`
-	},
-
-	dockerBaseImage(nodeVersion: string): string {
-		return `node:${nodeVersion}-alpine`
-	},
-
-	dockerSetupSteps(): string[] {
-		return ["RUN corepack enable"]
-	},
-
-	dockerCopyFiles(): string[] {
-		return ["package.json", "pnpm-lock.yaml"]
-	},
-
-	dockerInstallStep(production: boolean): string {
-		return production ? "pnpm install --frozen-lockfile --prod" : "pnpm install --frozen-lockfile"
-	},
-
-	dockerBuildStep(): string {
-		return "pnpm build"
-	},
-
-	dockerStartStep(dev: boolean): string {
-		return dev ? '["pnpm", "develop"]' : '["pnpm", "start"]'
-	},
-}
+	addCommand: "pnpm add",
+	removeCommand: "pnpm remove",
+	baseImage: nodeAlpineImage,
+	setupSteps: ["RUN corepack enable"],
+	installStep: "pnpm install --frozen-lockfile",
+	prodInstallStep: "pnpm install --frozen-lockfile --prod",
+	buildStep: "pnpm build",
+	startStep: '["pnpm", "start"]',
+	devStep: '["pnpm", "develop"]',
+})

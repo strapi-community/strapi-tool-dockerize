@@ -1,6 +1,6 @@
-import type { PackageManagerPlugin } from "../types"
+import { createPackageManagerPlugin, nodeAlpineImage } from "./shared"
 
-export const yarnPlugin: PackageManagerPlugin = {
+export const yarnPlugin = createPackageManagerPlugin({
 	id: "yarn",
 	displayName: "Yarn",
 	lockFile: "yarn.lock",
@@ -8,38 +8,12 @@ export const yarnPlugin: PackageManagerPlugin = {
 	buildCommand: "yarn build",
 	startCommand: "yarn start",
 	devCommand: "yarn develop",
-
-	addPackageCommand(pkg: string): string {
-		return `yarn add ${pkg}`
-	},
-
-	removePackageCommand(pkg: string): string {
-		return `yarn remove ${pkg}`
-	},
-
-	dockerBaseImage(nodeVersion: string): string {
-		return `node:${nodeVersion}-alpine`
-	},
-
-	dockerSetupSteps(): string[] {
-		return []
-	},
-
-	dockerCopyFiles(): string[] {
-		return ["package.json", "yarn.lock"]
-	},
-
-	dockerInstallStep(production: boolean): string {
-		return production
-			? "yarn install --frozen-lockfile --production"
-			: "yarn install --frozen-lockfile"
-	},
-
-	dockerBuildStep(): string {
-		return "yarn build"
-	},
-
-	dockerStartStep(dev: boolean): string {
-		return dev ? '["yarn", "develop"]' : '["yarn", "start"]'
-	},
-}
+	addCommand: "yarn add",
+	removeCommand: "yarn remove",
+	baseImage: nodeAlpineImage,
+	installStep: "yarn install --frozen-lockfile",
+	prodInstallStep: "yarn install --frozen-lockfile --production",
+	buildStep: "yarn build",
+	startStep: '["yarn", "start"]',
+	devStep: '["yarn", "develop"]',
+})

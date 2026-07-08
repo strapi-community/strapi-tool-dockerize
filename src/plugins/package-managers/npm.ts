@@ -1,6 +1,6 @@
-import type { PackageManagerPlugin } from "../types"
+import { createPackageManagerPlugin, nodeAlpineImage } from "./shared"
 
-export const npmPlugin: PackageManagerPlugin = {
+export const npmPlugin = createPackageManagerPlugin({
 	id: "npm",
 	displayName: "npm",
 	lockFile: "package-lock.json",
@@ -8,36 +8,12 @@ export const npmPlugin: PackageManagerPlugin = {
 	buildCommand: "npm run build",
 	startCommand: "npm start",
 	devCommand: "npm run develop",
-
-	addPackageCommand(pkg: string): string {
-		return `npm install ${pkg}`
-	},
-
-	removePackageCommand(pkg: string): string {
-		return `npm uninstall ${pkg}`
-	},
-
-	dockerBaseImage(nodeVersion: string): string {
-		return `node:${nodeVersion}-alpine`
-	},
-
-	dockerSetupSteps(): string[] {
-		return []
-	},
-
-	dockerCopyFiles(): string[] {
-		return ["package.json", "package-lock.json"]
-	},
-
-	dockerInstallStep(production: boolean): string {
-		return production ? "npm ci --omit=dev" : "npm ci"
-	},
-
-	dockerBuildStep(): string {
-		return "npm run build"
-	},
-
-	dockerStartStep(dev: boolean): string {
-		return dev ? '["npm", "run", "develop"]' : '["npm", "start"]'
-	},
-}
+	addCommand: "npm install",
+	removeCommand: "npm uninstall",
+	baseImage: nodeAlpineImage,
+	installStep: "npm ci",
+	prodInstallStep: "npm ci --omit=dev",
+	buildStep: "npm run build",
+	startStep: '["npm", "start"]',
+	devStep: '["npm", "run", "develop"]',
+})
