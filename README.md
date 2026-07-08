@@ -374,7 +374,7 @@ Built with [Bun](https://bun.sh) and TypeScript. To get started:
 ```bash
 bun install
 bun run dev        # run locally
-bun test           # run tests (464 tests, 994 assertions)
+bun test           # run tests (469 tests, 1013 assertions)
 bun run lint       # lint with biome
 bun run lint:fix   # auto-fix lint issues
 bun run format     # format with biome
