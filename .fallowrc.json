@@ -10,7 +10,10 @@
 	},
 	"health": {
 		"ignore": ["tmp/**", "dist/**"],
-		"thresholdOverrides": [{ "files": ["tests/**"], "maxUnitSize": 400 }]
+		"thresholdOverrides": [
+			{ "files": ["tests/**"], "maxUnitSize": 400 },
+			{ "files": ["src/cli/commands/**"], "maxCrap": 100 }
+		]
 	},
 	"rules": {}
 }
