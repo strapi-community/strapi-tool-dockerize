@@ -74,6 +74,13 @@ describe("Dockerfile dev template", () => {
 		expect(runtime).toContain("NODE_ENV=development")
 	})
 
+	it("runtime stage copies build output with chown instead of a separate chown layer", async () => {
+		const result = await renderTemplate("Dockerfile", baseContext)
+		const runtime = extractStage(result, "runtime")
+		expect(runtime).toContain("COPY --chown=strapi:strapi --from=build /opt/app .")
+		expect(runtime).not.toContain("RUN chown -R strapi:strapi")
+	})
+
 	it("runtime stage includes pm setup steps when present", async () => {
 		const ctx = { ...baseContext, pmSetupSteps: ["RUN corepack enable"] }
 		const result = await renderTemplate("Dockerfile", ctx)
