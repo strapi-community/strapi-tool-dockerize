@@ -1,5 +1,5 @@
 import type { ResolvedConfig, ResourceLimitOverrides, StrapiHealthCheckOverrides } from "../config"
-import { buildEnvVars, buildManagedSection } from "../generators/env"
+import { buildEnvVars, buildManagedSection, placeholderAppSecrets } from "../generators/env"
 import {
 	type GeneratedFile,
 	renderComposeFiles,
@@ -12,7 +12,7 @@ import type { PluginRegistry } from "../plugins/types"
 export type PreviewFile = GeneratedFile
 
 function renderEnvPreview(config: ResolvedConfig, registry: PluginRegistry): PreviewFile {
-	const vars = buildEnvVars(config, registry)
+	const vars = { ...buildEnvVars(config, registry), ...placeholderAppSecrets() }
 	const plugins = config.detectedPlugins ?? []
 	return { filename: ".env", content: `${buildManagedSection(vars, plugins)}\n` }
 }

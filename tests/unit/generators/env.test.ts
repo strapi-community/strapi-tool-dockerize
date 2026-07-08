@@ -3,6 +3,7 @@ import { join } from "node:path"
 import type { ResolvedConfig } from "../../../src/config"
 import { generateEnv } from "../../../src/generators/env"
 import { pluginRegistry } from "../../../src/plugins"
+import { parseEnvContent } from "../../../src/utils/env-parser"
 import { readFile, writeFile } from "../../../src/utils/fs"
 import { cleanupTempDir, createTempDir } from "../../setup"
 
@@ -130,5 +131,50 @@ describe("generateEnv", () => {
 		const content = await readFile(join(tmpDir, ".env"))
 		expect(content).not.toContain("# AWS S3 Upload")
 		expect(content).not.toContain("# SendGrid Email")
+	})
+
+	describe("strapi app secrets", () => {
+		it("generates all required app secrets when none exist", async () => {
+			await generateEnv(baseConfig, pluginRegistry, tmpDir)
+			const parsed = parseEnvContent(await readFile(join(tmpDir, ".env")))
+			expect(parsed.APP_KEYS).toBeDefined()
+			expect(parsed.API_TOKEN_SALT).toBeDefined()
+			expect(parsed.ADMIN_JWT_SECRET).toBeDefined()
+			expect(parsed.TRANSFER_TOKEN_SALT).toBeDefined()
+			expect(parsed.JWT_SECRET).toBeDefined()
+			expect(parsed.JWT_SECRET.length).toBeGreaterThan(0)
+		})
+
+		it("generates APP_KEYS as a comma-separated pair", async () => {
+			await generateEnv(baseConfig, pluginRegistry, tmpDir)
+			const parsed = parseEnvContent(await readFile(join(tmpDir, ".env")))
+			expect(parsed.APP_KEYS.split(",").length).toBeGreaterThanOrEqual(2)
+		})
+
+		it("keeps the same secret values across re-runs", async () => {
+			await generateEnv(baseConfig, pluginRegistry, tmpDir)
+			const first = parseEnvContent(await readFile(join(tmpDir, ".env")))
+			await generateEnv(baseConfig, pluginRegistry, tmpDir)
+			const second = parseEnvContent(await readFile(join(tmpDir, ".env")))
+			expect(second.APP_KEYS).toBe(first.APP_KEYS)
+			expect(second.JWT_SECRET).toBe(first.JWT_SECRET)
+			expect(second.ADMIN_JWT_SECRET).toBe(first.ADMIN_JWT_SECRET)
+		})
+
+		it("does not regenerate, relocate, or comment out secrets already in .env", async () => {
+			await writeFile(join(tmpDir, ".env"), "APP_KEYS=userkey1,userkey2\nJWT_SECRET=usersecret\n")
+			await generateEnv(baseConfig, pluginRegistry, tmpDir)
+			const content = await readFile(join(tmpDir, ".env"))
+
+			expect(content).toContain("APP_KEYS=userkey1,userkey2")
+			expect(content).toContain("JWT_SECRET=usersecret")
+			expect(content).not.toContain("# APP_KEYS=userkey1")
+			expect(content).not.toContain("# JWT_SECRET=usersecret")
+
+			const managedVars = parseEnvContent(content.slice(content.indexOf(MARKER_START)))
+			expect(managedVars.APP_KEYS).toBeUndefined()
+			expect(managedVars.JWT_SECRET).toBeUndefined()
+			expect(managedVars.API_TOKEN_SALT).toBeDefined()
+		})
 	})
 })

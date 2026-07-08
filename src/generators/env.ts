@@ -1,10 +1,63 @@
+import { randomBytes } from "node:crypto"
 import { join } from "node:path"
 import type { DetectedPlugin, ResolvedConfig } from "../config"
 import type { PluginRegistry } from "../plugins/types"
+import { parseEnvContent } from "../utils/env-parser"
 import { fileExists, readFile, writeFile } from "../utils/fs"
 
 const MARKER_START = "# --- Dockerize Start ---"
 const MARKER_END = "# --- Dockerize End ---"
+
+export const APP_SECRET_KEYS = [
+	"APP_KEYS",
+	"API_TOKEN_SALT",
+	"ADMIN_JWT_SECRET",
+	"TRANSFER_TOKEN_SALT",
+	"JWT_SECRET",
+] as const
+
+const APP_SECRET_PLACEHOLDER = "<generated on write>"
+
+function randomSecret(): string {
+	return randomBytes(16).toString("base64")
+}
+
+function generateSecretValue(key: string): string {
+	// Strapi expects APP_KEYS to be a comma-separated list of keys
+	return key === "APP_KEYS" ? `${randomSecret()},${randomSecret()}` : randomSecret()
+}
+
+function splitManagedBlock(content: string): { managed: string; outside: string } {
+	const startIdx = content.indexOf(MARKER_START)
+	const endIdx = content.indexOf(MARKER_END)
+	if (startIdx === -1 || endIdx === -1) return { managed: "", outside: content }
+	const end = endIdx + MARKER_END.length
+	return {
+		managed: content.slice(startIdx, end),
+		outside: content.slice(0, startIdx) + content.slice(end),
+	}
+}
+
+// Fills in Strapi's required app secrets. Values already present outside the managed
+// block (e.g. from create-strapi) are left untouched; values previously written inside
+// the managed block are carried forward so re-runs stay idempotent; anything missing is
+// generated fresh.
+function resolveAppSecrets(existingContent: string): Record<string, string> {
+	const { managed, outside } = splitManagedBlock(existingContent)
+	const outsideVars = parseEnvContent(outside)
+	const managedVars = parseEnvContent(managed)
+
+	const secrets: Record<string, string> = {}
+	for (const key of APP_SECRET_KEYS) {
+		if (key in outsideVars) continue
+		secrets[key] = managedVars[key] ?? generateSecretValue(key)
+	}
+	return secrets
+}
+
+export function placeholderAppSecrets(): Record<string, string> {
+	return Object.fromEntries(APP_SECRET_KEYS.map((key) => [key, APP_SECRET_PLACEHOLDER]))
+}
 
 function buildPluginSection(plugins: DetectedPlugin[]): string {
 	if (plugins.length === 0) return ""
@@ -96,16 +149,18 @@ export async function generateEnv(
 	cwd: string,
 ): Promise<void> {
 	const envPath = join(cwd, ".env")
+	const exists = await fileExists(envPath)
+	const existingContent = exists ? await readFile(envPath) : ""
 
-	const vars = buildEnvVars(config, registry)
+	const vars = { ...buildEnvVars(config, registry), ...resolveAppSecrets(existingContent) }
 
 	const plugins = config.detectedPlugins ?? []
 	const managedSection = buildManagedSection(vars, plugins)
 	const pluginKeys = plugins.flatMap((p) => Object.keys(p.envVars))
 	const managedKeys = new Set([...Object.keys(vars), ...pluginKeys])
 
-	if (await fileExists(envPath)) {
-		let content = await readFile(envPath)
+	if (exists) {
+		let content = existingContent
 		const startIdx = content.indexOf(MARKER_START)
 		const endIdx = content.indexOf(MARKER_END)
 

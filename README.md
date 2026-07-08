@@ -197,9 +197,13 @@ Detected plugins show up in the CLI summary and their env vars are grouped in th
 | `docker-compose.yml` | `--env=development` or `--env=both` | Development Compose with database service and health checks |
 | `docker-compose.prod.yml` | `--env=both` | Production Compose with secrets and resource limits |
 | `.dockerignore` | Always | Comprehensive exclusion list |
-| `.env` | Always | Environment variables with detected plugin vars (appended with markers, preserves existing content) |
+| `.env` | Always | Database vars, detected plugin vars, and Strapi app secrets (appended with markers, preserves existing content) |
 | `config/env/{dev,prod}/database.{ts,js}` | Always | Strapi database config wired to environment variables |
 | `secrets/db_password.txt` | When `--secrets docker-secrets` | Docker secret file for database password |
+
+### App Secrets
+
+Strapi requires `APP_KEYS`, `API_TOKEN_SALT`, `ADMIN_JWT_SECRET`, `TRANSFER_TOKEN_SALT`, and `JWT_SECRET` to boot. Any of these missing from your `.env` are generated with random values. Existing values are never overwritten or moved, and generated values stay stable across re-runs.
 
 ## Production Dockerfile
 
