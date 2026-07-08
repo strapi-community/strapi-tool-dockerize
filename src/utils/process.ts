@@ -22,7 +22,7 @@ export function exec(
 			cwd: options.cwd,
 			env: options.env ? { ...process.env, ...options.env } : process.env,
 			stdio: options.stdio === "inherit" ? "inherit" : "pipe",
-			shell: true,
+			shell: process.platform === "win32",
 		})
 
 		let stdout = ""
