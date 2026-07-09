@@ -1,18 +1,11 @@
-import type { DatabaseClient, PackageManager, SecretBackend } from "../config"
+import type { DatabaseClient, PackageManager } from "../config"
 import { databasePlugins } from "./databases"
 import { packageManagerPlugins } from "./package-managers"
-import { secretManagerPlugins } from "./secret-managers"
-import type {
-	DatabasePlugin,
-	PackageManagerPlugin,
-	PluginRegistry,
-	SecretManagerPlugin,
-} from "./types"
+import type { DatabasePlugin, PackageManagerPlugin, PluginRegistry } from "./types"
 
 export const pluginRegistry: PluginRegistry = {
 	databases: databasePlugins,
 	packageManagers: packageManagerPlugins,
-	secretManagers: secretManagerPlugins,
 
 	getDatabase(id: DatabaseClient): DatabasePlugin {
 		const plugin = this.databases.get(id)
@@ -26,14 +19,6 @@ export const pluginRegistry: PluginRegistry = {
 		const plugin = this.packageManagers.get(id)
 		if (!plugin) {
 			throw new Error(`Unknown package manager: ${id}`)
-		}
-		return plugin
-	},
-
-	getSecretManager(id: SecretBackend): SecretManagerPlugin {
-		const plugin = this.secretManagers.get(id)
-		if (!plugin) {
-			throw new Error(`Unknown secret backend: ${id}`)
 		}
 		return plugin
 	},

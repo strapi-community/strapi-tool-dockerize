@@ -41,7 +41,7 @@ export async function writeGeneratedFiles(
 	cwd: string,
 	healthCheckOverrides?: StrapiHealthCheckOverrides,
 	resourceLimits?: ResourceLimitOverrides,
-): Promise<string[]> {
+): Promise<void> {
 	const spinner = createSpinner("Generating Docker configuration...")
 	try {
 		await generateDockerfiles(config, pluginRegistry, cwd, healthCheckOverrides)
@@ -56,11 +56,7 @@ export async function writeGeneratedFiles(
 		spinner.update("Updating .env...")
 		await generateEnv(config, pluginRegistry, cwd)
 
-		const secretManager = pluginRegistry.getSecretManager(config.secretBackend)
-		const secretFiles = await secretManager.generateFiles(config, cwd)
-
 		spinner.success("Docker configuration ready!")
-		return secretFiles
 	} catch (err) {
 		spinner.error("Generation failed")
 		log.error(err instanceof Error ? err.message : String(err))
@@ -99,14 +95,8 @@ function composeNames(config: ResolvedConfig): string[] {
 		: ["docker-compose.yml"]
 }
 
-export function listGeneratedFiles(config: ResolvedConfig, secretFiles: string[]): string[] {
-	return [
-		...dockerfileNames(config),
-		".dockerignore",
-		...composeNames(config),
-		".env",
-		...secretFiles,
-	]
+export function listGeneratedFiles(config: ResolvedConfig): string[] {
+	return [...dockerfileNames(config), ".dockerignore", ...composeNames(config), ".env"]
 }
 
 export function printOutcome(config: ResolvedConfig, generated: string[]): void {

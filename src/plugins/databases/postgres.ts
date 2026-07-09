@@ -2,11 +2,9 @@ import type { ResolvedConfig } from "../../config"
 import { DEFAULT_DATABASE_IMAGES, DEFAULT_PORTS } from "../../config"
 import type { ComposeService, DatabasePlugin, HealthCheck } from "../types"
 import {
-	DB_PASSWORD_SECRET_PATH,
 	standardDatabaseComposeService,
 	standardDatabaseEnvVars,
 	standardDatabaseHealthcheck,
-	usesDockerSecrets,
 } from "./shared"
 
 export const postgresPlugin: DatabasePlugin = {
@@ -23,9 +21,7 @@ export const postgresPlugin: DatabasePlugin = {
 			image: DEFAULT_DATABASE_IMAGES.postgres,
 			environment: {
 				POSTGRES_USER: "${DATABASE_USERNAME}",
-				...(usesDockerSecrets(config)
-					? { POSTGRES_PASSWORD_FILE: DB_PASSWORD_SECRET_PATH }
-					: { POSTGRES_PASSWORD: "${DATABASE_PASSWORD}" }),
+				POSTGRES_PASSWORD: "${DATABASE_PASSWORD}",
 				POSTGRES_DB: "${DATABASE_NAME}",
 			},
 			containerPort: 5432,

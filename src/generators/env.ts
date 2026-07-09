@@ -99,12 +99,6 @@ export function buildEnvVars(
 		}
 	}
 
-	const secretManager = registry.getSecretManager(config.secretBackend)
-	Object.assign(vars, secretManager.envOverrides(config))
-	for (const key of secretManager.envRemovals(config)) {
-		delete vars[key]
-	}
-
 	return vars
 }
 

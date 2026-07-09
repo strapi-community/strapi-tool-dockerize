@@ -52,7 +52,6 @@ function buildDockerfileContext(
 		pmDevStep: pm.dockerStartStep(true),
 		projectName: config.projectName,
 		strapiPort: STRAPI_DEFAULT_PORT,
-		useSecrets: config.secretBackend === "docker-secrets" && config.databaseClient !== "sqlite",
 		...resolveHealthCheck(healthCheckOverrides),
 	}
 }
@@ -147,8 +146,6 @@ export async function renderComposeFiles(
 	if (!config.useCompose) return []
 
 	const pm = registry.getPackageManager(config.packageManager)
-	const secretManager = registry.getSecretManager(config.secretBackend)
-	const composeSecrets = secretManager.composeSecrets(config)
 
 	const baseContext = {
 		projectName: config.projectName,
@@ -163,9 +160,6 @@ export async function renderComposeFiles(
 		backupSchedule: BACKUP_SCHEDULE,
 		backupRetentionDays: BACKUP_RETENTION_DAYS,
 		...buildDatabaseComposeContext(config, registry),
-		secrets: composeSecrets,
-		serviceSecrets: secretManager.serviceSecrets(config),
-		hasSecrets: composeSecrets.length > 0,
 	}
 
 	async function renderFor(environment: "development" | "production"): Promise<string> {

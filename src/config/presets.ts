@@ -5,19 +5,16 @@ const presets = {
 		environment: "development" as const,
 		useCompose: true,
 		useAdminer: true,
-		secretBackend: "none" as const,
 	},
 	production: {
 		environment: "production" as const,
 		useCompose: true,
 		useAdminer: false,
-		secretBackend: "docker-secrets" as const,
 	},
 	ci: {
 		environment: "production" as const,
 		useCompose: true,
 		useAdminer: false,
-		secretBackend: "none" as const,
 	},
 } as const satisfies Record<string, Partial<DetectedConfig>>
 

@@ -1,12 +1,6 @@
 import type { ResolvedConfig } from "../../config"
 import type { ComposeService, HealthCheck } from "../types"
 
-export const DB_PASSWORD_SECRET_PATH = "/run/secrets/db_password"
-
-export function usesDockerSecrets(config: ResolvedConfig): boolean {
-	return config.secretBackend === "docker-secrets" && config.databaseClient !== "sqlite"
-}
-
 interface DatabaseServiceSpec {
 	image: string
 	environment: Record<string, string>

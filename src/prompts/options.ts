@@ -1,5 +1,5 @@
 import * as p from "@clack/prompts"
-import type { Environment, SecretBackend } from "../config"
+import type { Environment } from "../config"
 
 export async function promptProjectName(detected?: string): Promise<string> {
 	const name = await p.text({
@@ -50,28 +50,6 @@ export async function promptUseCompose(): Promise<boolean> {
 	}
 
 	return result
-}
-
-export async function promptSecretBackend(detected?: SecretBackend): Promise<SecretBackend> {
-	const selected = await p.select({
-		message: "How should secrets be managed?",
-		initialValue: detected ?? "none",
-		options: [
-			{ value: "none", label: "None", hint: "plain env vars" },
-			{
-				value: "docker-secrets",
-				label: "Docker Secrets",
-				hint: "file-based, more secure",
-			},
-		],
-	})
-
-	if (p.isCancel(selected)) {
-		p.cancel("Setup cancelled.")
-		process.exit(0)
-	}
-
-	return selected as SecretBackend
 }
 
 export async function promptUseAdminer(): Promise<boolean> {

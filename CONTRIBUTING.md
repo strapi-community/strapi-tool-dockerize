@@ -141,9 +141,9 @@ Fix lint issues automatically with `bun run lint:fix`.
 
 ## Writing Plugins
 
-The plugin system is the core extension point. Three interfaces exist: `DatabasePlugin`, `PackageManagerPlugin`, and `SecretManagerPlugin`. All are defined in `src/plugins/types.ts`.
+The plugin system is the core extension point. Two interfaces exist: `DatabasePlugin` and `PackageManagerPlugin`. Both are defined in `src/plugins/types.ts`.
 
-Plugins are registered at build time in the `Map` inside each category's `index.ts` (`src/plugins/databases/`, `src/plugins/package-managers/`, `src/plugins/secret-managers/`). There is no runtime registration API. Adding a backend means adding a file and wiring it into the map, then submitting a PR. The steps below walk through each category.
+Plugins are registered at build time in the `Map` inside each category's `index.ts` (`src/plugins/databases/`, `src/plugins/package-managers/`). There is no runtime registration API. Adding a backend means adding a file and wiring it into the map, then submitting a PR. The steps below walk through each category.
 
 ### Database Plugins
 
@@ -212,32 +212,6 @@ interface PackageManagerPlugin {
 | `dockerInstallStep()` | Install command in Docker, with production flag support |
 | `dockerBuildStep()` | Build command in Docker |
 | `dockerStartStep()` | CMD for Dockerfile, dev or prod |
-
-### Secret Manager Plugins
-
-Every secret backend implements the `SecretManagerPlugin` interface:
-
-```typescript
-interface SecretManagerPlugin {
-  id: SecretBackend
-  displayName: string
-  composeSecrets(config: ResolvedConfig): ComposeSecret[]
-  serviceSecrets(config: ResolvedConfig): string[]
-  envOverrides(config: ResolvedConfig): Record<string, string>
-  generateFiles(config: ResolvedConfig, cwd: string): Promise<string[]>
-}
-```
-
-| Field / Method | Purpose |
-|----------------|---------|
-| `id` | Matches the `SecretBackend` enum value (`none`, `docker-secrets`) |
-| `displayName` | Human-readable name shown in prompts |
-| `composeSecrets()` | Top-level `secrets:` entries for the Compose file (name + source file) |
-| `serviceSecrets()` | Secret names attached to the Strapi service under `secrets:` |
-| `envOverrides()` | Env values to override when this backend is active (e.g. point a password at a secret file path) |
-| `generateFiles()` | Writes any files the backend needs (e.g. `secrets/db_password.txt`) and returns the paths it created |
-
-The `none` backend is the no-op baseline: every method returns empty. Use it as the reference for the minimal contract when building a new backend.
 
 ### Step by Step: Adding a New Database
 
@@ -436,71 +410,6 @@ const LOCK_FILE_ORDER: [string, PackageManager][] = [
 **5. Write tests**
 
 Follow the pattern in `tests/unit/plugins/package-managers/npm.test.ts`.
-
-### Step by Step: Adding a New Secret Backend
-
-Example: adding a `vault` backend.
-
-**1. Add to the schema**
-
-In `src/config/schema.ts`, add `"vault"` to the `secretBackendSchema` enum:
-
-```typescript
-export const secretBackendSchema = z.enum(["none", "docker-secrets", "vault"])
-```
-
-**2. Create the plugin file**
-
-Create `src/plugins/secret-managers/vault.ts` implementing `SecretManagerPlugin`. Use `none.ts` as the minimal contract and `docker-secrets.ts` as a working reference. Skip work for databases that do not need a password (SQLite) the same way `docker-secrets` does.
-
-```typescript
-import type { ResolvedConfig } from "../../config"
-import type { ComposeSecret, SecretManagerPlugin } from "../types"
-
-export const vaultSecretManager: SecretManagerPlugin = {
-  id: "vault",
-  displayName: "HashiCorp Vault",
-
-  composeSecrets(_config: ResolvedConfig): ComposeSecret[] {
-    return []
-  },
-
-  serviceSecrets(_config: ResolvedConfig): string[] {
-    return []
-  },
-
-  envOverrides(config: ResolvedConfig): Record<string, string> {
-    if (config.databaseClient === "sqlite") return {}
-    return { DATABASE_PASSWORD: "${VAULT_DB_PASSWORD}" }
-  },
-
-  async generateFiles(_config: ResolvedConfig, _cwd: string): Promise<string[]> {
-    return []
-  },
-}
-```
-
-**3. Register it**
-
-In `src/plugins/secret-managers/index.ts`, import and add it to the map:
-
-```typescript
-import { vaultSecretManager } from "./vault"
-
-export const secretManagerPlugins = new Map<SecretBackend, SecretManagerPlugin>([
-  ["none", noneSecretManager],
-  ["docker-secrets", dockerSecretsManager],
-  ["vault", vaultSecretManager],
-])
-```
-
-**4. Surface the flag and prompt (optional)**
-
-Update the `--secrets` flag description in `src/cli/flags.ts` and the secret backend prompt in `src/prompts/` so the new backend is selectable.
-
-**5. Write tests**
-
-Create `tests/unit/plugins/secret-managers/vault.test.ts` following the pattern in `docker-secrets.test.ts`.
 
 ---
 

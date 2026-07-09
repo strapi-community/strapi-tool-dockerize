@@ -2,11 +2,9 @@ import type { ResolvedConfig } from "../../config"
 import { DEFAULT_DATABASE_IMAGES, DEFAULT_PORTS } from "../../config"
 import type { ComposeService, DatabasePlugin, HealthCheck } from "../types"
 import {
-	DB_PASSWORD_SECRET_PATH,
 	standardDatabaseComposeService,
 	standardDatabaseEnvVars,
 	standardDatabaseHealthcheck,
-	usesDockerSecrets,
 } from "./shared"
 
 export const mysqlPlugin: DatabasePlugin = {
@@ -21,19 +19,12 @@ export const mysqlPlugin: DatabasePlugin = {
 	composeService(config: ResolvedConfig): ComposeService {
 		return standardDatabaseComposeService(config, {
 			image: DEFAULT_DATABASE_IMAGES.mysql,
-			environment: usesDockerSecrets(config)
-				? {
-						MYSQL_ROOT_PASSWORD_FILE: DB_PASSWORD_SECRET_PATH,
-						MYSQL_DATABASE: "${DATABASE_NAME}",
-						MYSQL_USER: "${DATABASE_USERNAME}",
-						MYSQL_PASSWORD_FILE: DB_PASSWORD_SECRET_PATH,
-					}
-				: {
-						MYSQL_ROOT_PASSWORD: "${DATABASE_PASSWORD}",
-						MYSQL_DATABASE: "${DATABASE_NAME}",
-						MYSQL_USER: "${DATABASE_USERNAME}",
-						MYSQL_PASSWORD: "${DATABASE_PASSWORD}",
-					},
+			environment: {
+				MYSQL_ROOT_PASSWORD: "${DATABASE_PASSWORD}",
+				MYSQL_DATABASE: "${DATABASE_NAME}",
+				MYSQL_USER: "${DATABASE_USERNAME}",
+				MYSQL_PASSWORD: "${DATABASE_PASSWORD}",
+			},
 			containerPort: 3306,
 			volumePath: "/var/lib/mysql",
 			healthcheck: this.healthcheck(),

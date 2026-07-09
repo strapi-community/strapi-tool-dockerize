@@ -33,8 +33,6 @@ export const STRAPI_DEFAULT_PORT = 1337
 export const ADMINER_IMAGE = "adminer:4.8.1"
 export const ADMINER_PORT = 8080
 
-export const DEFAULT_SECRET_BACKEND = "none" as const
-
 export const BACKUP_IMAGES: Record<string, string> = {
 	postgres: "prodrigestivill/postgres-backup-local:16",
 	mysql: "databack/mysql-backup:latest",

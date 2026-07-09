@@ -42,11 +42,6 @@ export const sharedFlags = {
 		description: "Print detection, resolution, and file write diagnostics",
 		default: false,
 	},
-	secrets: {
-		type: "string",
-		description: "Secret backend (none, docker-secrets)",
-		alias: "s",
-	},
 	preset: {
 		type: "string",
 		description: "Named preset (local-dev, production, ci)",

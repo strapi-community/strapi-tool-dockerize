@@ -34,12 +34,6 @@ services:
     networks:
       - {{ projectName }}-network
 {%- endif %}
-{%- if hasSecrets %}
-    secrets:
-{%- for secret in serviceSecrets %}
-      - {{ secret }}
-{%- endfor %}
-{%- endif %}
     deploy:
       resources:
         limits:
@@ -76,12 +70,6 @@ services:
       retries: {{ dbHealthRetries }}
 {%- if dbHealthStartPeriod %}
       start_period: {{ dbHealthStartPeriod }}
-{%- endif %}
-{%- if hasSecrets %}
-    secrets:
-{%- for secret in serviceSecrets %}
-      - {{ secret }}
-{%- endfor %}
 {%- endif %}
     networks:
       - {{ projectName }}-network
@@ -163,12 +151,4 @@ volumes:
 networks:
   {{ projectName }}-network:
     driver: bridge
-{%- endif %}
-{%- if hasSecrets %}
-
-secrets:
-{%- for secret in secrets %}
-  {{ secret.name }}:
-    file: {{ secret.file }}
-{%- endfor %}
 {%- endif %}

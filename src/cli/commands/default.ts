@@ -56,7 +56,7 @@ export const defaultCommand = defineCommand({
 
 		const config = args.yes ? resolveYesConfig(detected) : await runPrompts(detected)
 		log.debug(
-			`Resolved: strapi ${config.strapiVersion} | ${config.projectType} | ${config.databaseClient} | ${config.packageManager} | env=${config.environment} | secrets=${config.secretBackend} | compose=${config.useCompose} | backups=${config.useBackups}`,
+			`Resolved: strapi ${config.strapiVersion} | ${config.projectType} | ${config.databaseClient} | ${config.packageManager} | env=${config.environment} | compose=${config.useCompose} | backups=${config.useBackups}`,
 		)
 
 		const healthCheckOverrides = buildHealthCheckOverrides(args)
@@ -78,14 +78,11 @@ export const defaultCommand = defineCommand({
 			log.warn(`Backed up existing files: ${backedUp.join(", ")}`)
 		}
 
-		const secretFiles = await writeGeneratedFiles(config, cwd, healthCheckOverrides, resourceLimits)
-		if (secretFiles.length > 0) {
-			log.debug(`Generated secret files: ${secretFiles.join(", ")}`)
-		}
+		await writeGeneratedFiles(config, cwd, healthCheckOverrides, resourceLimits)
 
 		await maybeInstallDriver(config, cwd, Boolean(args["skip-deps"]))
 
-		printOutcome(config, listGeneratedFiles(config, secretFiles))
+		printOutcome(config, listGeneratedFiles(config))
 		log.success("Docker configuration generated successfully!")
 	},
 })

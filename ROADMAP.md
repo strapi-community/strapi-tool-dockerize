@@ -9,7 +9,6 @@ Complete ground-up rewrite in TypeScript with Bun. The v1 codebase is gone.
 **What's done:**
 
 - Plugin architecture for databases (PostgreSQL, MySQL, MariaDB, SQLite) and package managers (npm, yarn, pnpm, bun)
-- Secret manager plugin system (`--secrets docker-secrets`) with `none` and `docker-secrets` backends
 - LiquidJS template engine for all Dockerfile and Compose generation
 - Smart auto-detection of Strapi version, database, package manager, ESM/CJS, installed Strapi plugins, and existing `.env` values
 - Strapi v4 and v5 support with database drivers pinned to compatible versions
@@ -34,7 +33,7 @@ Complete ground-up rewrite in TypeScript with Bun. The v1 codebase is gone.
 
 Polish and power-user features after v2.5 stabilizes.
 
-- **Additional secret backends** ([#149](https://github.com/strapi-community/strapi-tool-dockerize/issues/149)) - The `docker-secrets` backend shipped in v2.5. Vault and AWS Secrets Manager are the next candidates on the same plugin interface.
+- **Deployment & secrets guides** ([#149](https://github.com/strapi-community/strapi-tool-dockerize/issues/149)) - Platform-specific docs (DigitalOcean, Railway, Render, Fly, Kubernetes) for injecting runtime env/secrets, plus BuildKit build-secret recipes. The tool scaffolds and documents; it does not manage secrets itself.
 - **Reverse proxy templates** - Optional Traefik or nginx configs for SSL termination and routing *(speculative)*
 - **Custom template overrides** - Drop a `dockerize/templates/` directory in your project to override built-in Liquid templates *(speculative)*
 - **Config file support** - `.dockerizerc` or `dockerize` key in `package.json` for persisting preferences across runs *(speculative)*

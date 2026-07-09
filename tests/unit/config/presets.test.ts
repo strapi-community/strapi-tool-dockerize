@@ -10,23 +10,20 @@ describe("getPreset", () => {
 		expect(preset.environment).toBe("development")
 		expect(preset.useCompose).toBe(true)
 		expect(preset.useAdminer).toBe(true)
-		expect(preset.secretBackend).toBe("none")
 	})
 
-	it("returns production preset with docker-secrets and no adminer", () => {
+	it("returns production preset with no adminer", () => {
 		const preset = getPreset("production")
 		expect(preset.environment).toBe("production")
 		expect(preset.useCompose).toBe(true)
 		expect(preset.useAdminer).toBe(false)
-		expect(preset.secretBackend).toBe("docker-secrets")
 	})
 
-	it("returns ci preset with production env and no secrets", () => {
+	it("returns ci preset with production env", () => {
 		const preset = getPreset("ci")
 		expect(preset.environment).toBe("production")
 		expect(preset.useCompose).toBe(true)
 		expect(preset.useAdminer).toBe(false)
-		expect(preset.secretBackend).toBe("none")
 	})
 
 	it("returns a new object each call", () => {
@@ -62,7 +59,6 @@ describe("applyPreset", () => {
 		expect(result.environment).toBe("development")
 		expect(result.useCompose).toBe(true)
 		expect(result.useAdminer).toBe(true)
-		expect(result.secretBackend).toBe("none")
 	})
 
 	it("preset overrides detected values for overlapping fields", () => {
@@ -70,13 +66,11 @@ describe("applyPreset", () => {
 			environment: "development",
 			useCompose: false,
 			useAdminer: true,
-			secretBackend: "docker-secrets",
 		}
 		const result = applyPreset(detected, "ci")
 		expect(result.environment).toBe("production")
 		expect(result.useCompose).toBe(true)
 		expect(result.useAdminer).toBe(false)
-		expect(result.secretBackend).toBe("none")
 	})
 
 	it("does not modify the original detected config", () => {
@@ -149,15 +143,5 @@ describe("cli flag priority over preset", () => {
 		merged.databasePort = DEFAULT_PORTS.mysql
 		expect(merged.databaseClient).toBe("mysql")
 		expect(merged.databasePort).toBe(3306)
-	})
-
-	it("secrets flag overrides preset secretBackend", () => {
-		const detected: DetectedConfig = {}
-
-		const merged = applyPreset(detected, "production")
-		expect(merged.secretBackend).toBe("docker-secrets")
-
-		merged.secretBackend = "none"
-		expect(merged.secretBackend).toBe("none")
 	})
 })

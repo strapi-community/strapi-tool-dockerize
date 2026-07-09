@@ -6,7 +6,6 @@ import type {
 	PackageManager,
 	ProjectType,
 	ResolvedConfig,
-	SecretBackend,
 	StrapiVersion,
 } from "../config"
 import {
@@ -15,21 +14,13 @@ import {
 	DEFAULT_DATABASE_PASSWORD,
 	DEFAULT_DATABASE_USERNAME,
 	DEFAULT_PORTS,
-	DEFAULT_SECRET_BACKEND,
 } from "../config"
 import { resolvedConfigSchema } from "../config"
-import {
-	DB_LABELS,
-	LANG_LABELS,
-	PM_LABELS,
-	SECRET_BACKEND_LABELS,
-	logDetectedSummary,
-} from "./confirm-detected"
+import { DB_LABELS, LANG_LABELS, PM_LABELS, logDetectedSummary } from "./confirm-detected"
 import { promptDatabaseConnection, selectDatabase } from "./database"
 import {
 	promptEnvironment,
 	promptProjectName,
-	promptSecretBackend,
 	promptUseAdminer,
 	promptUseBackups,
 	promptUseCompose,
@@ -138,7 +129,6 @@ async function collectDatabaseConnection(
 
 interface DeploymentOptions {
 	environment: Environment
-	secretBackend: SecretBackend
 	useCompose: boolean
 	useAdminer: boolean
 	useBackups: boolean
@@ -152,17 +142,12 @@ async function collectDeploymentOptions(
 	const isProduction = environment === "production" || environment === "both"
 	const notSqlite = databaseClient !== "sqlite"
 
-	const secretBackend =
-		isProduction && notSqlite
-			? await promptSecretBackend(detected.secretBackend)
-			: DEFAULT_SECRET_BACKEND
-
 	const useCompose = await promptUseCompose()
 	const useAdminer = useCompose && notSqlite ? await promptUseAdminer() : false
 	const useBackups =
 		useCompose && notSqlite && isProduction ? await promptUseBackups(detected.useBackups) : false
 
-	return { environment, secretBackend, useCompose, useAdminer, useBackups }
+	return { environment, useCompose, useAdminer, useBackups }
 }
 
 function buildSummaryLines(config: ResolvedConfig): string[] {
@@ -175,9 +160,6 @@ function buildSummaryLines(config: ResolvedConfig): string[] {
 	if (config.databaseClient !== "sqlite") {
 		lines.push(`Database: ${config.databaseHost}:${config.databasePort}/${config.databaseName}`)
 		lines.push(`DB User: ${config.databaseUsername}`)
-	}
-	if (config.secretBackend !== "none") {
-		lines.push(`Secrets: ${SECRET_BACKEND_LABELS[config.secretBackend]}`)
 	}
 	if (config.useCompose) {
 		const extras: string[] = []

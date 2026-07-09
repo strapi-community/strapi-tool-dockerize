@@ -6,7 +6,6 @@ import type {
 	PresetName,
 	ResolvedConfig,
 	ResourceLimitOverrides,
-	SecretBackend,
 	StrapiHealthCheckOverrides,
 } from "../../config"
 import { DEFAULT_PORTS, PRESET_NAMES, getPreset, resolvedConfigSchema } from "../../config"
@@ -112,10 +111,6 @@ export function applyPresetAndOverrides(
 		result.useCompose = args.compose as boolean
 		log.debug(`Flag override compose=${result.useCompose}`)
 	}
-	if (args.secrets) {
-		result.secretBackend = args.secrets as SecretBackend
-		log.debug(`Flag override secrets=${result.secretBackend}`)
-	}
 	if (args.backups !== undefined) {
 		result.useBackups = args.backups as boolean
 		log.debug(`Flag override backups=${result.useBackups}`)
@@ -137,7 +132,6 @@ const YES_MODE_DEFAULTS = {
 	useCompose: true,
 	useAdminer: false,
 	useBackups: false,
-	secretBackend: "none",
 	isESM: false,
 	envVars: {},
 	detectedPlugins: [],

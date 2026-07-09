@@ -25,7 +25,7 @@ Complete rewrite in TypeScript with [Bun](https://bun.sh). Plugin-based architec
 
 **Core:**
 
-- Plugin architecture for databases, package managers, and secret backends
+- Plugin architecture for databases and package managers
 - [LiquidJS](https://liquidjs.com/) templates for all Dockerfile and Compose generation
 - [@clack/prompts](https://github.com/bombshell-dev/clack) for a polished interactive CLI
 - Auto-detection of Strapi version, database, package manager, ESM/CJS, installed plugins, and existing `.env` values
@@ -34,7 +34,6 @@ Complete rewrite in TypeScript with [Bun](https://bun.sh). Plugin-based architec
 
 **Production-Ready:**
 
-- Secret manager plugin system (`--secrets docker-secrets`); new backends are a single plugin file (see [CONTRIBUTING.md](./CONTRIBUTING.md))
 - Container resource limits (memory, CPU) with environment-aware defaults
 - Database backup sidecar for automated production backups
 - Health check customization for both Strapi and database services
@@ -56,7 +55,7 @@ npx @strapi-community/dockerize
 # Non-interactive, accept all detected defaults
 npx @strapi-community/dockerize --yes
 
-# Production-ready with secrets and backups
+# Production-ready with automated database backups
 npx @strapi-community/dockerize --preset production --backups
 
 # Preview what would be generated
@@ -76,7 +75,6 @@ npx @strapi-community/dockerize --yes -d postgres --pm pnpm
 | **Languages** | TypeScript, JavaScript |
 | **Module Systems** | ESM, CommonJS |
 | **Environments** | development, production, both |
-| **Secret Backends** | none, docker-secrets |
 | **Presets** | local-dev, production, ci |
 
 ## CLI Flags
@@ -88,7 +86,6 @@ npx @strapi-community/dockerize --yes -d postgres --pm pnpm
 | `--package-manager` | `--pm` | Package manager (`npm`, `yarn`, `pnpm`, `bun`) | auto-detected |
 | `--env` | `-e` | Environment (`development`, `production`, `both`) | prompted |
 | `--compose` / `--no-compose` | | Generate docker-compose.yml (or skip it) | prompted |
-| `--secrets` | `-s` | Secret backend (`none`, `docker-secrets`) | `none` |
 | `--preset` | | Named preset (`local-dev`, `production`, `ci`) | none |
 | `--backups` | | Include database backup sidecar in production compose | `false` |
 | `--memory` | | Container memory limit (e.g., `2g`, `512m`) | env-based |
@@ -111,8 +108,8 @@ npx @strapi-community/dockerize
 # Non-interactive with defaults
 npx @strapi-community/dockerize --yes
 
-# Production preset with backups and secrets
-npx @strapi-community/dockerize --preset production --backups --secrets docker-secrets
+# Production preset with automated backups
+npx @strapi-community/dockerize --preset production --backups
 
 # CI-friendly with custom resource limits
 npx @strapi-community/dockerize --preset ci --memory 4g --cpus 4
@@ -137,11 +134,11 @@ npx @strapi-community/dockerize reset
 
 Presets bundle opinionated defaults for common scenarios. They merge with auto-detection and can be overridden by CLI flags.
 
-| Preset | Environment | Compose | Adminer | Secrets |
-|--------|-------------|---------|---------|---------|
-| `local-dev` | development | yes | yes | none |
-| `production` | production | yes | no | docker-secrets |
-| `ci` | production | yes | no | none |
+| Preset | Environment | Compose | Adminer |
+|--------|-------------|---------|---------|
+| `local-dev` | development | yes | yes |
+| `production` | production | yes | no |
+| `ci` | production | yes | no |
 
 Priority order: **CLI flags > preset > auto-detection > defaults**
 
@@ -195,10 +192,9 @@ Detected plugins show up in the CLI summary and their env vars are grouped in th
 | `Dockerfile` | `--env=development` or `--env=both` | Development image with hot-reload support |
 | `Dockerfile.prod` | `--env=production` or `--env=both` | Production multi-stage image (4-stage build) |
 | `docker-compose.yml` | `--env=development` or `--env=both` | Development Compose with database service and health checks |
-| `docker-compose.prod.yml` | `--env=both` | Production Compose with secrets and resource limits |
+| `docker-compose.prod.yml` | `--env=both` | Production Compose with resource limits |
 | `.dockerignore` | Always | Comprehensive exclusion list |
 | `.env` | Always | Database vars, detected plugin vars, and Strapi app secrets (appended with markers, preserves existing content) |
-| `secrets/db_password.txt` | When `--secrets docker-secrets` | Docker secret file for database password |
 
 The tool never writes or overwrites your `config/database.ts`. Strapi's own config already reads the connection details (including `DATABASE_URL`) from environment variables, so the tool only sets those values in `.env` and leaves your config untouched.
 
@@ -265,34 +261,39 @@ Compose services include `deploy.resources.limits` with sensible defaults per en
 
 Override with `--memory` and `--cpus` for the Strapi service (database gets half).
 
-### Secret Manager
+### Secrets & Security
 
-The `--secrets` flag controls how sensitive values (database passwords) are handled in production compose files.
+The tool scaffolds a secure image and reads runtime configuration from `.env` — it does **not** manage your secrets for you. How you supply them is your call, and depends on where you run.
 
-**`--secrets none`** (default): Database password lives in `.env` as a plain value.
+**Runtime secrets (database password, etc.)** — these are needed when the container *runs*, never at build. Supply them as runtime environment. Never pass them as a Docker build `ARG` (build args are baked into image layers and readable via `docker history`).
 
-**`--secrets docker-secrets`**: The password is written to `secrets/db_password.txt`, mounted into both containers as a Docker secret, and kept out of `.env` entirely (no plaintext). The two sides read it differently:
+- **Local / development**: keep the password in `.env` (already gitignored in a standard Strapi project). Compose reads it via `env_file: .env`.
+- **Platform / PaaS (Railway, Render, Fly, Kubernetes, …)**: let the platform inject `DATABASE_PASSWORD` (or a single `DATABASE_URL`) as an environment variable. Strapi's own `config/database.ts` already reads both, so nothing extra is needed.
+- **Docker Compose file secrets (Swarm / self-host)**: mount a file secret and bridge it to the env var Strapi reads. Because Strapi consumes env vars (not files), add a tiny entrypoint that reads the file at startup:
 
-- **Database** uses the image's native support (`POSTGRES_PASSWORD_FILE`, `MYSQL_ROOT_PASSWORD_FILE`, `MARIADB_*_FILE`).
-- **Strapi** reads the file via an entrypoint that exports `DATABASE_PASSWORD` before startup, so Strapi's own config (`env('DATABASE_PASSWORD')`) works unchanged.
+  ```yaml
+  services:
+    my-app:
+      entrypoint: ["/bin/sh", "-c", "export DATABASE_PASSWORD=$(cat /run/secrets/db_password); exec \"$@\"", "--"]
+      secrets: [db_password]
+    my-app-db:
+      environment:
+        POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      secrets: [db_password]
+  secrets:
+    db_password:
+      file: ./secrets/db_password.txt
+  ```
 
-```yaml
-secrets:
-  db_password:
-    file: ./secrets/db_password.txt
+**Build-time secrets (private npm registry token, license key, …)** — needed *during* the image build. Use BuildKit mount secrets so they never land in a layer:
 
-services:
-  my-app:
-    secrets:
-      - db_password        # bridged to DATABASE_PASSWORD by the entrypoint
-  my-app-db:
-    environment:
-      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
-    secrets:
-      - db_password
+```dockerfile
+RUN --mount=type=secret,id=npm_token \
+    NPM_TOKEN=$(cat /run/secrets/npm_token) npm ci
 ```
-
-The secret manager is a plugin system. Adding new backends (Vault, AWS Secrets Manager) only requires creating a new plugin file. See [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
+```bash
+docker build --secret id=npm_token,src=./npm_token.txt .
+```
 
 ### Database Backups
 
@@ -359,7 +360,6 @@ It never touches your Strapi config files.
 - Optional Adminer for database management.
 - Automatic database driver installation with version pinning.
 - Existing Docker files are backed up before overwriting.
-- Docker secrets via `--secrets docker-secrets`.
 - Named presets for common scenarios.
 - Dry-run preview mode.
 - Strapi plugin detection and env var generation.
